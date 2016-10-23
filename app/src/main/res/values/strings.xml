@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Ride Atlanta</string>
+
+    <string name="title_tab_buses">Buses</string>
+    <string name="title_tab_trains">Trains</string>
+    <string name="title_tab_home">Home</string>
+    <string name="title_tab_fav_routes">Favorites</string>
+    <string name="title_tab_notifications">Alerts</string>
+
+    <string name="content_description_toolbar_icon">
+        Icon of the current page. Press to see additional options.
+    </string>
+</resources>
