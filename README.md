@@ -1,5 +1,7 @@
 # Ride Atlanta
 
+![build status](https://travis-ci.org/FaytxZen/rideatlanta.svg?branch=master)
+
 ## Purpose
 Because the *[MARTA On the Go](http://www.itsmarta.com/)* Android app just doesn't cut it.
 
