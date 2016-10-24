@@ -1,7 +1,9 @@
 package com.andrewvora.apps.rideatlanta.notifications;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 
 /**
  * Created by faytx on 10/22/2016.
@@ -9,6 +11,16 @@ import android.os.Bundle;
  */
 
 public class NotificationsPresenter implements NotificationsContract.Presenter {
+
+    private Context mContext;
+    private NotificationsContract.View mView;
+
+    public NotificationsPresenter(@NonNull Context context,
+                                  @NonNull NotificationsContract.View view)
+    {
+        mContext = context;
+        mView = view;
+    }
 
     @Override
     public void onResult(int requestCode, int resultCode, Intent data) {

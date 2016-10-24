@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <tabs>
     <tab
+        id="@+id/tab_buses"
+        icon="@drawable/ic_bus_24dp"
+        title="@string/title_tab_buses" />
+    <tab
         id="@+id/tab_home"
         icon="@drawable/ic_home_24dp"
         title="@string/title_tab_home" />
@@ -8,10 +12,6 @@
         id="@+id/tab_notifications"
         icon="@drawable/ic_notifications_24dp"
         title="@string/title_tab_notifications"/>
-    <tab
-        id="@+id/tab_buses"
-        icon="@drawable/ic_bus_24dp"
-        title="@string/title_tab_buses" />
     <tab
         id="@+id/tab_fav_routes"
         icon="@drawable/ic_favorite_24dp"

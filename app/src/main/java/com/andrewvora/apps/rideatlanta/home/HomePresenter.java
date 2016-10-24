@@ -1,7 +1,9 @@
 package com.andrewvora.apps.rideatlanta.home;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 
 /**
  * Created by faytx on 10/22/2016.
@@ -9,6 +11,14 @@ import android.os.Bundle;
  */
 
 public class HomePresenter implements HomeContract.Presenter {
+
+    private Context mContext;
+    private HomeContract.View mView;
+
+    public HomePresenter(@NonNull Context context, @NonNull HomeContract.View view) {
+        mContext = context;
+        mView = view;
+    }
 
     @Override
     public void onResult(int requestCode, int resultCode, Intent data) {

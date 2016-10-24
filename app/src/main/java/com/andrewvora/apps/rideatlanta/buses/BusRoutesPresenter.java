@@ -1,7 +1,9 @@
 package com.andrewvora.apps.rideatlanta.buses;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 
 /**
  * Created by faytx on 10/22/2016.
@@ -9,6 +11,14 @@ import android.os.Bundle;
  */
 
 public class BusRoutesPresenter implements BusRoutesContract.Presenter {
+
+    private Context mContext;
+    private BusRoutesContract.View mView;
+
+    public BusRoutesPresenter(@NonNull Context context, @NonNull BusRoutesContract.View view) {
+        mContext = context;
+        mView = view;
+    }
 
     @Override
     public void onResult(int requestCode, int resultCode, Intent data) {
@@ -27,6 +37,11 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter {
 
     @Override
     public void start() {
+
+    }
+
+    @Override
+    public void loadBusRoutes() {
 
     }
 }
