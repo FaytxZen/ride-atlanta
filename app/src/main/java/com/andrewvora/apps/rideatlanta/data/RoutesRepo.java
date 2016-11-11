@@ -5,5 +5,5 @@ package com.andrewvora.apps.rideatlanta.data;
  * @author Andrew Vorakrajangthiti
  */
 
-public class FavoriteRoutesRepo implements FavoriteRoutesDataSource {
+public class RoutesRepo implements RoutesDataSource {
 }

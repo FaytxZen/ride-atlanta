@@ -10,4 +10,11 @@
     <string name="content_description_toolbar_icon">
         Icon of the current page. Press to see additional options.
     </string>
+
+    <string name="base_url_trains">
+        http://developer.itsmarta.com/RealtimeTrain/RestServiceNextTrain/GetRealtimeArrivals
+    </string>
+    <string name="base_url_buses">
+        http://developer.itsmarta.com/BRDRestService/RestBusRealTimeService/GetAllBus
+    </string>
 </resources>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp">
+
+    <TextView
+        android:id="@+id/train_line_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:text="Red Line"/>
+
+    <TextView
+        android:id="@+id/train_destination_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:text="Lindburgh"/>
+
+    <TextView
+        android:id="@+id/train_next_arrival_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:text="Arrives in 10 minutes"/>
+
+    <TextView
+        android:id="@+id/train_station_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:text="Lindburgh Station"/>
+</LinearLayout>

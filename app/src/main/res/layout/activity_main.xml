@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="@dimen/toolbar_height"
-        android:layout_marginBottom="@dimen/bottom_bar_height"/>
+        android:layout_marginBottom="@dimen/bottom_bar_content_margin"/>
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"

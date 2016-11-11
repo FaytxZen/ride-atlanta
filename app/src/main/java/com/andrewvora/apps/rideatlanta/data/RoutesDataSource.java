@@ -5,5 +5,5 @@ package com.andrewvora.apps.rideatlanta.data;
  * @author Andrew Vorakrajangthiti
  */
 
-public interface FavoriteRoutesDataSource {
+public interface RoutesDataSource {
 }

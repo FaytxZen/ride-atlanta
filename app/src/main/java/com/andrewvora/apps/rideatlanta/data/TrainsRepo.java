@@ -40,8 +40,8 @@ public class TrainsRepo implements TrainsDataSource {
 
     public static TrainsRepo getInstance(@NonNull Context context) {
         if(mInstance == null) {
-            TrainsDataSource remoteSource = new TrainsRemoteSource();
-            TrainsDataSource localSource = new TrainsLocalSource();
+            TrainsDataSource remoteSource = TrainsRemoteSource.getInstance(context);
+            TrainsDataSource localSource = TrainsLocalSource.getInstance(context);
             mInstance = new TrainsRepo(remoteSource, localSource);
         }
 

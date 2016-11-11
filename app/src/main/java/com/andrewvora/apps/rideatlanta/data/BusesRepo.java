@@ -40,8 +40,8 @@ public class BusesRepo implements BusesDataSource {
 
     public static BusesRepo getInstance(@NonNull Context context) {
         if(mInstance == null) {
-            BusesDataSource remoteSource = new BusesRemoteSource();
-            BusesDataSource localSource = new BusesLocalSource();
+            BusesDataSource remoteSource = BusesRemoteSource.getInstance(context);
+            BusesDataSource localSource = BusesLocalSource.getInstance(context);
 
             mInstance = new BusesRepo(remoteSource, localSource);
         }

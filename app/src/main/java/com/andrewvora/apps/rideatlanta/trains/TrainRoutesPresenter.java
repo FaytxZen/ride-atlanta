@@ -5,6 +5,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
+import com.andrewvora.apps.rideatlanta.common.models.Train;
+import com.andrewvora.apps.rideatlanta.data.TrainsDataSource;
+import com.andrewvora.apps.rideatlanta.data.TrainsRepo;
+
+import java.util.List;
+
 /**
  * Created by faytx on 10/22/2016.
  * @author Andrew Vorakrajangthiti
@@ -37,6 +43,23 @@ public class TrainRoutesPresenter implements TrainRoutesContract.Presenter {
 
     @Override
     public void start() {
+        loadTrainRoutes();
+    }
 
+    @Override
+    public void loadTrainRoutes() {
+        TrainsRepo trainsRepo = TrainsRepo.getInstance(mContext);
+        trainsRepo.reloadTrains();
+        trainsRepo.getTrains(new TrainsDataSource.GetTrainRoutesCallback() {
+            @Override
+            public void onFinished(List<Train> trainList) {
+                mView.onTrainRoutesLoaded(trainList);
+            }
+
+            @Override
+            public void onError(Object error) {
+
+            }
+        });
     }
 }

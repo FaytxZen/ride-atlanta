@@ -5,6 +5,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
+import com.andrewvora.apps.rideatlanta.common.models.Bus;
+import com.andrewvora.apps.rideatlanta.data.BusesDataSource;
+import com.andrewvora.apps.rideatlanta.data.BusesRepo;
+
+import java.util.List;
+
 /**
  * Created by faytx on 10/22/2016.
  * @author Andrew Vorakrajangthiti
@@ -37,11 +43,23 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter {
 
     @Override
     public void start() {
-
+        loadBusRoutes();
     }
 
     @Override
     public void loadBusRoutes() {
+        BusesRepo repo = BusesRepo.getInstance(mContext);
+        repo.reloadBuses();
+        repo.getBuses(new BusesDataSource.GetBusesCallback() {
+            @Override
+            public void onFinished(List<Bus> buses) {
+                mView.onBusRoutesLoaded(buses);
+            }
 
+            @Override
+            public void onError(Object error) {
+
+            }
+        });
     }
 }
