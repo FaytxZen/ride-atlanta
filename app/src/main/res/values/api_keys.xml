@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="marta_api_key"></string>
+    <string name="marta_api_key">
+   </string>
+
+    <string name="fabric_api_key">
+   </string>
+
+    <string name="twitter_key">
+    </string>
+
+    <string name="twitter_secret">
+    </string>
 </resources>
