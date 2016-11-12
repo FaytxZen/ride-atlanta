@@ -3,6 +3,7 @@ package com.andrewvora.apps.rideatlanta.data.local.notifications;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
+import com.andrewvora.apps.rideatlanta.common.models.Notification;
 import com.andrewvora.apps.rideatlanta.data.NotificationsDataSource;
 
 /**
@@ -26,4 +27,23 @@ public class NotificationsLocalSource implements NotificationsDataSource {
         return mInstance;
     }
 
+    @Override
+    public void getNotifications(@NonNull GetNotificationsCallback callback) {
+
+    }
+
+    @Override
+    public void deleteAllNotifications() {
+
+    }
+
+    @Override
+    public void saveNotification(@NonNull Notification notification) {
+
+    }
+
+    @Override
+    public void reloadNotifications() {
+
+    }
 }

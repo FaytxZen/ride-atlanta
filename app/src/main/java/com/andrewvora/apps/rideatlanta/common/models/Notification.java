@@ -9,6 +9,9 @@ import com.google.gson.annotations.SerializedName;
 
 public class Notification {
 
+    @SerializedName("id")
+    private String id;
+
     @SerializedName("date")
     private String date;
 
@@ -17,6 +20,14 @@ public class Notification {
 
     @SerializedName("type")
     private String type;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getDate() {
         return date;

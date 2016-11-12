@@ -5,6 +5,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
+import com.andrewvora.apps.rideatlanta.common.models.Notification;
+import com.andrewvora.apps.rideatlanta.data.NotificationsDataSource;
+import com.andrewvora.apps.rideatlanta.data.NotificationsRepo;
+
+import java.util.List;
+
 /**
  * Created by faytx on 10/22/2016.
  * @author Andrew Vorakrajangthiti
@@ -39,6 +45,23 @@ public class NotificationsPresenter implements NotificationsContract.Presenter {
 
     @Override
     public void start() {
+        loadNotifications();
+    }
 
+    @Override
+    public void loadNotifications() {
+        NotificationsRepo repo = NotificationsRepo.getInstance(mContext);
+        repo.reloadNotifications();
+        repo.getNotifications(new NotificationsDataSource.GetNotificationsCallback() {
+            @Override
+            public void onFinished(List<Notification> notifications) {
+                mView.onNotificationsLoaded(notifications);
+            }
+
+            @Override
+            public void onError(Object error) {
+
+            }
+        });
     }
 }
