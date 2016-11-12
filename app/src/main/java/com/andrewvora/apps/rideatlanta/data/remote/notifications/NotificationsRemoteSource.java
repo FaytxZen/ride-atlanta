@@ -78,16 +78,16 @@ public class NotificationsRemoteSource implements NotificationsDataSource {
 
     @Override
     public void deleteAllNotifications() {
-
+        // remote notifications are read-only
     }
 
     @Override
     public void saveNotification(@NonNull Notification notification) {
-
+        // remote notifications are read-only
     }
 
     @Override
     public void reloadNotifications() {
-
+        // reloading is handled in the NotificationsRepo
     }
 }

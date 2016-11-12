@@ -1,9 +1,9 @@
 # Ride Atlanta
 
-![build status](https://travis-ci.org/FaytxZen/rideatlanta.svg?branch=master)
+![license](https://img.shields.io/badge/license-MIT-blue.svg)
 
 ## Purpose
-Because the *[MARTA On the Go](http://www.itsmarta.com/)* Android app just doesn't cut it.
+Because the *[MARTA On the Go](http://www.itsmarta.com/)* Android app just doesn't cut it sometimes.
 
 
 ## Contributing
