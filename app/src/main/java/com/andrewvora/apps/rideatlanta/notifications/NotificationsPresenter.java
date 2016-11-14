@@ -6,8 +6,9 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.common.models.Notification;
-import com.andrewvora.apps.rideatlanta.data.NotificationsDataSource;
-import com.andrewvora.apps.rideatlanta.data.NotificationsRepo;
+import com.andrewvora.apps.rideatlanta.data.contracts.NotificationsDataSource;
+import com.andrewvora.apps.rideatlanta.data.repos.NotificationsRepo;
+import com.andrewvora.apps.rideatlanta.utils.NetworkUtil;
 
 import java.util.List;
 
@@ -34,14 +35,10 @@ public class NotificationsPresenter implements NotificationsContract.Presenter {
     }
 
     @Override
-    public void onSaveState(Bundle outState) {
-
-    }
+    public void onSaveState(Bundle outState) { }
 
     @Override
-    public void onRestoreState(Bundle savedState) {
-
-    }
+    public void onRestoreState(Bundle savedState) { }
 
     @Override
     public void start() {
@@ -51,7 +48,11 @@ public class NotificationsPresenter implements NotificationsContract.Presenter {
     @Override
     public void loadNotifications() {
         NotificationsRepo repo = NotificationsRepo.getInstance(mContext);
-        repo.reloadNotifications();
+
+        if(shouldNotUseCachedNotifications()) {
+            repo.reloadNotifications();
+        }
+
         repo.getNotifications(new NotificationsDataSource.GetNotificationsCallback() {
             @Override
             public void onFinished(List<Notification> notifications) {
@@ -63,5 +64,9 @@ public class NotificationsPresenter implements NotificationsContract.Presenter {
 
             }
         });
+    }
+
+    private boolean shouldNotUseCachedNotifications() {
+        return NetworkUtil.connectedToInternet(mContext);
     }
 }

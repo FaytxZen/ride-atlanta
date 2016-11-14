@@ -7,7 +7,8 @@ import com.google.gson.annotations.SerializedName;
  * @author Andrew Vorakrajangthiti
  */
 
-public class Bus {
+public class Bus extends BaseModel {
+
     @SerializedName("ADHERENCE")
     private Integer adherence;
 

@@ -3,7 +3,7 @@ package com.andrewvora.apps.rideatlanta.data.local.routes;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-import com.andrewvora.apps.rideatlanta.data.RoutesDataSource;
+import com.andrewvora.apps.rideatlanta.data.contracts.RoutesDataSource;
 import com.andrewvora.apps.rideatlanta.data.local.RideAtlantaDbHelper;
 
 /**

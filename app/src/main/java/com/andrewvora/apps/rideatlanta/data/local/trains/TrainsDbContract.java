@@ -23,10 +23,10 @@ public interface TrainsDbContract {
         public static final String COLUMN_WAITING_TIME = "waiting_time";
 
         public static final String CREATE_STATEMENT = String.format(
-                "CREATE TABLE %s (%s %s PRIMARY KEY, %s %s, %s %s, %s %s,"+
+                "CREATE TABLE %s (%s %s PRIMARY KEY AUTOINCREMENT, %s %s, %s %s, %s %s,"+
                         " %s %s, %s %s, %s %s, %s %s, %s %s, %s %s)",
                 TABLE_NAME,
-                _ID, TYPE_STRING,
+                _ID, TYPE_INT,
                 COLUMN_TRAIN_ID, TYPE_INT,
                 COLUMN_DESTINATION, TYPE_STRING,
                 COLUMN_DIRECTION, TYPE_STRING,
@@ -36,5 +36,20 @@ public interface TrainsDbContract {
                 COLUMN_STATION, TYPE_STRING,
                 COLUMN_WAITING_SECONDS, TYPE_INT,
                 COLUMN_WAITING_TIME, TYPE_STRING);
+
+        public static String[] getColumns() {
+            return new String[] {
+                    _ID,
+                    COLUMN_TRAIN_ID,
+                    COLUMN_DESTINATION,
+                    COLUMN_DIRECTION,
+                    COLUMN_EVENT_TIME,
+                    COLUMN_LINE,
+                    COLUMN_NEXT_ARRIVAL,
+                    COLUMN_STATION,
+                    COLUMN_WAITING_SECONDS,
+                    COLUMN_WAITING_TIME
+            };
+        }
     }
 }

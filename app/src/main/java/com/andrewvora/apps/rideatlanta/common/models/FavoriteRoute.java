@@ -7,13 +7,12 @@ import com.google.gson.annotations.SerializedName;
  * @author Andrew Vorakrajangthiti
  */
 
-public class FavoriteRoute {
+public class FavoriteRoute extends BaseModel {
 
     public static final String TYPE_BUS = "bus";
     public static final String TYPE_TRAIN = "train";
 
     private String type;
-    private String id;
 
     public String getType() {
         return type;
@@ -21,13 +20,5 @@ public class FavoriteRoute {
 
     public void setType(String type) {
         this.type = type;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 }

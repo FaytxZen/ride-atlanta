@@ -57,6 +57,10 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
         mTrainsRecyclerView.setAdapter(mTrainAdapter);
         mTrainsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
+        if(mPresenter != null) {
+            mPresenter.onRestoreState(savedInstanceState);
+        }
+
         return view;
     }
 
@@ -66,6 +70,15 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
 
         if(mPresenter != null) {
             mPresenter.start();
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        if(mPresenter != null) {
+            mPresenter.onSaveState(outState);
         }
     }
 

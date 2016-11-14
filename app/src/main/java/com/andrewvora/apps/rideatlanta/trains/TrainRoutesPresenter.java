@@ -6,8 +6,9 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.common.models.Train;
-import com.andrewvora.apps.rideatlanta.data.TrainsDataSource;
-import com.andrewvora.apps.rideatlanta.data.TrainsRepo;
+import com.andrewvora.apps.rideatlanta.data.CachedDataMap;
+import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
+import com.andrewvora.apps.rideatlanta.data.repos.TrainsRepo;
 
 import java.util.List;
 
@@ -27,19 +28,13 @@ public class TrainRoutesPresenter implements TrainRoutesContract.Presenter {
     }
 
     @Override
-    public void onResult(int requestCode, int resultCode, Intent data) {
-
-    }
+    public void onResult(int requestCode, int resultCode, Intent data) { }
 
     @Override
-    public void onSaveState(Bundle outState) {
-
-    }
+    public void onSaveState(Bundle outState) { }
 
     @Override
-    public void onRestoreState(Bundle savedState) {
-
-    }
+    public void onRestoreState(Bundle savedState) { }
 
     @Override
     public void start() {
@@ -49,10 +44,13 @@ public class TrainRoutesPresenter implements TrainRoutesContract.Presenter {
     @Override
     public void loadTrainRoutes() {
         TrainsRepo trainsRepo = TrainsRepo.getInstance(mContext);
-        trainsRepo.reloadTrains();
+
+        useCachedDataIfAvailable(trainsRepo);
+
         trainsRepo.getTrains(new TrainsDataSource.GetTrainRoutesCallback() {
             @Override
             public void onFinished(List<Train> trainList) {
+                makeCachedDataAvailable();
                 mView.onTrainRoutesLoaded(trainList);
             }
 
@@ -61,5 +59,23 @@ public class TrainRoutesPresenter implements TrainRoutesContract.Presenter {
 
             }
         });
+    }
+
+    private boolean hasNoCachedData() {
+        return !CachedDataMap.getInstance().hasCachedData(getCachedDataTag());
+    }
+
+    private void makeCachedDataAvailable() {
+        CachedDataMap.getInstance().put(getCachedDataTag(), true);
+    }
+
+    private void useCachedDataIfAvailable(TrainsRepo repo) {
+        if(hasNoCachedData()) {
+            repo.reloadTrains();
+        }
+    }
+
+    private String getCachedDataTag() {
+        return TrainRoutesPresenter.class.getSimpleName();
     }
 }

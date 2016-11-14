@@ -3,7 +3,7 @@ package com.andrewvora.apps.rideatlanta.data.remote.notifications;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.common.models.Notification;
-import com.andrewvora.apps.rideatlanta.data.NotificationsDataSource;
+import com.andrewvora.apps.rideatlanta.data.contracts.NotificationsDataSource;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
 import com.twitter.sdk.android.core.TwitterApiClient;
@@ -59,8 +59,8 @@ public class NotificationsRemoteSource implements NotificationsDataSource {
 
                 for(Tweet tweet : tweets) {
                     Notification notification = new Notification();
-                    notification.setId(String.valueOf(tweet.getId()));
-                    notification.setDate(tweet.createdAt);
+                    notification.setNotificationId(String.valueOf(tweet.getId()));
+                    notification.setPostedAt(tweet.createdAt);
                     notification.setMessage(tweet.text);
 
                     notifications.add(notification);

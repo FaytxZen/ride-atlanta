@@ -7,34 +7,31 @@ import com.google.gson.annotations.SerializedName;
  * @author Andrew Vorakrajangthiti
  */
 
-public class Notification {
+public class Notification extends BaseModel {
 
-    @SerializedName("id")
-    private String id;
+    @SerializedName("notificationId")
+    private String notificationId;
 
-    @SerializedName("date")
-    private String date;
+    @SerializedName("postedAt")
+    private String postedAt;
 
     @SerializedName("message")
     private String message;
 
-    @SerializedName("type")
-    private String type;
-
-    public String getId() {
-        return id;
+    public String getNotificationId() {
+        return notificationId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setNotificationId(String notificationId) {
+        this.notificationId = notificationId;
     }
 
-    public String getDate() {
-        return date;
+    public String getPostedAt() {
+        return postedAt;
     }
 
-    public void setDate(String date) {
-        this.date = date;
+    public void setPostedAt(String postedAt) {
+        this.postedAt = postedAt;
     }
 
     public String getMessage() {
@@ -43,13 +40,5 @@ public class Notification {
 
     public void setMessage(String message) {
         this.message = message;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 }

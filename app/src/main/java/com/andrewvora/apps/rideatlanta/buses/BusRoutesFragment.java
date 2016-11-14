@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 
 import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.common.models.Bus;
+import com.andrewvora.apps.rideatlanta.data.repos.BusesRepo;
 
 import java.util.List;
 
@@ -57,6 +58,10 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
         mBusesRecyclerView.setAdapter(mBusAdapter);
         mBusesRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
+        if(mPresenter != null) {
+            mPresenter.onRestoreState(savedInstanceState);
+        }
+
         return view;
     }
 
@@ -67,6 +72,22 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
         if(mPresenter != null) {
             mPresenter.start();
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        if(mPresenter != null) {
+            mPresenter.onSaveState(outState);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        BusesRepo.destroyInstance();
     }
 
     @Override

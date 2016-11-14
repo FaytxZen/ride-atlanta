@@ -14,15 +14,14 @@ import io.fabric.sdk.android.Fabric;
 
 public class RideAtlantaApplication extends Application {
 
-    private TwitterAuthConfig mTwitterAuthConfig;
-
     @Override
     public void onCreate() {
         super.onCreate();
 
         final String twitterKey = getString(R.string.twitter_key);
         final String twitterSecret = getString(R.string.twitter_secret);
-        mTwitterAuthConfig = new TwitterAuthConfig(twitterKey, twitterSecret);
-        Fabric.with(this, new Twitter(mTwitterAuthConfig));
+        TwitterAuthConfig twitterAuthConfig = new TwitterAuthConfig(twitterKey, twitterSecret);
+
+        Fabric.with(this, new Twitter(twitterAuthConfig));
     }
 }

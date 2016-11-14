@@ -1,4 +1,4 @@
-package com.andrewvora.apps.rideatlanta.data;
+package com.andrewvora.apps.rideatlanta.data.contracts;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;

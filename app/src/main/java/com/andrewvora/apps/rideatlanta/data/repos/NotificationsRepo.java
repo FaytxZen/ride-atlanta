@@ -1,10 +1,11 @@
-package com.andrewvora.apps.rideatlanta.data;
+package com.andrewvora.apps.rideatlanta.data.repos;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.andrewvora.apps.rideatlanta.common.models.Notification;
+import com.andrewvora.apps.rideatlanta.data.contracts.NotificationsDataSource;
 import com.andrewvora.apps.rideatlanta.data.local.notifications.NotificationsLocalSource;
 import com.andrewvora.apps.rideatlanta.data.remote.notifications.NotificationsRemoteSource;
 
@@ -136,7 +137,7 @@ public class NotificationsRepo implements NotificationsDataSource {
 
     private void cacheNotification(Notification notification) {
         mCachedNotifications = checkNotNull(mCachedNotifications);
-        mCachedNotifications.put(notification.getId(), notification);
+        mCachedNotifications.put(notification.getNotificationId(), notification);
     }
 
     private Map<String, Notification> checkNotNull(@Nullable Map<String, Notification> map)

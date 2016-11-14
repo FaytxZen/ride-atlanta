@@ -1,10 +1,11 @@
-package com.andrewvora.apps.rideatlanta.data;
+package com.andrewvora.apps.rideatlanta.data.repos;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.andrewvora.apps.rideatlanta.common.models.Bus;
+import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
 import com.andrewvora.apps.rideatlanta.data.local.buses.BusesLocalSource;
 import com.andrewvora.apps.rideatlanta.data.remote.buses.BusesRemoteSource;
 
@@ -31,7 +32,7 @@ public class BusesRepo implements BusesDataSource {
 
     private boolean mCacheIsDirty;
 
-    public BusesRepo(@NonNull BusesDataSource remoteSource,
+    private BusesRepo(@NonNull BusesDataSource remoteSource,
                      @NonNull BusesDataSource localSource)
     {
         mRemoteSource = remoteSource;

@@ -7,7 +7,7 @@ import com.google.gson.annotations.SerializedName;
  * @author Andrew Vorakrajangthiti
  */
 
-public class Train {
+public class Train extends BaseModel {
 
     @SerializedName("DESTINATION")
     private String destination;

@@ -1,6 +1,6 @@
 package com.andrewvora.apps.rideatlanta.data.remote.routes;
 
-import com.andrewvora.apps.rideatlanta.data.RoutesDataSource;
+import com.andrewvora.apps.rideatlanta.data.contracts.RoutesDataSource;
 
 /**
  * Created by faytx on 10/24/2016.

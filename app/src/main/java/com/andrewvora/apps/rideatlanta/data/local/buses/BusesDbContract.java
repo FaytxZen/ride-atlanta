@@ -1,7 +1,5 @@
 package com.andrewvora.apps.rideatlanta.data.local.buses;
 
-import android.provider.BaseColumns;
-
 import com.andrewvora.apps.rideatlanta.data.local.common.BaseDbContract;
 
 /**
@@ -28,10 +26,10 @@ public interface BusesDbContract {
         public static final String COLUMN_VEHICLE = "vehicle";
 
         public static final String CREATE_STATEMENT = String.format(
-                "CREATE TABLE %s (%s %s PRIMARY KEY, %s %s, %s %s, %s %s,"+
+                "CREATE TABLE %s (%s %s PRIMARY KEY AUTOINCREMENT, %s %s, %s %s, %s %s,"+
                         " %s %s, %s %s, %s %s, %s %s, %s %s, %s %s, %s %s, %s %s, %s %s)",
                 TABLE_NAME,
-                _ID, TYPE_STRING,
+                _ID, TYPE_INT,
                 COLUMN_ROUTEID, TYPE_STRING,
                 COLUMN_ADHERENCE, TYPE_INT,
                 COLUMN_BLOCKID, TYPE_INT,
@@ -45,5 +43,23 @@ public interface BusesDbContract {
                 COLUMN_TRIPID, TYPE_INT,
                 COLUMN_VEHICLE, TYPE_INT
         );
+
+        public static String[] getColumns() {
+            return new String[] {
+                    _ID,
+                    COLUMN_ROUTEID,
+                    COLUMN_ADHERENCE,
+                    COLUMN_BLOCKID,
+                    COLUMN_BLOCK_ABBR,
+                    COLUMN_DIRECTION,
+                    COLUMN_LATITUDE,
+                    COLUMN_LONGITUDE,
+                    COLUMN_MSGTIME,
+                    COLUMN_STOPID,
+                    COLUMN_TIMEPOINT,
+                    COLUMN_TRIPID,
+                    COLUMN_VEHICLE
+            };
+        }
     }
 }

@@ -6,7 +6,7 @@ import android.support.annotation.Nullable;
 
 import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.common.models.Train;
-import com.andrewvora.apps.rideatlanta.data.TrainsDataSource;
+import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
