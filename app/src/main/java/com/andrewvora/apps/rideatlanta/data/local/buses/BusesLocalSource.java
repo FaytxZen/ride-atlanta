@@ -49,6 +49,8 @@ public class BusesLocalSource implements BusesDataSource {
                     columns, selection, null, null, null, null);
             List<Bus> busList = getBusesFrom(busesCursor);
             callback.onFinished(busList);
+
+            busesCursor.close();
         }
         catch (Exception e) {
             e.printStackTrace();

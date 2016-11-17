@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.andrewvora.apps.rideatlanta.data.local.buses.BusesDbContract;
-import com.andrewvora.apps.rideatlanta.data.local.routes.RoutesDbContract;
+import com.andrewvora.apps.rideatlanta.data.local.routes.FavoriteRoutesDbContract;
 import com.andrewvora.apps.rideatlanta.data.local.notifications.NotificationsDbContract;
 import com.andrewvora.apps.rideatlanta.data.local.trains.TrainsDbContract;
 
@@ -26,7 +26,7 @@ public class RideAtlantaDbHelper extends SQLiteOpenHelper {
     public static final String CREATE_TRAINS_TABLE = TrainsDbContract.TrainsTable.CREATE_STATEMENT;
     public static final String CREATE_BUSES_TABLE = BusesDbContract.BusesTable.CREATE_STATEMENT;
     public static final String CREATE_FAV_ROUTES_TABLE =
-            RoutesDbContract.FavoriteRoutesTable.CREATE_STATEMENT;
+            FavoriteRoutesDbContract.FavoriteRoutesTable.CREATE_STATEMENT;
     public static final String CREATE_NOTIFICATIONS_TABLE =
             NotificationsDbContract.NotificationsTable.CREATE_STATEMENT;
 

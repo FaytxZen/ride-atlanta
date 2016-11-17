@@ -41,4 +41,9 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
     public void start() {
 
     }
+
+    @Override
+    public void loadFavoriteRoutes() {
+
+    }
 }

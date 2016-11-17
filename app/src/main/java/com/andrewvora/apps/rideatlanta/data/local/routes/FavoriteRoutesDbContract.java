@@ -7,7 +7,7 @@ import com.andrewvora.apps.rideatlanta.data.local.common.BaseDbContract;
  * @author Andrew Vorakrajangthiti
  */
 
-public interface RoutesDbContract {
+public interface FavoriteRoutesDbContract {
 
     final class FavoriteRoutesTable implements BaseDbContract {
         public static final String TABLE_NAME = "favorite_routes";
@@ -21,5 +21,13 @@ public interface RoutesDbContract {
                 _ID, TYPE_STRING,
                 COLUMN_ROUTE_ID, TYPE_STRING,
                 COLUMN_TYPE, TYPE_STRING);
+
+        public static String[] getColumns() {
+            return new String[] {
+                    _ID,
+                    COLUMN_ROUTE_ID,
+                    COLUMN_TYPE
+            };
+        }
     }
 }

@@ -8,6 +8,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.andrewvora.apps.rideatlanta.R;
+import com.andrewvora.apps.rideatlanta.common.models.FavoriteRoute;
+
+import java.util.List;
 
 import butterknife.ButterKnife;
 
@@ -47,5 +50,10 @@ public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesCo
     @Override
     public void setPresenter(FavoriteRoutesContract.Presenter presenter) {
         mPresenter = presenter;
+    }
+
+    @Override
+    public void onFavoriteRoutesLoaded(List<FavoriteRoute> favRoutes) {
+
     }
 }
