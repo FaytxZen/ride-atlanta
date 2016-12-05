@@ -2,6 +2,7 @@ package com.andrewvora.apps.rideatlanta;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.IdRes;
@@ -11,9 +12,12 @@ import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.andrewvora.apps.rideatlanta.breezebalance.BreezeBalanceActivity;
 import com.andrewvora.apps.rideatlanta.buses.BusRoutesContract;
 import com.andrewvora.apps.rideatlanta.buses.BusRoutesFragment;
 import com.andrewvora.apps.rideatlanta.buses.BusRoutesPresenter;
@@ -28,6 +32,7 @@ import com.andrewvora.apps.rideatlanta.home.HomePresenter;
 import com.andrewvora.apps.rideatlanta.notifications.NotificationsContract;
 import com.andrewvora.apps.rideatlanta.notifications.NotificationsFragment;
 import com.andrewvora.apps.rideatlanta.notifications.NotificationsPresenter;
+import com.andrewvora.apps.rideatlanta.seeandsay.SeeAndSayActivity;
 import com.andrewvora.apps.rideatlanta.trains.TrainRoutesContract;
 import com.andrewvora.apps.rideatlanta.trains.TrainRoutesFragment;
 import com.andrewvora.apps.rideatlanta.trains.TrainRoutesPresenter;
@@ -85,6 +90,27 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_home, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_breeze_balance:
+                goToCheckBreezeBalancePage();
+                break;
+
+            case R.id.menu_report:
+                goToSeeSayReportingPage();
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -160,6 +186,16 @@ public class MainActivity extends AppCompatActivity {
         setActiveViewAndPresenter(fragment, presenter);
 
         startFragment(R.id.fragment_container, fragment, FavoriteRoutesFragment.TAG, false);
+    }
+
+    private void goToCheckBreezeBalancePage() {
+        Intent openBreezeBalanceSiteIntent = new Intent(this, BreezeBalanceActivity.class);
+        startActivity(openBreezeBalanceSiteIntent);
+    }
+
+    private void goToSeeSayReportingPage() {
+        Intent reportIncidentIntent = new Intent(this, SeeAndSayActivity.class);
+        startActivity(reportIncidentIntent);
     }
 
     private void onNotificationsTabSelected() {

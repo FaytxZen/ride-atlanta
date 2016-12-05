@@ -23,6 +23,14 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".breezebalance.BreezeBalanceActivity"
+            android:alwaysRetainTaskState="true"/>
+
+        <activity
+            android:name=".seeandsay.SeeAndSayActivity"
+            android:alwaysRetainTaskState="true"/>
+
          <meta-data
             android:name="io.fabric.ApiKey"
             android:value="" />

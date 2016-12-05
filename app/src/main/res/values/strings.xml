@@ -7,6 +7,10 @@
     <string name="title_tab_fav_routes">Favorites</string>
     <string name="title_tab_notifications">Alerts</string>
 
+    <string name="menu_refresh">Refresh</string>
+    <string name="menu_breeze_balance">Check Breeze Balance</string>
+    <string name="menu_report_incident">Report Incident</string>
+
     <string name="content_description_toolbar_icon">
         Icon of the current page. Press to see additional options.
     </string>
@@ -16,5 +20,9 @@
     </string>
     <string name="base_url_buses">
         http://developer.itsmarta.com/BRDRestService/RestBusRealTimeService/GetAllBus
+    </string>
+
+    <string name="breeze_balance_url">
+        https://balance.breezecard.com/breezeWeb/jsp/web/cardnumberweb.jsp
     </string>
 </resources>
