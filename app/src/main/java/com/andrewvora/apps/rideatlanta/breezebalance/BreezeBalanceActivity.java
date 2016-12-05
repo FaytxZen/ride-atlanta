@@ -1,5 +1,6 @@
 package com.andrewvora.apps.rideatlanta.breezebalance;
 
+import android.net.http.SslError;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -7,6 +8,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -23,7 +25,7 @@ import butterknife.ButterKnife;
  */
 public class BreezeBalanceActivity extends AppCompatActivity {
 
-    @BindView(R.id.toolbar) Toolbar mToolbar;
+    @BindView(R.id.web_view_toolbar) Toolbar mToolbar;
     @BindView(R.id.web_view) WebView mWebView;
     @BindView(R.id.web_view_progress_bar) ProgressBar mPageProgressBar;
 
@@ -35,10 +37,19 @@ public class BreezeBalanceActivity extends AppCompatActivity {
 
         setSupportActionBar(mToolbar);
         if(getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(R.string.breeze_balance_url);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        mWebView.setWebViewClient(new WebViewClient());
+        mWebView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+                //super.onReceivedSslError(view, handler, error);
+                if(view.getUrl().equals(getString(R.string.breeze_balance_url))) {
+                    handler.proceed();
+                }
+            }
+        });
         mWebView.getSettings().setSupportZoom(true);
 
         mWebView.setWebChromeClient(new WebChromeClient() {
@@ -48,7 +59,7 @@ public class BreezeBalanceActivity extends AppCompatActivity {
 
                 int progressBarVisibility = newProgress >= 100 ?
                         View.INVISIBLE :
-                        View.GONE;
+                        View.VISIBLE;
 
                 mPageProgressBar.setProgress(newProgress);
                 mPageProgressBar.setVisibility(progressBarVisibility);

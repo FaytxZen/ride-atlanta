@@ -25,6 +25,7 @@
 
         <activity
             android:name=".breezebalance.BreezeBalanceActivity"
+            android:configChanges="orientation|screenSize"
             android:alwaysRetainTaskState="true"/>
 
         <activity
