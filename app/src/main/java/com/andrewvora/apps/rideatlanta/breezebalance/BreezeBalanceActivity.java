@@ -35,17 +35,39 @@ public class BreezeBalanceActivity extends AppCompatActivity {
         setContentView(R.layout.activity_breeze_balance);
         ButterKnife.bind(this);
 
-        setSupportActionBar(mToolbar);
-        if(getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(R.string.breeze_balance_url);
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        configureToolbar();
+        configureWebView();
+
+        mWebView.loadUrl(getString(R.string.breeze_balance_url));
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_web_view, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch(item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                break;
+
+            case R.id.menu_refresh:
+                mWebView.reload();
+                break;
         }
 
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void configureWebView() {
         mWebView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-
                 view.scrollTo(0, 0);
             }
 
@@ -78,29 +100,13 @@ public class BreezeBalanceActivity extends AppCompatActivity {
                 mToolbar.setTitle(title);
             }
         });
-
-        mWebView.loadUrl(getString(R.string.breeze_balance_url));
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_web_view, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        switch(item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                break;
-
-            case R.id.menu_refresh:
-                mWebView.reload();
-                break;
+    private void configureToolbar() {
+        setSupportActionBar(mToolbar);
+        if(getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(R.string.breeze_balance_url);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
-
-        return super.onOptionsItemSelected(item);
     }
 }
