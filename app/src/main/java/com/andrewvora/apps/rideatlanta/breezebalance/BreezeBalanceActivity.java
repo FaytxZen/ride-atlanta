@@ -43,11 +43,18 @@ public class BreezeBalanceActivity extends AppCompatActivity {
 
         mWebView.setWebViewClient(new WebViewClient() {
             @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+
+                view.scrollTo(0, 0);
+            }
+
+            @Override
             public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-                //super.onReceivedSslError(view, handler, error);
-                if(view.getUrl().equals(getString(R.string.breeze_balance_url))) {
+                if(error.getUrl().equals(getString(R.string.breeze_balance_url))) {
                     handler.proceed();
                 }
+                else super.onReceivedSslError(view, handler, error);
             }
         });
         mWebView.getSettings().setSupportZoom(true);
