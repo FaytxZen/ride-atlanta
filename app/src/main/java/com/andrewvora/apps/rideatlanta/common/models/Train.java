@@ -1,5 +1,6 @@
 package com.andrewvora.apps.rideatlanta.common.models;
 
+import com.andrewvora.apps.rideatlanta.common.FavoriteRouteDataObject;
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -7,7 +8,7 @@ import com.google.gson.annotations.SerializedName;
  * @author Andrew Vorakrajangthiti
  */
 
-public class Train extends BaseModel {
+public class Train extends BaseModel implements FavoriteRouteDataObject {
 
     @SerializedName("DESTINATION")
     private String destination;
@@ -106,5 +107,15 @@ public class Train extends BaseModel {
 
     public void setWaitingTime(String waitingTime) {
         this.waitingTime = waitingTime;
+    }
+
+    @Override
+    public String getType() {
+        return FavoriteRouteDataObject.TYPE_TRAIN;
+    }
+
+    @Override
+    public String getRouteId() {
+        return getId().toString();
     }
 }

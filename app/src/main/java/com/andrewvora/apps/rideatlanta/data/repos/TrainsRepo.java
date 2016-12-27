@@ -78,6 +78,11 @@ public class TrainsRepo implements TrainsDataSource {
     }
 
     @Override
+    public void getTrains(@NonNull GetTrainRoutesCallback callback, @NonNull Long... trainIds) {
+        mLocalSource.getTrains(callback, trainIds);
+    }
+
+    @Override
     public void getTrain(@NonNull final Long trainId, @NonNull final GetTrainRouteCallback callback) {
         final Train cachedTrain = mCachedTrains.get(trainId);
 

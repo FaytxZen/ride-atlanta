@@ -30,6 +30,7 @@ public interface BusesDataSource {
     }
 
     void getBuses(@NonNull GetBusesCallback callback);
+    void getBuses(@NonNull GetBusesCallback callback, @NonNull String... routeIds);
     void getBus(@NonNull String routeId, @NonNull GetBusCallback callback);
     void deleteAllBus(@Nullable DeleteBusesCallback callback);
     void saveBus(@NonNull Bus route);

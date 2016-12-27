@@ -59,6 +59,29 @@ public class BusesLocalSource implements BusesDataSource {
     }
 
     @Override
+    public void getBuses(@NonNull GetBusesCallback callback, @NonNull String... routeIds) {
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+        try {
+            String[] columns = BusesTable.getColumns();
+            String selection = String.format("%s IN (%s)",
+                    BusesTable.COLUMN_ROUTEID,
+                    getIdsAsSqlString(routeIds));
+
+            Cursor busesCursor = db.query(BusesTable.TABLE_NAME,
+                    columns, selection, routeIds, null, null, null);
+            List<Bus> busList = getBusesFrom(busesCursor);
+            callback.onFinished(busList);
+
+            busesCursor.close();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            callback.onError(e);
+        }
+    }
+
+    @Override
     public void getBus(@NonNull String routeId, @NonNull GetBusCallback callback) {
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
@@ -183,5 +206,19 @@ public class BusesLocalSource implements BusesDataSource {
         bus.setVehicleNumber(cursor.getLong(vehicleIndex));
 
         return bus;
+    }
+
+    private String getIdsAsSqlString(@NonNull String... routeIds) {
+        StringBuilder sb = new StringBuilder();
+
+        for(int i = 0; i < routeIds.length; i++) {
+            String toAppend = i != routeIds.length - 1 ?
+                    routeIds[i] + "," :
+                    routeIds[i];
+
+            sb.append(toAppend);
+        }
+
+        return sb.toString();
     }
 }

@@ -50,11 +50,55 @@ public class TrainsLocalSource implements TrainsDataSource {
                     columns, selection, null, null, null, null);
             List<Train> trainList = getTrainsFrom(trainsCursor);
             callback.onFinished(trainList);
+
+            trainsCursor.close();
         }
         catch (Exception e) {
             e.printStackTrace();
             callback.onError(e);
         }
+    }
+
+    @Override
+    public void getTrains(@NonNull GetTrainRoutesCallback callback, @NonNull Long... trainIds) {
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+        try {
+            String[] columns = TrainsTable.getColumns();
+            String[] selectionArgs = new String[trainIds.length];
+            String selection = String.format("%s IN (%s)",
+                    TrainsTable.COLUMN_TRAIN_ID,
+                    getIdsAsSqlString(selectionArgs));
+
+            for(int i = 0; i < selectionArgs.length; i++) {
+                selectionArgs[i] = trainIds[i].toString();
+            }
+
+            Cursor trainsCursor = db.query(TrainsTable.TABLE_NAME,
+                    columns, selection, selectionArgs, null, null, null);
+            List<Train> trainList = getTrainsFrom(trainsCursor);
+            callback.onFinished(trainList);
+
+            trainsCursor.close();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            callback.onError(e);
+        }
+    }
+
+    private String getIdsAsSqlString(@NonNull String... trainIds) {
+        StringBuilder sb = new StringBuilder();
+
+        for(int i = 0; i < trainIds.length; i++) {
+            String toAppend = i != trainIds.length - 1 ?
+                    trainIds[i] + "," :
+                    trainIds[i];
+
+            sb.append(toAppend);
+        }
+
+        return sb.toString();
     }
 
     @Override

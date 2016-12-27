@@ -1,18 +1,18 @@
 package com.andrewvora.apps.rideatlanta.common.models;
 
+import com.andrewvora.apps.rideatlanta.common.FavoriteRouteDataObject;
+
 /**
  * Created by faytx on 10/24/2016.
  * @author Andrew Vorakrajangthiti
  */
 
-public class FavoriteRoute extends BaseModel {
-
-    public static final String TYPE_BUS = "bus";
-    public static final String TYPE_TRAIN = "train";
+public class FavoriteRoute extends BaseModel implements FavoriteRouteDataObject {
 
     private String routeId;
     private String type;
 
+    @Override
     public String getRouteId() {
         return routeId;
     }
@@ -21,6 +21,7 @@ public class FavoriteRoute extends BaseModel {
         this.routeId = routeId;
     }
 
+    @Override
     public String getType() {
         return type;
     }

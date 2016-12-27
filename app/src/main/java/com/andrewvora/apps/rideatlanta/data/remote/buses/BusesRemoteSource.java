@@ -76,6 +76,11 @@ public class BusesRemoteSource implements BusesDataSource {
     }
 
     @Override
+    public void getBuses(@NonNull GetBusesCallback callback, @NonNull String... routeIds) {
+
+    }
+
+    @Override
     public void getBus(@NonNull String routeId, @NonNull GetBusCallback callback) {
 
     }

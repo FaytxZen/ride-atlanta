@@ -79,6 +79,11 @@ public class BusesRepo implements BusesDataSource {
     }
 
     @Override
+    public void getBuses(@NonNull GetBusesCallback callback, @NonNull String... routeIds) {
+        mLocalSource.getBuses(callback, routeIds);
+    }
+
+    @Override
     public void getBus(@NonNull final String routeId, @NonNull final GetBusCallback callback) {
         final Bus cachedRoute = mCachedBuses.get(routeId);
 

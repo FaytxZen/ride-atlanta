@@ -2,6 +2,7 @@ package com.andrewvora.apps.rideatlanta.favoriteroutes;
 
 import com.andrewvora.apps.rideatlanta.common.BasePresenter;
 import com.andrewvora.apps.rideatlanta.common.BaseView;
+import com.andrewvora.apps.rideatlanta.common.FavoriteRouteDataObject;
 import com.andrewvora.apps.rideatlanta.common.models.FavoriteRoute;
 
 import java.util.List;
@@ -18,6 +19,6 @@ public interface FavoriteRoutesContract {
     }
 
     interface View extends BaseView<FavoriteRoutesContract.Presenter> {
-        void onFavoriteRoutesLoaded(List<FavoriteRoute> favRoutes);
+        void onFavoriteRoutesLoaded(List<FavoriteRouteDataObject> favRoutes);
     }
 }

@@ -3,15 +3,17 @@ package com.andrewvora.apps.rideatlanta.favoriteroutes;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.andrewvora.apps.rideatlanta.R;
-import com.andrewvora.apps.rideatlanta.common.models.FavoriteRoute;
+import com.andrewvora.apps.rideatlanta.common.FavoriteRouteDataObject;
 
 import java.util.List;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -22,6 +24,8 @@ import butterknife.ButterKnife;
 public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesContract.View {
 
     public static final String TAG = FavoriteRoutesFragment.class.getSimpleName();
+
+    @BindView(R.id.favorite_routes_recycler_view) RecyclerView FavoriteRoutesRecyclerView;
 
     private FavoriteRoutesContract.Presenter mPresenter;
 
@@ -53,7 +57,7 @@ public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesCo
     }
 
     @Override
-    public void onFavoriteRoutesLoaded(List<FavoriteRoute> favRoutes) {
+    public void onFavoriteRoutesLoaded(List<FavoriteRouteDataObject> favRoutes) {
 
     }
 }

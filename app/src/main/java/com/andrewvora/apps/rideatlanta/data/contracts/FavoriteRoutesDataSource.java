@@ -2,6 +2,7 @@ package com.andrewvora.apps.rideatlanta.data.contracts;
 
 import android.support.annotation.NonNull;
 
+import com.andrewvora.apps.rideatlanta.common.FavoriteRouteDataObject;
 import com.andrewvora.apps.rideatlanta.common.models.FavoriteRoute;
 
 import java.util.List;

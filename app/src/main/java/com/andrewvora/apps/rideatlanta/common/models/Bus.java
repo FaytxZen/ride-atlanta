@@ -1,5 +1,6 @@
 package com.andrewvora.apps.rideatlanta.common.models;
 
+import com.andrewvora.apps.rideatlanta.common.FavoriteRouteDataObject;
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -7,7 +8,7 @@ import com.google.gson.annotations.SerializedName;
  * @author Andrew Vorakrajangthiti
  */
 
-public class Bus extends BaseModel {
+public class Bus extends BaseModel implements FavoriteRouteDataObject {
 
     @SerializedName("ADHERENCE")
     private Integer adherence;
@@ -101,10 +102,6 @@ public class Bus extends BaseModel {
         this.msgTime = msgTime;
     }
 
-    public String getRouteId() {
-        return routeId;
-    }
-
     public void setRouteId(String routeId) {
         this.routeId = routeId;
     }
@@ -139,5 +136,15 @@ public class Bus extends BaseModel {
 
     public void setVehicleNumber(Long vehicleNumber) {
         this.vehicleNumber = vehicleNumber;
+    }
+
+    @Override
+    public String getRouteId() {
+        return routeId;
+    }
+
+    @Override
+    public String getType() {
+        return FavoriteRouteDataObject.TYPE_BUS;
     }
 }
