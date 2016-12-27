@@ -8,14 +8,26 @@
     android:layout_marginBottom="12dp">
 
     <TextView
-        android:id="@+id/bus_vehicle_id_text_view"
+        android:id="@+id/bus_route_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:text="Vehicle ID"/>
+        tools:text="Route 54"/>
 
     <TextView
-        android:id="@+id/bus_adherence_text_view"
+        android:id="@+id/bus_destination_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:text="Adherence"/>
+        tools:text="Midtown Station"/>
+
+    <TextView
+        android:id="@+id/bus_direction_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:text="Southwest"/>
+
+    <TextView
+        android:id="@+id/bus_status_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:text="3 minutes early"/>
 </LinearLayout>

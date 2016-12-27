@@ -1,5 +1,6 @@
 package com.andrewvora.apps.rideatlanta.buses;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
@@ -24,8 +25,8 @@ import butterknife.ButterKnife;
 
 public class BusRoutesAdapter extends RecyclerView.Adapter<BusRoutesAdapter.BusRoutesViewHolder> {
 
-    private List<Bus> mBusList;
-    private BusRoutesFragment.BusItemListener mListener;
+    @NonNull private List<Bus> mBusList;
+    @Nullable private BusRoutesFragment.BusItemListener mListener;
 
     public BusRoutesAdapter(@Nullable List<Bus> buses,
                             @Nullable BusRoutesFragment.BusItemListener listener)
@@ -46,8 +47,36 @@ public class BusRoutesAdapter extends RecyclerView.Adapter<BusRoutesAdapter.BusR
     public void onBindViewHolder(BusRoutesViewHolder holder, int position) {
         Bus bus = mBusList.get(position);
 
-        holder.vehicleIdTextView.setText(String.valueOf(bus.getVehicleNumber()));
-        holder.adherenceTextView.setText(bus.getAdherence().toString());
+        holder.vehicleIdTextView.setText(String.valueOf(bus.getRouteId()));
+
+        holder.directionTextView.setText(bus.getDirection());
+
+        String busDestination = bus.getTimePoint();
+        holder.destinationTextView.setText(busDestination);
+
+        // determine bus schedule adherence
+        // non-zero is minutes late, zero is on-time
+        final Context context = holder.itemView.getContext();
+        final int busAdherence = bus.getAdherence();
+        final boolean isOnTime = busAdherence == 0;
+        final boolean isEarly = busAdherence < 0;
+        String status;
+
+        if(isOnTime) {
+            status = context.getString(R.string.text_bus_adherence_suffix_on_time);
+        }
+        else if(isEarly) {
+            status = String.format("%s %s",
+                    Math.abs(busAdherence),
+                    context.getString(R.string.text_bus_adherence_suffix_early));
+        }
+        else {
+            status = String.format("%s %s",
+                    busAdherence,
+                    context.getString(R.string.text_bus_adherence_suffix_late));
+        }
+
+        holder.statusTextView.setText(status);
     }
 
     @Override
@@ -61,8 +90,10 @@ public class BusRoutesAdapter extends RecyclerView.Adapter<BusRoutesAdapter.BusR
 
     static class BusRoutesViewHolder extends RecyclerView.ViewHolder {
 
-        @BindView(R.id.bus_vehicle_id_text_view) TextView vehicleIdTextView;
-        @BindView(R.id.bus_adherence_text_view) TextView adherenceTextView;
+        @BindView(R.id.bus_route_text_view) TextView vehicleIdTextView;
+        @BindView(R.id.bus_destination_text_view) TextView destinationTextView;
+        @BindView(R.id.bus_direction_text_view) TextView directionTextView;
+        @BindView(R.id.bus_status_text_view) TextView statusTextView;
 
         BusRoutesViewHolder(@NonNull View view) {
             super(view);

@@ -25,4 +25,16 @@
     <string name="breeze_balance_url">
         https://balance.breezecard.com/breezeWeb/jsp/web/cardnumberweb.jsp
     </string>
+
+    <string name="text_bus_adherence_suffix_on_time">
+        On time
+    </string>
+
+    <string name="text_bus_adherence_suffix_early">
+        minutes early
+    </string>
+
+    <string name="text_bus_adherence_suffix_late">
+        minutes late
+    </string>
 </resources>

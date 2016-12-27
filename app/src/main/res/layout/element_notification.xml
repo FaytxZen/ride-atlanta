@@ -5,12 +5,25 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
     android:layout_marginBottom="12dp">
 
     <TextView
         android:id="@+id/notification_msg_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:text="This is a notification"/>
+        android:layout_marginBottom="4dp"
+        android:gravity="start"
+        android:textAlignment="viewStart"
+        tools:text="This is a notification. It has to take up a lot of space to be accurate."/>
 
+    <TextView
+        android:id="@+id/notification_msg_timestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/md_grey_500"
+        android:textSize="12sp"
+        tools:text="30 mins ago"/>
 </LinearLayout>

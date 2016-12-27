@@ -45,7 +45,9 @@ public class NotificationsAdapter extends
     @Override
     public void onBindViewHolder(NotificationsViewHolder holder, int position) {
         Notification notification = mNotificationList.get(position);
+
         holder.messageTextView.setText(notification.getMessage());
+        holder.timeStampTextView.setText(notification.getPostedAt());
     }
 
     @Override
@@ -60,6 +62,7 @@ public class NotificationsAdapter extends
     static class NotificationsViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.notification_msg_text_view) TextView messageTextView;
+        @BindView(R.id.notification_msg_timestamp) TextView timeStampTextView;
 
         NotificationsViewHolder(@NonNull View view) {
             super(view);

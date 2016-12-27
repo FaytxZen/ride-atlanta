@@ -25,7 +25,7 @@ import butterknife.ButterKnife;
 public class TrainRoutesAdapter extends
         RecyclerView.Adapter<TrainRoutesAdapter.TrainRoutesViewHolder>
 {
-    @Nullable private List<Train> mTrainList;
+    @NonNull private List<Train> mTrainList;
     @Nullable private TrainRoutesFragment.TrainItemListener mItemListener;
 
     public TrainRoutesAdapter(@Nullable List<Train> trainList,
@@ -48,26 +48,29 @@ public class TrainRoutesAdapter extends
         Train train = mTrainList.get(position);
 
         holder.lineTextView.setText(train.getLine());
-        holder.destinationTextView.setText(train.getDestination());
-        holder.nextArrivalTextView.setText(train.getNextArrival());
-        holder.stationTextView.setText(train.getStation());
+
+        // determine train destination
+        String destinationText = train.getStation();
+        holder.destinationTextView.setText(destinationText);
+
+        // determine train status
+        holder.statusTextView.setText(train.getWaitingTime());
     }
 
     @Override
     public int getItemCount() {
-        return mTrainList != null ? mTrainList.size() : 0;
+        return mTrainList.size();
     }
 
-    public void setTrains(List<Train> trains) {
+    public void setTrains(@NonNull List<Train> trains) {
         mTrainList = trains;
     }
 
     static class TrainRoutesViewHolder extends RecyclerView.ViewHolder {
 
-        @BindView(R.id.train_line_text_view) TextView lineTextView ;
         @BindView(R.id.train_destination_text_view) TextView destinationTextView;
-        @BindView(R.id.train_next_arrival_text_view) TextView nextArrivalTextView;
-        @BindView(R.id.train_station_text_view) TextView stationTextView;
+        @BindView(R.id.train_line_text_view) TextView lineTextView;
+        @BindView(R.id.train_status_text_view) TextView statusTextView;
 
         TrainRoutesViewHolder(@NonNull View view) {
             super(view);

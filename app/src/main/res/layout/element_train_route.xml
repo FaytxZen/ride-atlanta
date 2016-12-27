@@ -1,33 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginTop="8dp"
     android:layout_marginBottom="12dp">
+
+    <TextView
+        android:id="@+id/train_destination_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp"
+        android:layout_marginRight="12dp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        tools:text="Hamilton E Holmes Station"/>
 
     <TextView
         android:id="@+id/train_line_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/train_destination_text_view"
+        android:layout_toEndOf="@id/train_destination_text_view"
+        android:gravity="end"
+        android:maxLines="1"
+        android:ellipsize="end"
+        tools:textColor="@color/md_blue_500"
         tools:text="Red Line"/>
 
     <TextView
-        android:id="@+id/train_destination_text_view"
+        android:id="@+id/train_status_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:text="Lindburgh"/>
-
-    <TextView
-        android:id="@+id/train_next_arrival_text_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        tools:text="Arrives in 10 minutes"/>
-
-    <TextView
-        android:id="@+id/train_station_text_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        tools:text="Lindburgh Station"/>
-</LinearLayout>
+        android:layout_below="@id/train_destination_text_view"
+        tools:text="Boarding"/>
+</RelativeLayout>
