@@ -32,10 +32,6 @@
             android:name=".seeandsay.SeeAndSayActivity"
             android:alwaysRetainTaskState="true"/>
 
-         <meta-data
-            android:name="io.fabric.ApiKey"
-            android:value="" />
-
     </application>
 
 </manifest>
