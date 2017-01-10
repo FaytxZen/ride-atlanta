@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.andrewvora.apps.rideatlanta.BuildConfig;
 import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.common.models.Train;
 import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
@@ -36,7 +37,7 @@ public class TrainsRemoteSource implements TrainsDataSource {
     private TrainsRemoteSource(@NonNull Context context) {
         mContext = context;
         mBaseUrl = context.getString(R.string.base_url_trains);
-        mApiKey = context.getString(R.string.marta_api_key);
+        mApiKey = BuildConfig.MARTA_API_KEY;
     }
 
     public static synchronized TrainsRemoteSource getInstance(Context context) {

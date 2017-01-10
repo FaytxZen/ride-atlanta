@@ -39,4 +39,19 @@ public class HomePresenter implements HomeContract.Presenter {
     public void start() {
 
     }
+
+    @Override
+    public void loadAlerts() {
+
+    }
+
+    @Override
+    public void loadInfoItems() {
+
+    }
+
+    @Override
+    public void loadFavoriteRoutes() {
+
+    }
 }

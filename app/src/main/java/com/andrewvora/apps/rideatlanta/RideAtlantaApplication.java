@@ -18,8 +18,9 @@ public class RideAtlantaApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        final String twitterKey = getString(R.string.twitter_key);
-        final String twitterSecret = getString(R.string.twitter_secret);
+        final String twitterKey = BuildConfig.TWITTER_API_KEY;
+        final String twitterSecret = BuildConfig.TWITTER_SECRET;
+
         TwitterAuthConfig twitterAuthConfig = new TwitterAuthConfig(twitterKey, twitterSecret);
 
         Fabric.with(this, new Twitter(twitterAuthConfig));
