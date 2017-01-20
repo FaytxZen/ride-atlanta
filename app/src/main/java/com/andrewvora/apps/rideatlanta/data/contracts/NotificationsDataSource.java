@@ -2,7 +2,7 @@ package com.andrewvora.apps.rideatlanta.data.contracts;
 
 import android.support.annotation.NonNull;
 
-import com.andrewvora.apps.rideatlanta.common.models.Notification;
+import com.andrewvora.apps.rideatlanta.data.models.Notification;
 
 import java.util.List;
 

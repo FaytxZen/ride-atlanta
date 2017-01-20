@@ -1,5 +1,7 @@
-package com.andrewvora.apps.rideatlanta.common.models;
+package com.andrewvora.apps.rideatlanta.data.models;
 
+import com.andrewvora.apps.rideatlanta.common.AlertItemModel;
+import com.andrewvora.apps.rideatlanta.common.HomeItemModel;
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -7,7 +9,7 @@ import com.google.gson.annotations.SerializedName;
  * @author Andrew Vorakrajangthiti
  */
 
-public class Notification extends BaseModel {
+public class Notification extends BaseModel implements AlertItemModel {
 
     @SerializedName("notificationId")
     private String notificationId;
@@ -17,6 +19,21 @@ public class Notification extends BaseModel {
 
     @SerializedName("message")
     private String message;
+
+    @Override
+    public int getViewType() {
+        return HomeItemModel.VIEW_TYPE_ALERT_ITEM;
+    }
+
+    @Override
+    public String getTimeStamp() {
+        return getPostedAt();
+    }
+
+    @Override
+    public String getAlertMessage() {
+        return getMessage();
+    }
 
     public String getNotificationId() {
         return notificationId;

@@ -2,7 +2,7 @@ package com.andrewvora.apps.rideatlanta.trains;
 
 import com.andrewvora.apps.rideatlanta.common.BasePresenter;
 import com.andrewvora.apps.rideatlanta.common.BaseView;
-import com.andrewvora.apps.rideatlanta.common.models.Train;
+import com.andrewvora.apps.rideatlanta.data.models.Train;
 
 import java.util.List;
 

@@ -11,19 +11,12 @@
     <string name="menu_breeze_balance">Check Breeze Balance</string>
     <string name="menu_report_incident">Report Incident</string>
 
+    <string name="text_see_and_say">Notice something suspicious? Report it anonymously!</string>
+    <string name="button_see_and_say">Learn More</string>
+    <string name="button_tips">Go to Favorites</string>
+
     <string name="content_description_toolbar_icon">
         Icon of the current page. Press to see additional options.
-    </string>
-
-    <string name="base_url_trains">
-        http://developer.itsmarta.com/RealtimeTrain/RestServiceNextTrain/GetRealtimeArrivals
-    </string>
-    <string name="base_url_buses">
-        http://developer.itsmarta.com/BRDRestService/RestBusRealTimeService/GetAllBus
-    </string>
-
-    <string name="breeze_balance_url">
-        https://balance.breezecard.com/breezeWeb/jsp/web/cardnumberweb.jsp
     </string>
 
     <string name="text_bus_adherence_suffix_on_time">

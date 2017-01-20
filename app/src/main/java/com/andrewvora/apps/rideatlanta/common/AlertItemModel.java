@@ -6,4 +6,6 @@ package com.andrewvora.apps.rideatlanta.common;
  */
 public interface AlertItemModel extends HomeItemModel {
 
+    String getTimeStamp();
+    String getAlertMessage();
 }

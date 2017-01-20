@@ -2,7 +2,7 @@ package com.andrewvora.apps.rideatlanta.data.remote.notifications;
 
 import android.support.annotation.NonNull;
 
-import com.andrewvora.apps.rideatlanta.common.models.Notification;
+import com.andrewvora.apps.rideatlanta.data.models.Notification;
 import com.andrewvora.apps.rideatlanta.data.contracts.NotificationsDataSource;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;

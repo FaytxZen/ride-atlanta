@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="base_url_trains">
+        http://developer.itsmarta.com/RealtimeTrain/RestServiceNextTrain/GetRealtimeArrivals
+    </string>
+    <string name="base_url_buses">
+        http://developer.itsmarta.com/BRDRestService/RestBusRealTimeService/GetAllBus
+    </string>
+
+    <string name="breeze_balance_url">
+        https://balance.breezecard.com/breezeWeb/jsp/web/cardnumberweb.jsp
+    </string>
+</resources>

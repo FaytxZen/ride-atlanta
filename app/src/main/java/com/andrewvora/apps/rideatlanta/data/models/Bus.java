@@ -1,4 +1,4 @@
-package com.andrewvora.apps.rideatlanta.common.models;
+package com.andrewvora.apps.rideatlanta.data.models;
 
 import com.andrewvora.apps.rideatlanta.common.FavoriteRouteDataObject;
 import com.google.gson.annotations.SerializedName;

@@ -2,7 +2,7 @@ package com.andrewvora.apps.rideatlanta.data.remote.routes;
 
 import android.support.annotation.NonNull;
 
-import com.andrewvora.apps.rideatlanta.common.models.FavoriteRoute;
+import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
 
 /**

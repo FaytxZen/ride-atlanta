@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.andrewvora.apps.rideatlanta.R;
-import com.andrewvora.apps.rideatlanta.common.models.Train;
+import com.andrewvora.apps.rideatlanta.data.models.Train;
 
 import java.util.ArrayList;
 import java.util.List;

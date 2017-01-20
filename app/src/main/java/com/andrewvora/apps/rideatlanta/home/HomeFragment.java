@@ -2,6 +2,7 @@ package com.andrewvora.apps.rideatlanta.home;
 
 import android.app.Fragment;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,6 +14,8 @@ import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.common.AlertItemModel;
 import com.andrewvora.apps.rideatlanta.common.InfoItemModel;
 import com.andrewvora.apps.rideatlanta.common.RouteItemModel;
+
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -69,23 +72,26 @@ public class HomeFragment extends Fragment implements HomeContract.View {
     }
 
     @Override
-    public void displayAlerts(AlertItemModel alertItem) {
-        if(alertItem != null) {
-            mHomeAdapter.addListItem(alertItem);
+    public void displayAlerts(@NonNull List<AlertItemModel> alertItems) {
+        for(AlertItemModel alertItem : alertItems) {
+            int position = mHomeAdapter.addListItem(alertItem);
+            mHomeAdapter.notifyItemInserted(position);
         }
     }
 
     @Override
-    public void displayInfoItems(InfoItemModel infoItem) {
-        if(infoItem != null) {
-            mHomeAdapter.addListItem(infoItem);
+    public void displayInfoItems(@NonNull List<InfoItemModel> infoItems) {
+        for(InfoItemModel infoItem : infoItems) {
+            int position = mHomeAdapter.addListItem(infoItem);
+            mHomeAdapter.notifyItemInserted(position);
         }
     }
 
     @Override
-    public void displayRouteItems(RouteItemModel routeItem) {
-        if(routeItem != null) {
-            mHomeAdapter.addListItem(routeItem);
+    public void displayRouteItems(@NonNull List<RouteItemModel> routeItems) {
+        for(RouteItemModel routeItem : routeItems) {
+            int position = mHomeAdapter.addListItem(routeItem);
+            mHomeAdapter.notifyItemInserted(position);
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.andrewvora.apps.rideatlanta.common.models;
+package com.andrewvora.apps.rideatlanta.data.models;
 
 /**
  * Created by faytx on 11/13/2016.

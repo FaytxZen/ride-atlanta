@@ -2,7 +2,7 @@ package com.andrewvora.apps.rideatlanta.buses;
 
 import com.andrewvora.apps.rideatlanta.common.BasePresenter;
 import com.andrewvora.apps.rideatlanta.common.BaseView;
-import com.andrewvora.apps.rideatlanta.common.models.Bus;
+import com.andrewvora.apps.rideatlanta.data.models.Bus;
 
 import java.util.List;
 

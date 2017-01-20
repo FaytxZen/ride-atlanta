@@ -3,7 +3,7 @@ package com.andrewvora.apps.rideatlanta.data.contracts;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.andrewvora.apps.rideatlanta.common.models.Train;
+import com.andrewvora.apps.rideatlanta.data.models.Train;
 
 import java.util.List;
 

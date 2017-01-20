@@ -1,5 +1,6 @@
 package com.andrewvora.apps.rideatlanta.home;
 
+import android.content.Context;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -7,12 +8,20 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
 
 import com.andrewvora.apps.rideatlanta.R;
+import com.andrewvora.apps.rideatlanta.common.AlertItemModel;
 import com.andrewvora.apps.rideatlanta.common.HomeItemModel;
+import com.andrewvora.apps.rideatlanta.common.InfoItemModel;
+import com.andrewvora.apps.rideatlanta.common.RouteItemModel;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * Created by faytx on 1/7/2017.
@@ -47,10 +56,6 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 HomeItemModel.class.getCanonicalName());
 
         throw new IllegalArgumentException(exceptionMsg);
-    }
-
-    private View getLayoutFor(@NonNull ViewGroup parent, @LayoutRes int layoutResId) {
-        return LayoutInflater.from(parent.getContext()).inflate(layoutResId, parent, false);
     }
 
     @Override
@@ -93,35 +98,82 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     private void onBindInfoViewHolder(@NonNull InfoViewHolder holder, int position) {
+        InfoItemModel infoItemModel = (InfoItemModel) mListItems.get(position);
+        Context context = holder.itemView.getContext();
 
+        holder.infoTextView.setText(infoItemModel.getInfoText());
+
+        String infoButtonText = infoItemModel.getActionText(context);
+        holder.infoButton.setText(infoButtonText);
+
+        holder.infoButton.setOnClickListener(getClickListenerFor(infoItemModel.getActionType()));
     }
 
     private void onBindAlertViewHolder(@NonNull AlertViewHolder holder, int position) {
+        AlertItemModel alertItemModel = (AlertItemModel) mListItems.get(position);
 
+        holder.messageTextView.setText(alertItemModel.getAlertMessage());
+        holder.timeStampTextView.setText(alertItemModel.getTimeStamp());
     }
 
     private void onBindRouteViewHolder(@NonNull RouteViewHolder holder, int position) {
+        RouteItemModel routeItemModel = (RouteItemModel) mListItems.get(position);
 
+        holder.nameTextView.setText(routeItemModel.getName());
+        holder.destinationTextView.setText(routeItemModel.getDestination());
+        holder.timeTilArrivalTextView.setText(routeItemModel.getTimeUntilArrival());
     }
+    private View getLayoutFor(@NonNull ViewGroup parent, @LayoutRes int layoutResId) {
+        return LayoutInflater.from(parent.getContext()).inflate(layoutResId, parent, false);
+    }
+
+    private View.OnClickListener getClickListenerFor(final int actionType) {
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                switch(actionType) {
+                    case InfoItemModel.SEE_AND_SAY:
+                        break;
+
+                    case InfoItemModel.TIP_ABOUT_FAVORITES:
+                        break;
+                }
+            }
+        };
+    }
+
 
     public static class AlertViewHolder extends RecyclerView.ViewHolder {
 
+        @BindView(R.id.alert_time_stamp) TextView timeStampTextView;
+        @BindView(R.id.alert_message) TextView messageTextView;
+
         public AlertViewHolder(@NonNull View view) {
             super(view);
+            ButterKnife.bind(this, view);
         }
     }
 
     public static class InfoViewHolder extends RecyclerView.ViewHolder {
 
+        @BindView(R.id.info_message) TextView infoTextView;
+        @BindView(R.id.info_action_button) Button infoButton;
+
         public InfoViewHolder(@NonNull View view) {
             super(view);
+            ButterKnife.bind(this, view);
         }
     }
 
     public static class RouteViewHolder extends RecyclerView.ViewHolder {
 
+        @BindView(R.id.route_name) TextView nameTextView;
+        @BindView(R.id.route_destination) TextView destinationTextView;
+        @BindView(R.id.route_time_until_arrival) TextView timeTilArrivalTextView;
+
         public RouteViewHolder(@NonNull View view) {
             super(view);
+            ButterKnife.bind(this, view);
         }
     }
 }

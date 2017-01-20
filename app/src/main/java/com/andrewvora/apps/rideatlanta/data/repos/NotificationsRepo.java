@@ -4,7 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.andrewvora.apps.rideatlanta.common.models.Notification;
+import com.andrewvora.apps.rideatlanta.data.models.Notification;
 import com.andrewvora.apps.rideatlanta.data.contracts.NotificationsDataSource;
 import com.andrewvora.apps.rideatlanta.data.local.notifications.NotificationsLocalSource;
 import com.andrewvora.apps.rideatlanta.data.remote.notifications.NotificationsRemoteSource;

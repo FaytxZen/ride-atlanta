@@ -1,10 +1,14 @@
 package com.andrewvora.apps.rideatlanta.home;
 
+import android.support.annotation.NonNull;
+
 import com.andrewvora.apps.rideatlanta.common.AlertItemModel;
 import com.andrewvora.apps.rideatlanta.common.BasePresenter;
 import com.andrewvora.apps.rideatlanta.common.BaseView;
 import com.andrewvora.apps.rideatlanta.common.InfoItemModel;
 import com.andrewvora.apps.rideatlanta.common.RouteItemModel;
+
+import java.util.List;
 
 /**
  * Created by faytx on 10/22/2016.
@@ -20,8 +24,8 @@ public interface HomeContract {
     }
 
     interface View extends BaseView<HomeContract.Presenter> {
-        void displayAlerts(AlertItemModel alertItem);
-        void displayInfoItems(InfoItemModel infoItem);
-        void displayRouteItems(RouteItemModel routeItem);
+        void displayAlerts(@NonNull List<AlertItemModel> alertItems);
+        void displayInfoItems(@NonNull List<InfoItemModel> infoItems);
+        void displayRouteItems(@NonNull List<RouteItemModel> routeItems);
     }
 }

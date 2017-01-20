@@ -5,10 +5,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
-import com.andrewvora.apps.rideatlanta.common.models.Notification;
+import com.andrewvora.apps.rideatlanta.data.models.Notification;
+import com.andrewvora.apps.rideatlanta.data.CachedDataMap;
 import com.andrewvora.apps.rideatlanta.data.contracts.NotificationsDataSource;
 import com.andrewvora.apps.rideatlanta.data.repos.NotificationsRepo;
-import com.andrewvora.apps.rideatlanta.utils.NetworkUtil;
 
 import java.util.List;
 
@@ -49,14 +49,13 @@ public class NotificationsPresenter implements NotificationsContract.Presenter {
     public void loadNotifications() {
         NotificationsRepo repo = NotificationsRepo.getInstance(mContext);
 
-        if(shouldNotUseCachedNotifications()) {
-            repo.reloadNotifications();
-        }
+        useCachedDataIfAvailable();
 
         repo.getNotifications(new NotificationsDataSource.GetNotificationsCallback() {
             @Override
             public void onFinished(List<Notification> notifications) {
                 mView.onNotificationsLoaded(notifications);
+                makeCachedDataAvailable();
             }
 
             @Override
@@ -66,7 +65,21 @@ public class NotificationsPresenter implements NotificationsContract.Presenter {
         });
     }
 
-    private boolean shouldNotUseCachedNotifications() {
-        return NetworkUtil.connectedToInternet(mContext);
+    private void useCachedDataIfAvailable() {
+        if(!hasCachedData()) {
+            NotificationsRepo.getInstance(mContext).reloadNotifications();
+        }
+    }
+
+    private boolean hasCachedData() {
+        return CachedDataMap.getInstance().hasCachedData(getCachedDataTag());
+    }
+
+    private void makeCachedDataAvailable() {
+        CachedDataMap.getInstance().put(getCachedDataTag(), true);
+    }
+
+    private String getCachedDataTag() {
+        return NotificationsPresenter.class.getSimpleName();
     }
 }
