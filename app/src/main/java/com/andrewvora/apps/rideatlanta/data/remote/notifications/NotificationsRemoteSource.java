@@ -24,7 +24,7 @@ import retrofit2.Call;
 
 public class NotificationsRemoteSource implements NotificationsDataSource {
 
-    private static final long TWITTER_USER_ID = 14944459L;
+    private static final long TWITTER_USER_ID = 28942750L;
     private static final int MAX_TWEETS = 50;
 
     private TwitterApiClient mTwitterApiClient;

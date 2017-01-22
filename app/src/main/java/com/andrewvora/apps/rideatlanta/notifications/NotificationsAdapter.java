@@ -9,9 +9,11 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.andrewvora.apps.rideatlanta.R;
+import com.andrewvora.apps.rideatlanta.data.DateHelper;
 import com.andrewvora.apps.rideatlanta.data.models.Notification;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
@@ -47,7 +49,12 @@ public class NotificationsAdapter extends
         Notification notification = mNotificationList.get(position);
 
         holder.messageTextView.setText(notification.getMessage());
-        holder.timeStampTextView.setText(notification.getPostedAt());
+
+        final DateHelper dateHelper = DateHelper.getInstance();
+        final long timeInMillis = dateHelper.getTimeAsMilliseconds(
+                notification.getPostedAt(), DateHelper.TWITTER_TIME_STAMP_FORMAT);
+        final String timeToDisplay = dateHelper.getRelativeTimeStamp(timeInMillis);
+        holder.timeStampTextView.setText(timeToDisplay);
     }
 
     @Override
