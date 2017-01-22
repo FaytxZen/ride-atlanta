@@ -1,4 +1,4 @@
-package com.andrewvora.apps.rideatlanta.common;
+package com.andrewvora.apps.rideatlanta.data.contracts;
 
 /**
  * Created by faytx on 12/26/2016.
@@ -11,4 +11,7 @@ public interface FavoriteRouteDataObject {
 
     String getType();
     String getRouteId();
+    String getName();
+    String getDestination();
+    String getTimeTilArrival();
 }

@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.andrewvora.apps.rideatlanta.R;
-import com.andrewvora.apps.rideatlanta.common.FavoriteRouteDataObject;
+import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 
 import java.util.List;
 

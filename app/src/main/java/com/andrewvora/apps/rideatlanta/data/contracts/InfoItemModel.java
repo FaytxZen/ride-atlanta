@@ -1,7 +1,6 @@
-package com.andrewvora.apps.rideatlanta.common;
+package com.andrewvora.apps.rideatlanta.data.contracts;
 
 import android.content.Context;
-import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 
 /**

@@ -11,9 +11,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.andrewvora.apps.rideatlanta.R;
-import com.andrewvora.apps.rideatlanta.common.AlertItemModel;
-import com.andrewvora.apps.rideatlanta.common.InfoItemModel;
-import com.andrewvora.apps.rideatlanta.common.RouteItemModel;
+import com.andrewvora.apps.rideatlanta.data.contracts.AlertItemModel;
+import com.andrewvora.apps.rideatlanta.data.contracts.InfoItemModel;
+import com.andrewvora.apps.rideatlanta.data.contracts.RouteItemModel;
 
 import java.util.List;
 

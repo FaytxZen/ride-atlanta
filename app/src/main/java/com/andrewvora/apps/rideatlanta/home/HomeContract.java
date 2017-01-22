@@ -2,11 +2,11 @@ package com.andrewvora.apps.rideatlanta.home;
 
 import android.support.annotation.NonNull;
 
-import com.andrewvora.apps.rideatlanta.common.AlertItemModel;
+import com.andrewvora.apps.rideatlanta.data.contracts.AlertItemModel;
 import com.andrewvora.apps.rideatlanta.common.BasePresenter;
 import com.andrewvora.apps.rideatlanta.common.BaseView;
-import com.andrewvora.apps.rideatlanta.common.InfoItemModel;
-import com.andrewvora.apps.rideatlanta.common.RouteItemModel;
+import com.andrewvora.apps.rideatlanta.data.contracts.InfoItemModel;
+import com.andrewvora.apps.rideatlanta.data.contracts.RouteItemModel;
 
 import java.util.List;
 

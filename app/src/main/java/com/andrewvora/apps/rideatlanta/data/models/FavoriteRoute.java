@@ -1,8 +1,8 @@
 package com.andrewvora.apps.rideatlanta.data.models;
 
-import com.andrewvora.apps.rideatlanta.common.FavoriteRouteDataObject;
-import com.andrewvora.apps.rideatlanta.common.HomeItemModel;
-import com.andrewvora.apps.rideatlanta.common.RouteItemModel;
+import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
+import com.andrewvora.apps.rideatlanta.data.contracts.HomeItemModel;
+import com.andrewvora.apps.rideatlanta.data.contracts.RouteItemModel;
 
 /**
  * Created by faytx on 10/24/2016.
@@ -13,6 +13,7 @@ public class FavoriteRoute extends BaseModel implements FavoriteRouteDataObject,
 
     private String routeId;
     private String type;
+    private String name;
     private String destination;
     private String timeTilArrival;
 
@@ -41,7 +42,11 @@ public class FavoriteRoute extends BaseModel implements FavoriteRouteDataObject,
 
     @Override
     public String getName() {
-        return getRouteId();
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override
@@ -60,5 +65,10 @@ public class FavoriteRoute extends BaseModel implements FavoriteRouteDataObject,
 
     public void setTimeUntilArrival(String untilArrival) {
         this.timeTilArrival = untilArrival;
+    }
+
+    @Override
+    public String getTimeTilArrival() {
+        return getTimeUntilArrival();
     }
 }

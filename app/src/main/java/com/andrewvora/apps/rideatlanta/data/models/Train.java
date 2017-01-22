@@ -1,6 +1,6 @@
 package com.andrewvora.apps.rideatlanta.data.models;
 
-import com.andrewvora.apps.rideatlanta.common.FavoriteRouteDataObject;
+import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -37,6 +37,7 @@ public class Train extends BaseModel implements FavoriteRouteDataObject {
     @SerializedName("WAITING_TIME")
     private String waitingTime;
 
+    @Override
     public String getDestination() {
         return destination;
     }
@@ -117,5 +118,15 @@ public class Train extends BaseModel implements FavoriteRouteDataObject {
     @Override
     public String getRouteId() {
         return getId().toString();
+    }
+
+    @Override
+    public String getName() {
+        return getLine();
+    }
+
+    @Override
+    public String getTimeTilArrival() {
+        return getWaitingTime();
     }
 }

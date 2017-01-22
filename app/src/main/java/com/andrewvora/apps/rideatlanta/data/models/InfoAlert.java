@@ -5,8 +5,8 @@ import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.R;
-import com.andrewvora.apps.rideatlanta.common.HomeItemModel;
-import com.andrewvora.apps.rideatlanta.common.InfoItemModel;
+import com.andrewvora.apps.rideatlanta.data.contracts.HomeItemModel;
+import com.andrewvora.apps.rideatlanta.data.contracts.InfoItemModel;
 
 /**
  * Created by faytx on 1/11/2017.

@@ -2,7 +2,7 @@ package com.andrewvora.apps.rideatlanta.favoriteroutes;
 
 import com.andrewvora.apps.rideatlanta.common.BasePresenter;
 import com.andrewvora.apps.rideatlanta.common.BaseView;
-import com.andrewvora.apps.rideatlanta.common.FavoriteRouteDataObject;
+import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 
 import java.util.List;
 

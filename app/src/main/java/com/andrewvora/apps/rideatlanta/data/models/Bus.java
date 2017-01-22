@@ -1,6 +1,6 @@
 package com.andrewvora.apps.rideatlanta.data.models;
 
-import com.andrewvora.apps.rideatlanta.common.FavoriteRouteDataObject;
+import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -146,5 +146,20 @@ public class Bus extends BaseModel implements FavoriteRouteDataObject {
     @Override
     public String getType() {
         return FavoriteRouteDataObject.TYPE_BUS;
+    }
+
+    @Override
+    public String getName() {
+        return null;
+    }
+
+    @Override
+    public String getDestination() {
+        return null;
+    }
+
+    @Override
+    public String getTimeTilArrival() {
+        return null;
     }
 }

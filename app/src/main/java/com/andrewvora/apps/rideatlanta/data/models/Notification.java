@@ -1,7 +1,7 @@
 package com.andrewvora.apps.rideatlanta.data.models;
 
-import com.andrewvora.apps.rideatlanta.common.AlertItemModel;
-import com.andrewvora.apps.rideatlanta.common.HomeItemModel;
+import com.andrewvora.apps.rideatlanta.data.contracts.AlertItemModel;
+import com.andrewvora.apps.rideatlanta.data.contracts.HomeItemModel;
 import com.google.gson.annotations.SerializedName;
 
 /**

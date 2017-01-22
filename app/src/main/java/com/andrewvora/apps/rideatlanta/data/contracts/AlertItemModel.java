@@ -1,4 +1,4 @@
-package com.andrewvora.apps.rideatlanta.common;
+package com.andrewvora.apps.rideatlanta.data.contracts;
 
 /**
  * Created by faytx on 1/7/2017.

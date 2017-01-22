@@ -135,10 +135,16 @@ public class FavoriteRoutesLocalSource implements FavoriteRoutesDataSource {
         int idIndex = cursor.getColumnIndex(FavoriteRoutesTable._ID);
         int routeIdIndex = cursor.getColumnIndex(FavoriteRoutesTable.COLUMN_ROUTE_ID);
         int typeIndex = cursor.getColumnIndex(FavoriteRoutesTable.COLUMN_TYPE);
+        int destinationIndex = cursor.getColumnIndex(FavoriteRoutesTable.COLUMN_DESTINATION);
+        int nameIndex = cursor.getColumnIndex(FavoriteRoutesTable.COLUMN_NAME);
+        int timeTilArrival = cursor.getColumnIndex(FavoriteRoutesTable.COLUMN_TIME_TIL_ARRIVAL);
 
         route.setId(cursor.getLong(idIndex));
         route.setRouteId(cursor.getString(routeIdIndex));
         route.setType(cursor.getString(typeIndex));
+        route.setDestination(cursor.getString(destinationIndex));
+        route.setTimeUntilArrival(cursor.getString(timeTilArrival));
+        route.setName(cursor.getString(nameIndex));
 
         return route;
     }

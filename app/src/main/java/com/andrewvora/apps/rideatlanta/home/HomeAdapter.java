@@ -12,10 +12,10 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.andrewvora.apps.rideatlanta.R;
-import com.andrewvora.apps.rideatlanta.common.AlertItemModel;
-import com.andrewvora.apps.rideatlanta.common.HomeItemModel;
-import com.andrewvora.apps.rideatlanta.common.InfoItemModel;
-import com.andrewvora.apps.rideatlanta.common.RouteItemModel;
+import com.andrewvora.apps.rideatlanta.data.contracts.AlertItemModel;
+import com.andrewvora.apps.rideatlanta.data.contracts.HomeItemModel;
+import com.andrewvora.apps.rideatlanta.data.contracts.InfoItemModel;
+import com.andrewvora.apps.rideatlanta.data.contracts.RouteItemModel;
 
 import java.util.ArrayList;
 import java.util.List;

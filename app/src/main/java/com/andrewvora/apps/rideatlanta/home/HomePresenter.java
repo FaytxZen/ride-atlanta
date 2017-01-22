@@ -6,9 +6,10 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.R;
-import com.andrewvora.apps.rideatlanta.common.AlertItemModel;
-import com.andrewvora.apps.rideatlanta.common.InfoItemModel;
-import com.andrewvora.apps.rideatlanta.common.RouteItemModel;
+import com.andrewvora.apps.rideatlanta.data.contracts.AlertItemModel;
+import com.andrewvora.apps.rideatlanta.data.contracts.InfoItemModel;
+import com.andrewvora.apps.rideatlanta.data.contracts.RouteItemModel;
+import com.andrewvora.apps.rideatlanta.data.CachedDataMap;
 import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
 import com.andrewvora.apps.rideatlanta.data.models.InfoAlert;
 import com.andrewvora.apps.rideatlanta.data.models.Notification;
@@ -16,6 +17,7 @@ import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
 import com.andrewvora.apps.rideatlanta.data.contracts.NotificationsDataSource;
 import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
 import com.andrewvora.apps.rideatlanta.data.repos.NotificationsRepo;
+import com.andrewvora.apps.rideatlanta.notifications.NotificationsPresenter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,11 +59,18 @@ public class HomePresenter implements HomeContract.Presenter {
     @Override
     public void loadAlerts() {
         NotificationsRepo alertRepo = NotificationsRepo.getInstance(mContext);
+
+        final String cachedDataTag = NotificationsPresenter.class.getSimpleName();
+        final boolean hasNoCachedData = !CachedDataMap.getInstance().hasCachedData(cachedDataTag);
+        if(hasNoCachedData) {
+            alertRepo.reloadNotifications();
+        }
+
         alertRepo.getNotifications(new NotificationsDataSource.GetNotificationsCallback() {
             @Override
             public void onFinished(List<Notification> notifications) {
                 List<AlertItemModel> alertItems = new ArrayList<>();
-                for(int i = 0; i < MAX_NOTIFICATIONS; i++) {
+                for(int i = 0; i < MAX_NOTIFICATIONS && i < notifications.size(); i++) {
                     alertItems.add(notifications.get(i));
                 }
 
