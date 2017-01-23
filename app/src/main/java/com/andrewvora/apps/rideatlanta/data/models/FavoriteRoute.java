@@ -71,4 +71,9 @@ public class FavoriteRoute extends BaseModel implements FavoriteRouteDataObject,
     public String getTimeTilArrival() {
         return getTimeUntilArrival();
     }
+
+    @Override
+    public String getIdentifier() {
+        return getRouteId();
+    }
 }

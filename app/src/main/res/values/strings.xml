@@ -11,7 +11,20 @@
     <string name="menu_breeze_balance">Check Breeze Balance</string>
     <string name="menu_report_incident">Report Incident</string>
 
-    <string name="text_see_and_say">Notice something suspicious? Report it anonymously!</string>
+    <string name="title_see_and_say">See &amp; Say</string>
+    <string name="text_about_see_and_say">
+        Discreetly report suspicious activity and persons directly to the MARTA police.
+    </string>
+    <string name="text_see_and_say_disclaimer">
+        See &amp; Say is not for emergencies. Call 911 in the case of an emergency!
+    </string>
+    <string name="phone_number_see_and_say">404–848–4911</string>
+    <string name="sms_number_see_and_say">404–334–5355</string>
+    <string name="text_report_options">How do you want to submit your report?</string>
+    <string name="text_report_via_call">Call</string>
+    <string name="text_report_via_text">SMS Text Message</string>
+
+    <string name="text_see_and_say">Notice something suspicious? Report it!</string>
     <string name="button_see_and_say">Learn More</string>
     <string name="button_tips">Go to Favorites</string>
 

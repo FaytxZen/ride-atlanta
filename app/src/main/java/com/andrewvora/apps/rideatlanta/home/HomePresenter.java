@@ -29,7 +29,7 @@ import java.util.List;
 
 public class HomePresenter implements HomeContract.Presenter {
 
-    private static final int MAX_NOTIFICATIONS = 3;
+    private static final int MAX_NOTIFICATIONS = 2;
 
     @NonNull private Context mContext;
     @NonNull private HomeContract.View mView;

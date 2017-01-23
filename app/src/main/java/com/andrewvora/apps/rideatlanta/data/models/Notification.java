@@ -35,6 +35,11 @@ public class Notification extends BaseModel implements AlertItemModel {
         return getMessage();
     }
 
+    @Override
+    public String getIdentifier() {
+        return getNotificationId();
+    }
+
     public String getNotificationId() {
         return notificationId;
     }

@@ -1,6 +1,7 @@
 package com.andrewvora.apps.rideatlanta.home;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -12,13 +13,17 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.andrewvora.apps.rideatlanta.R;
+import com.andrewvora.apps.rideatlanta.data.DateHelper;
 import com.andrewvora.apps.rideatlanta.data.contracts.AlertItemModel;
 import com.andrewvora.apps.rideatlanta.data.contracts.HomeItemModel;
 import com.andrewvora.apps.rideatlanta.data.contracts.InfoItemModel;
 import com.andrewvora.apps.rideatlanta.data.contracts.RouteItemModel;
+import com.andrewvora.apps.rideatlanta.seeandsay.SeeAndSayActivity;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -29,10 +34,21 @@ import butterknife.ButterKnife;
  */
 public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    @NonNull private List<HomeItemModel> mListItems;
+    public static final int UNSUCCESSFUL_INSERT = -1;
+
+    @NonNull private Map<String, HomeItemModel> mItemMap;
+    @NonNull private List<HomeItemModel> mItemList;
 
     public HomeAdapter(@Nullable List<HomeItemModel> listItemModels) {
-        mListItems = listItemModels == null ? new ArrayList<HomeItemModel>() : listItemModels;
+        mItemMap = new LinkedHashMap<>();
+
+        if(listItemModels != null) {
+            for(HomeItemModel item : listItemModels) {
+                mItemMap.put(item.getIdentifier(), item);
+            }
+        }
+
+        mItemList = new ArrayList<>(mItemMap.values());
     }
 
     @Override
@@ -73,32 +89,33 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        return mListItems.get(position).getViewType();
+        return mItemList.get(position).getViewType();
     }
 
     @Override
     public int getItemCount() {
-        return mListItems.size();
-    }
-
-    public List<HomeItemModel> getListItems() {
-        return mListItems;
+        return mItemList.size();
     }
 
     public int addListItem(@NonNull HomeItemModel model) {
-        // determine where to insert
-        int indexToInsertAt = determineIndexToInsert(model);
-        mListItems.add(indexToInsertAt, model);
+        if(!mItemMap.containsKey(model.getIdentifier())) {
+            // determine where to insert
+            int indexToInsertAt = determineIndexToInsert(model);
+            mItemMap.put(model.getIdentifier(), model);
+            mItemList.add(indexToInsertAt, model);
 
-        return indexToInsertAt;
+            return indexToInsertAt;
+        }
+
+        return UNSUCCESSFUL_INSERT;
     }
 
-    public int determineIndexToInsert(@NonNull HomeItemModel model) {
+    private int determineIndexToInsert(@NonNull HomeItemModel model) {
         return 0;
     }
 
     private void onBindInfoViewHolder(@NonNull InfoViewHolder holder, int position) {
-        InfoItemModel infoItemModel = (InfoItemModel) mListItems.get(position);
+        InfoItemModel infoItemModel = (InfoItemModel) mItemList.get(position);
         Context context = holder.itemView.getContext();
 
         holder.infoTextView.setText(infoItemModel.getInfoText());
@@ -110,14 +127,21 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     private void onBindAlertViewHolder(@NonNull AlertViewHolder holder, int position) {
-        AlertItemModel alertItemModel = (AlertItemModel) mListItems.get(position);
+        AlertItemModel alertItemModel = (AlertItemModel) mItemList.get(position);
 
         holder.messageTextView.setText(alertItemModel.getAlertMessage());
-        holder.timeStampTextView.setText(alertItemModel.getTimeStamp());
+
+        final DateHelper dateHelper = DateHelper.getInstance();
+        final String timeStamp = alertItemModel.getTimeStamp();
+        final long timeInMillis = dateHelper.getTimeAsMilliseconds(
+                timeStamp, DateHelper.TWITTER_TIME_STAMP_FORMAT);
+        final String formattedTimeStamp = dateHelper.getRelativeTimeStamp(timeInMillis);
+
+        holder.timeStampTextView.setText(formattedTimeStamp);
     }
 
     private void onBindRouteViewHolder(@NonNull RouteViewHolder holder, int position) {
-        RouteItemModel routeItemModel = (RouteItemModel) mListItems.get(position);
+        RouteItemModel routeItemModel = (RouteItemModel) mItemList.get(position);
 
         holder.nameTextView.setText(routeItemModel.getName());
         holder.destinationTextView.setText(routeItemModel.getDestination());
@@ -133,6 +157,9 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             public void onClick(View view) {
                 switch(actionType) {
                     case InfoItemModel.SEE_AND_SAY:
+                        Context context = view.getContext();
+                        Intent startSeeAndSayIntent = new Intent(context, SeeAndSayActivity.class);
+                        context.startActivity(startSeeAndSayIntent);
                         break;
 
                     case InfoItemModel.TIP_ABOUT_FAVORITES:
@@ -142,36 +169,35 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         };
     }
 
-
-    public static class AlertViewHolder extends RecyclerView.ViewHolder {
+    static class AlertViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.alert_time_stamp) TextView timeStampTextView;
         @BindView(R.id.alert_message) TextView messageTextView;
 
-        public AlertViewHolder(@NonNull View view) {
+        AlertViewHolder(@NonNull View view) {
             super(view);
             ButterKnife.bind(this, view);
         }
     }
 
-    public static class InfoViewHolder extends RecyclerView.ViewHolder {
+    static class InfoViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.info_message) TextView infoTextView;
         @BindView(R.id.info_action_button) Button infoButton;
 
-        public InfoViewHolder(@NonNull View view) {
+        InfoViewHolder(@NonNull View view) {
             super(view);
             ButterKnife.bind(this, view);
         }
     }
 
-    public static class RouteViewHolder extends RecyclerView.ViewHolder {
+    static class RouteViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.route_name) TextView nameTextView;
         @BindView(R.id.route_destination) TextView destinationTextView;
         @BindView(R.id.route_time_until_arrival) TextView timeTilArrivalTextView;
 
-        public RouteViewHolder(@NonNull View view) {
+        RouteViewHolder(@NonNull View view) {
             super(view);
             ButterKnife.bind(this, view);
         }

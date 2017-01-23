@@ -75,7 +75,7 @@ public class HomeFragment extends Fragment implements HomeContract.View {
     public void displayAlerts(@NonNull List<AlertItemModel> alertItems) {
         for(AlertItemModel alertItem : alertItems) {
             int position = mHomeAdapter.addListItem(alertItem);
-            mHomeAdapter.notifyItemInserted(position);
+            notifyItemInserted(position);
         }
     }
 
@@ -83,7 +83,7 @@ public class HomeFragment extends Fragment implements HomeContract.View {
     public void displayInfoItems(@NonNull List<InfoItemModel> infoItems) {
         for(InfoItemModel infoItem : infoItems) {
             int position = mHomeAdapter.addListItem(infoItem);
-            mHomeAdapter.notifyItemInserted(position);
+            notifyItemInserted(position);
         }
     }
 
@@ -91,6 +91,12 @@ public class HomeFragment extends Fragment implements HomeContract.View {
     public void displayRouteItems(@NonNull List<RouteItemModel> routeItems) {
         for(RouteItemModel routeItem : routeItems) {
             int position = mHomeAdapter.addListItem(routeItem);
+            notifyItemInserted(position);
+        }
+    }
+
+    private void notifyItemInserted(int position) {
+        if(position != HomeAdapter.UNSUCCESSFUL_INSERT) {
             mHomeAdapter.notifyItemInserted(position);
         }
     }

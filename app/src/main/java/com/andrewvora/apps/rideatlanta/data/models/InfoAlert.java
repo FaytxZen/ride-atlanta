@@ -54,4 +54,9 @@ public class InfoAlert implements InfoItemModel {
 
         return "";
     }
+
+    @Override
+    public String getIdentifier() {
+        return String.valueOf(getActionType());
+    }
 }

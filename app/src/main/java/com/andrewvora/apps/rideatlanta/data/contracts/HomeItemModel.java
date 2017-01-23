@@ -11,4 +11,5 @@ public interface HomeItemModel {
     int VIEW_TYPE_ROUTE_ITEM = 2;
 
     int getViewType();
+    String getIdentifier();
 }
