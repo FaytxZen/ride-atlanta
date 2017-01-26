@@ -1,6 +1,7 @@
 package com.andrewvora.apps.rideatlanta.data.repos;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -162,23 +163,33 @@ public class BusesRepo implements BusesDataSource {
         });
     }
 
-    private void reloadCachedBusRoutes(List<Bus> routesList) {
-        mCachedBuses = checkNotNull(mCachedBuses);
-        mCachedBuses.clear();
+    private void reloadCachedBusRoutes(final List<Bus> routesList) {
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                mCachedBuses = checkNotNull(mCachedBuses);
+                mCachedBuses.clear();
 
-        for(Bus route : routesList) {
-            cacheBusRoute(route);
-        }
+                for(Bus route : routesList) {
+                    cacheBusRoute(route);
+                }
 
-        mCacheIsDirty = false;
+                mCacheIsDirty = false;
+            }
+        });
     }
 
-    private void reloadLocalBusRoutes(@NonNull List<Bus> routesList) {
-        mLocalSource.deleteAllBus(null);
+    private void reloadLocalBusRoutes(@NonNull final List<Bus> routesList) {
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                mLocalSource.deleteAllBus(null);
 
-        for(Bus route : routesList) {
-            mLocalSource.saveBus(route);
-        }
+                for(Bus route : routesList) {
+                    mLocalSource.saveBus(route);
+                }
+            }
+        });
     }
 
     private void cacheBusRoute(@NonNull Bus bus) {

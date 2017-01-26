@@ -1,6 +1,7 @@
 package com.andrewvora.apps.rideatlanta.data.remote.trains;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -53,19 +54,7 @@ public class TrainsRemoteSource implements TrainsDataSource {
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
-                        List<Train> trainList = new ArrayList<>();
-
-                        for(int i = 0; i < response.length(); i++) {
-                            try {
-                                String jsonStr = response.getJSONObject(i).toString();
-                                Train train = new Gson().fromJson(jsonStr, Train.class);
-                                trainList.add(train);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        callback.onFinished(trainList);
+                        parseResponseInBackground(callback, response);
                     }
                 },
                 new Response.ErrorListener() {
@@ -101,6 +90,35 @@ public class TrainsRemoteSource implements TrainsDataSource {
     @Override
     public void reloadTrains() {
         // refreshing handled in the TrainsRepo
+    }
+
+    private void parseResponse(@NonNull GetTrainRoutesCallback callback,
+                               @NonNull JSONArray response)
+    {
+        List<Train> trainList = new ArrayList<>();
+
+        for(int i = 0; i < response.length(); i++) {
+            try {
+                String jsonStr = response.getJSONObject(i).toString();
+                Train train = new Gson().fromJson(jsonStr, Train.class);
+                trainList.add(train);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        callback.onFinished(trainList);
+    }
+
+    private void parseResponseInBackground(@NonNull final GetTrainRoutesCallback callback,
+                                           @NonNull final JSONArray response)
+    {
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                parseResponse(callback, response);
+            }
+        });
     }
 
     private RequestQueue getRequestQueue() {

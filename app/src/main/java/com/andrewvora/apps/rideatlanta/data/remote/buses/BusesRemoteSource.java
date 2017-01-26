@@ -1,6 +1,7 @@
 package com.andrewvora.apps.rideatlanta.data.remote.buses;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -17,6 +18,7 @@ import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +27,6 @@ import java.util.List;
  * Created by faytx on 10/22/2016.
  * @author Andrew Vorakrajangthiti
  */
-
 public class BusesRemoteSource implements BusesDataSource {
 
     private Context mContext;
@@ -49,20 +50,7 @@ public class BusesRemoteSource implements BusesDataSource {
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
-                        List<Bus> buses = new ArrayList<>();
-
-                        for(int i = 0; i < response.length(); i++) {
-                            try {
-                                String jsonStr = response.getJSONObject(i).toString();
-                                Bus bus = new Gson().fromJson(jsonStr, Bus.class);
-                                buses.add(bus);
-                            }
-                            catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        callback.onFinished(buses);
+                        parseResponseInBackground(callback, response);
                     }
                 },
                 new Response.ErrorListener() {
@@ -106,6 +94,36 @@ public class BusesRemoteSource implements BusesDataSource {
         }
 
         return mRequestQueue;
+    }
+
+    private void parseResponseInBackground(@NonNull final GetBusesCallback callback,
+                                           @NonNull final JSONArray response)
+    {
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                parseResponse(callback, response);
+            }
+        });
+    }
+
+    private void parseResponse(@NonNull final GetBusesCallback callback,
+                               @NonNull final JSONArray response)
+    {
+        List<Bus> buses = new ArrayList<>();
+
+        for(int i = 0; i < response.length(); i++) {
+            try {
+                String jsonStr = response.getJSONObject(i).toString();
+                Bus bus = new Gson().fromJson(jsonStr, Bus.class);
+                buses.add(bus);
+            }
+            catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        callback.onFinished(buses);
     }
 
     private <T> void addToRequestQueue(Request<T> request) {

@@ -3,6 +3,8 @@ package com.andrewvora.apps.rideatlanta.trains;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.data.models.Train;
@@ -50,8 +52,8 @@ public class TrainRoutesPresenter implements TrainRoutesContract.Presenter {
         trainsRepo.getTrains(new TrainsDataSource.GetTrainRoutesCallback() {
             @Override
             public void onFinished(List<Train> trainList) {
+                updateViews(trainList);
                 makeCachedDataAvailable();
-                mView.onTrainRoutesLoaded(trainList);
             }
 
             @Override
@@ -59,6 +61,29 @@ public class TrainRoutesPresenter implements TrainRoutesContract.Presenter {
 
             }
         });
+    }
+
+    private void updateViews(List<Train> trains) {
+        if(hasCachedData()) {
+            mView.onTrainRoutesLoaded(trains);
+        }
+        else {
+            updateViewsOnMainThread(trains);
+        }
+    }
+
+    private void updateViewsOnMainThread(final List<Train> trains) {
+        Handler mainThreadHandler = new Handler(Looper.getMainLooper());
+        mainThreadHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mView.onTrainRoutesLoaded(trains);
+            }
+        });
+    }
+
+    private boolean hasCachedData() {
+        return !hasNoCachedData();
     }
 
     private boolean hasNoCachedData() {

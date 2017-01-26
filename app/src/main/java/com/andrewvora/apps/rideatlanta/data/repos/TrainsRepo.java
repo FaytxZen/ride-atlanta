@@ -1,6 +1,7 @@
 package com.andrewvora.apps.rideatlanta.data.repos;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -157,23 +158,33 @@ public class TrainsRepo implements TrainsDataSource {
         });
     }
 
-    private void reloadCachedTrains(List<Train> trainList) {
-        mCachedTrains = checkNotNull(mCachedTrains);
-        mCachedTrains.clear();
+    private void reloadCachedTrains(final List<Train> trainList) {
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                mCachedTrains = checkNotNull(mCachedTrains);
+                mCachedTrains.clear();
 
-        for(Train train : trainList) {
-            cacheTrain(train);
-        }
+                for(Train train : trainList) {
+                    cacheTrain(train);
+                }
 
-        mCacheIsDirty = false;
+                mCacheIsDirty = false;
+            }
+        });
     }
 
-    private void reloadLocalTrains(List<Train> trainList) {
-        mLocalSource.deleteAllTrains(null);
+    private void reloadLocalTrains(final List<Train> trainList) {
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                mLocalSource.deleteAllTrains(null);
 
-        for(Train train : trainList) {
-            mLocalSource.saveTrain(train);
-        }
+                for(Train train : trainList) {
+                    mLocalSource.saveTrain(train);
+                }
+            }
+        });
     }
 
     private void cacheTrain(Train train) {

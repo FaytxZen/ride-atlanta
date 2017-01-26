@@ -2,7 +2,10 @@ package com.andrewvora.apps.rideatlanta.buses;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.data.models.Bus;
@@ -21,6 +24,7 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter {
 
     private Context mContext;
     private BusRoutesContract.View mView;
+    private BusesRepo mBusesRepo;
 
     public BusRoutesPresenter(@NonNull Context context, @NonNull BusRoutesContract.View view) {
         mContext = context;
@@ -38,20 +42,21 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter {
 
     @Override
     public void start() {
+        mBusesRepo = BusesRepo.getInstance(mContext);
+
         loadBusRoutes();
     }
 
     @Override
     public void loadBusRoutes() {
-        BusesRepo repo = BusesRepo.getInstance(mContext);
 
-        useCachedDataIfAvailable(repo);
+        useCachedDataIfAvailable(mBusesRepo);
 
-        repo.getBuses(new BusesDataSource.GetBusesCallback() {
+        mBusesRepo.getBuses(new BusesDataSource.GetBusesCallback() {
             @Override
             public void onFinished(List<Bus> buses) {
+                updateView(buses);
                 makeCachedDataAvailable();
-                mView.onBusRoutesLoaded(buses);
             }
 
             @Override
@@ -59,6 +64,29 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter {
 
             }
         });
+    }
+
+    private void updateView(List<Bus> buses) {
+        if(hasCachedData()) {
+            mView.onBusRoutesLoaded(buses);
+        }
+        else {
+            updateViewFromMainThread(buses);
+        }
+    }
+
+    private void updateViewFromMainThread(final List<Bus> buses) {
+        Handler updateViewHandler = new Handler(Looper.getMainLooper());
+        updateViewHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mView.onBusRoutesLoaded(buses);
+            }
+        });
+    }
+
+    private boolean hasCachedData() {
+        return !hasNoCachedData();
     }
 
     private boolean hasNoCachedData() {
