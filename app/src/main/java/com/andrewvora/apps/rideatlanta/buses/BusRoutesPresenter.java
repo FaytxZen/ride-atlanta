@@ -67,26 +67,7 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter {
     }
 
     private void updateView(List<Bus> buses) {
-        if(hasCachedData()) {
-            mView.onBusRoutesLoaded(buses);
-        }
-        else {
-            updateViewFromMainThread(buses);
-        }
-    }
-
-    private void updateViewFromMainThread(final List<Bus> buses) {
-        Handler updateViewHandler = new Handler(Looper.getMainLooper());
-        updateViewHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                mView.onBusRoutesLoaded(buses);
-            }
-        });
-    }
-
-    private boolean hasCachedData() {
-        return !hasNoCachedData();
+        mView.onBusRoutesLoaded(buses);
     }
 
     private boolean hasNoCachedData() {

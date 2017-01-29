@@ -7,8 +7,8 @@ import android.support.annotation.Nullable;
 
 import com.andrewvora.apps.rideatlanta.BuildConfig;
 import com.andrewvora.apps.rideatlanta.R;
-import com.andrewvora.apps.rideatlanta.data.models.Train;
 import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
+import com.andrewvora.apps.rideatlanta.data.models.Train;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -19,6 +19,7 @@ import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +55,7 @@ public class TrainsRemoteSource implements TrainsDataSource {
                 new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {
-                        parseResponseInBackground(callback, response);
+                        new ParseTrainsJsonTask(callback).execute(response);
                     }
                 },
                 new Response.ErrorListener() {
@@ -92,35 +93,6 @@ public class TrainsRemoteSource implements TrainsDataSource {
         // refreshing handled in the TrainsRepo
     }
 
-    private void parseResponse(@NonNull GetTrainRoutesCallback callback,
-                               @NonNull JSONArray response)
-    {
-        List<Train> trainList = new ArrayList<>();
-
-        for(int i = 0; i < response.length(); i++) {
-            try {
-                String jsonStr = response.getJSONObject(i).toString();
-                Train train = new Gson().fromJson(jsonStr, Train.class);
-                trainList.add(train);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-
-        callback.onFinished(trainList);
-    }
-
-    private void parseResponseInBackground(@NonNull final GetTrainRoutesCallback callback,
-                                           @NonNull final JSONArray response)
-    {
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                parseResponse(callback, response);
-            }
-        });
-    }
-
     private RequestQueue getRequestQueue() {
 
         if(mRequestQueue == null) {
@@ -132,5 +104,58 @@ public class TrainsRemoteSource implements TrainsDataSource {
 
     private <T> void addToRequestQueue(Request<T> request) {
         getRequestQueue().add(request);
+    }
+
+    private static class ParseTrainsJsonTask extends AsyncTask<JSONArray, Void, List<Train>> {
+
+        @NonNull
+        private GetTrainRoutesCallback callbackRef;
+
+        ParseTrainsJsonTask(@NonNull GetTrainRoutesCallback routesCallback) {
+            callbackRef = routesCallback;
+        }
+
+        @Override
+        protected List<Train> doInBackground(JSONArray... jsonArrays) {
+            final List<Train> trainList = new ArrayList<>();
+            final JSONArray response = jsonArrays[0];
+
+            for(int i = 0; i < response.length(); i++) {
+                try {
+                    String jsonStr = response.getJSONObject(i).toString();
+                    Train train = new Gson().fromJson(jsonStr, Train.class);
+                    trainList.add(train);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            return trainList;
+        }
+
+        @Override
+        protected void onPostExecute(List<Train> trains) {
+            callbackRef.onFinished(trains);
+        }
+    }
+
+    private static class ParseSingleTrainJsonTask extends AsyncTask<JSONObject, Void, Train> {
+
+        @NonNull
+        private GetTrainRouteCallback callbackRef;
+
+        public ParseSingleTrainJsonTask(@NonNull GetTrainRouteCallback callback) {
+            callbackRef = callback;
+        }
+
+        @Override
+        protected Train doInBackground(JSONObject... objects) {
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Train train) {
+            callbackRef.onFinished(train);
+        }
     }
 }

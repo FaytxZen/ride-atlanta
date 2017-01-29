@@ -64,26 +64,7 @@ public class TrainRoutesPresenter implements TrainRoutesContract.Presenter {
     }
 
     private void updateViews(List<Train> trains) {
-        if(hasCachedData()) {
-            mView.onTrainRoutesLoaded(trains);
-        }
-        else {
-            updateViewsOnMainThread(trains);
-        }
-    }
-
-    private void updateViewsOnMainThread(final List<Train> trains) {
-        Handler mainThreadHandler = new Handler(Looper.getMainLooper());
-        mainThreadHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                mView.onTrainRoutesLoaded(trains);
-            }
-        });
-    }
-
-    private boolean hasCachedData() {
-        return !hasNoCachedData();
+        mView.onTrainRoutesLoaded(trains);
     }
 
     private boolean hasNoCachedData() {
