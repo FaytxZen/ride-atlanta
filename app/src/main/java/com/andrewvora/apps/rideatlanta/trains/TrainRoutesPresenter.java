@@ -3,13 +3,11 @@ package com.andrewvora.apps.rideatlanta.trains;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 
-import com.andrewvora.apps.rideatlanta.data.models.Train;
 import com.andrewvora.apps.rideatlanta.data.CachedDataMap;
 import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
+import com.andrewvora.apps.rideatlanta.data.models.Train;
 import com.andrewvora.apps.rideatlanta.data.repos.TrainsRepo;
 
 import java.util.List;
@@ -61,6 +59,14 @@ public class TrainRoutesPresenter implements TrainRoutesContract.Presenter {
 
             }
         });
+    }
+
+    @Override
+    public void favoriteRoute(@NonNull Train route) {
+        route.setFavorited(!route.isFavorited());
+
+        TrainsRepo trainsRepo = TrainsRepo.getInstance(mContext);
+        trainsRepo.saveTrain(route);
     }
 
     private void updateViews(List<Train> trains) {

@@ -140,7 +140,7 @@ public class BusesLocalSource implements BusesDataSource {
         contentValues.put(BusesTable.COLUMN_TIMEPOINT, route.getTimePoint());
         contentValues.put(BusesTable.COLUMN_TRIPID, route.getTripId());
         contentValues.put(BusesTable.COLUMN_VEHICLE, route.getVehicleNumber());
-
+        contentValues.put(BusesTable.COLUMN_FAVORITED, route.isFavorited() ? 1 : 0);
 
         if(newRecord) {
             db.insertWithOnConflict(BusesTable.TABLE_NAME,
@@ -190,6 +190,7 @@ public class BusesLocalSource implements BusesDataSource {
         int timePointIndex = cursor.getColumnIndex(BusesTable.COLUMN_TIMEPOINT);
         int tripIdIndex = cursor.getColumnIndex(BusesTable.COLUMN_TRIPID);
         int vehicleIndex = cursor.getColumnIndex(BusesTable.COLUMN_VEHICLE);
+        int favoritedIndex = cursor.getColumnIndex(BusesTable.COLUMN_FAVORITED);
 
         bus.setId(cursor.getLong(idIndex));
         bus.setRouteId(cursor.getString(routeIdIndex));
@@ -204,6 +205,7 @@ public class BusesLocalSource implements BusesDataSource {
         bus.setTimePoint(cursor.getString(timePointIndex));
         bus.setTripId(cursor.getLong(tripIdIndex));
         bus.setVehicleNumber(cursor.getLong(vehicleIndex));
+        bus.setFavorited(cursor.getInt(favoritedIndex) == 1);
 
         return bus;
     }

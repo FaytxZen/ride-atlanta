@@ -74,7 +74,7 @@ public class TrainsRemoteSource implements TrainsDataSource {
     }
 
     @Override
-    public void getTrain(@NonNull Long trainId, @NonNull GetTrainRouteCallback callback) {
+    public void getTrain(@NonNull Train train, @NonNull GetTrainRouteCallback callback) {
 
     }
 

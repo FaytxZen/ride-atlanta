@@ -102,19 +102,19 @@ public class TrainsLocalSource implements TrainsDataSource {
     }
 
     @Override
-    public void getTrain(@NonNull Long trainId, @NonNull GetTrainRouteCallback callback) {
+    public void getTrain(@NonNull Train train, @NonNull GetTrainRouteCallback callback) {
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
         try {
             String[] columns = TrainsTable.getColumns();
             String selection = TrainsTable.COLUMN_TRAIN_ID+ "=?";
-            String[] selectionArgs = new String[] { trainId.toString() };
+            String[] selectionArgs = new String[] { train.getTrainId().toString() };
             String numResultsNeeded = "1";
 
             Cursor trainCursor = db.query(TrainsTable.TABLE_NAME,
                     columns, selection, selectionArgs, null, null, null, numResultsNeeded);
-            Train train = getTrainFrom(trainCursor);
-            callback.onFinished(train);
+            Train savedTrain = getTrainFrom(trainCursor);
+            callback.onFinished(savedTrain);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -157,6 +157,7 @@ public class TrainsLocalSource implements TrainsDataSource {
         contentValues.put(TrainsTable.COLUMN_STATION, route.getStation());
         contentValues.put(TrainsTable.COLUMN_WAITING_SECONDS, route.getWaitingSeconds());
         contentValues.put(TrainsTable.COLUMN_WAITING_TIME, route.getWaitingTime());
+        contentValues.put(TrainsTable.COLUMN_FAVORITED, route.isFavorited() ? 1 : 0);
 
         if(newRecord) {
             db.insertWithOnConflict(TrainsTable.TABLE_NAME,
@@ -206,6 +207,7 @@ public class TrainsLocalSource implements TrainsDataSource {
         int stationIndex = cursor.getColumnIndex(TrainsTable.COLUMN_STATION);
         int waitingSecondsIndex = cursor.getColumnIndex(TrainsTable.COLUMN_WAITING_SECONDS);
         int waitingTimeIndex = cursor.getColumnIndex(TrainsTable.COLUMN_WAITING_TIME);
+        int favoritedIndex = cursor.getColumnIndex(TrainsTable.COLUMN_FAVORITED);
 
         train.setId(cursor.getLong(idIndex));
         train.setTrainId(cursor.getLong(trainIdIndex));
@@ -217,6 +219,7 @@ public class TrainsLocalSource implements TrainsDataSource {
         train.setStation(cursor.getString(stationIndex));
         train.setWaitingSeconds(cursor.getInt(waitingSecondsIndex));
         train.setWaitingTime(cursor.getString(waitingTimeIndex));
+        train.setFavorited(cursor.getInt(favoritedIndex) == 1);
 
         return train;
     }

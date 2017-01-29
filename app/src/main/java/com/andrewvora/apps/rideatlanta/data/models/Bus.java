@@ -46,6 +46,8 @@ public class Bus extends BaseModel implements FavoriteRouteDataObject {
     @SerializedName("VEHICLE")
     private Long vehicleNumber;
 
+    private boolean favorited;
+
     public Integer getAdherence() {
         return adherence;
     }
@@ -136,6 +138,14 @@ public class Bus extends BaseModel implements FavoriteRouteDataObject {
 
     public void setVehicleNumber(Long vehicleNumber) {
         this.vehicleNumber = vehicleNumber;
+    }
+
+    public boolean isFavorited() {
+        return favorited;
+    }
+
+    public void setFavorited(boolean favorited) {
+        this.favorited = favorited;
     }
 
     @Override

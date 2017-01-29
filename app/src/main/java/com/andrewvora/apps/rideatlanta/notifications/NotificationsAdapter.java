@@ -11,7 +11,7 @@ import android.widget.TextView;
 import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.DateHelper;
 import com.andrewvora.apps.rideatlanta.data.models.Notification;
-import com.andrewvora.apps.rideatlanta.utils.CompatUtil;
+import com.andrewvora.apps.rideatlanta.utils.HtmlUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +48,7 @@ public class NotificationsAdapter extends
     public void onBindViewHolder(NotificationsViewHolder holder, int position) {
         Notification notification = mNotificationList.get(position);
 
-        String decodedMsg = CompatUtil.getDecodedHtml(notification.getMessage());
+        String decodedMsg = HtmlUtil.getDecodedHtml(notification.getMessage());
         holder.messageTextView.setText(decodedMsg);
 
         final DateHelper dateHelper = DateHelper.getInstance();

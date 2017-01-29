@@ -61,9 +61,9 @@ public final class DateHelper {
 
             return minutesSince == 1 ? minutesSince + " min" : minutesSince + " mins";
         }
-        else if(withinSameDay(givenCalendar, currentCalendar)) {
-            final int hoursSince = currentCalendar.get(Calendar.HOUR_OF_DAY) -
-                    givenCalendar.get(Calendar.HOUR_OF_DAY);
+        else if(within12Hours(givenCalendar, currentCalendar)) {
+            final long hoursSince = TimeUnit.MILLISECONDS.toHours(
+                    currentCalendar.getTimeInMillis() - givenCalendar.getTimeInMillis());
             return hoursSince + "h";
         }
         else {
@@ -71,8 +71,8 @@ public final class DateHelper {
         }
     }
 
-    private boolean withinSameDay(@NonNull Calendar cal1, @NonNull Calendar cal2) {
-        return cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
+    private boolean within12Hours(@NonNull Calendar cal1, @NonNull Calendar cal2) {
+        return TimeUnit.MILLISECONDS.toHours(cal2.getTimeInMillis() - cal1.getTimeInMillis()) <= 12;
     }
 
     private boolean withinSameHour(@NonNull Calendar cal1, @NonNull Calendar cal2) {

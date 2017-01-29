@@ -1,11 +1,14 @@
 package com.andrewvora.apps.rideatlanta.trains;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.andrewvora.apps.rideatlanta.R;
@@ -44,10 +47,10 @@ public class TrainRoutesAdapter extends
     }
 
     @Override
-    public void onBindViewHolder(TrainRoutesViewHolder holder, int position) {
+    public void onBindViewHolder(final TrainRoutesViewHolder holder, int position) {
         Train train = mTrainList.get(position);
 
-        holder.lineTextView.setText(train.getLine());
+        configureTrainLineView(holder.lineTextView, train);
 
         // determine train destination
         String destinationText = train.getStation();
@@ -55,6 +58,17 @@ public class TrainRoutesAdapter extends
 
         // determine train status
         holder.statusTextView.setText(train.getWaitingTime());
+
+        // attach click listeners
+        holder.favoriteButton.setSelected(train.isFavorited());
+        holder.favoriteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(mItemListener != null) {
+                    mItemListener.onFavoriteItem(holder.getAdapterPosition());
+                }
+            }
+        });
     }
 
     @Override
@@ -66,11 +80,42 @@ public class TrainRoutesAdapter extends
         mTrainList = trains;
     }
 
+    public Train getTrain(int position) {
+        return mTrainList.get(position);
+    }
+
+    private void configureTrainLineView(@NonNull TextView lineTextView, @NonNull Train train) {
+        int colorResId = R.color.md_grey_500;
+
+        switch(train.getLine()) {
+            case Train.BLUE_LINE:
+                colorResId = R.color.md_blue_500;
+                break;
+
+            case Train.GREEN_LINE:
+                colorResId = R.color.md_green_500;
+                break;
+
+            case Train.RED_LINE:
+                colorResId = R.color.md_red_500;
+                break;
+
+            case Train.GOLD_LINE:
+                colorResId = R.color.md_amber_500;
+                break;
+        }
+
+        Context context = lineTextView.getContext();
+        lineTextView.setBackgroundColor(ContextCompat.getColor(context, colorResId));
+        lineTextView.setText(train.getLine());
+    }
+
     static class TrainRoutesViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.train_destination_text_view) TextView destinationTextView;
         @BindView(R.id.train_line_text_view) TextView lineTextView;
         @BindView(R.id.train_status_text_view) TextView statusTextView;
+        @BindView(R.id.train_favorite_button) ImageView favoriteButton;
 
         TrainRoutesViewHolder(@NonNull View view) {
             super(view);

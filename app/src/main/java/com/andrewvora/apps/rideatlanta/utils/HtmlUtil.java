@@ -7,9 +7,9 @@ import android.text.Html;
  * Created by faytx on 1/29/2017.
  * @author Andrew Vorakrajangthiti
  */
-public final class CompatUtil {
+public final class HtmlUtil {
 
-    private CompatUtil() {
+    private HtmlUtil() {
         // prevent instantiation
     }
 

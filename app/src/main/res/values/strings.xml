@@ -32,6 +32,10 @@
         Icon of the current page. Press to see additional options.
     </string>
 
+    <string name="content_description_favorite_route">
+        Click to favorite route.
+    </string>
+
     <string name="text_bus_adherence_suffix_on_time">
         On time
     </string>

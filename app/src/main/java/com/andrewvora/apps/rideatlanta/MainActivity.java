@@ -41,9 +41,6 @@ import com.roughike.bottombar.OnTabSelectListener;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import com.twitter.sdk.android.Twitter;
-import com.twitter.sdk.android.core.TwitterAuthConfig;
-import io.fabric.sdk.android.Fabric;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -178,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void onFavRoutesTabSelected() {
         setTitle(R.string.title_tab_fav_routes);
-        setToolbarIcon(R.drawable.ic_favorite_24dp);
+        setToolbarIcon(R.drawable.ic_favorite_outline_24dp);
 
         FavoriteRoutesFragment fragment = (FavoriteRoutesFragment) getFragmentManager()
                 .findFragmentByTag(FavoriteRoutesFragment.TAG);

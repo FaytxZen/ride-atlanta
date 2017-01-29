@@ -24,10 +24,11 @@ public interface BusesDbContract {
         public static final String COLUMN_TIMEPOINT = "timepoint";
         public static final String COLUMN_TRIPID = "trip_id";
         public static final String COLUMN_VEHICLE = "vehicle";
+        public static final String COLUMN_FAVORITED = "favorited";
 
         public static final String CREATE_STATEMENT = String.format(
                 "CREATE TABLE %s (%s %s PRIMARY KEY AUTOINCREMENT, %s %s, %s %s, %s %s,"+
-                        " %s %s, %s %s, %s %s, %s %s, %s %s, %s %s, %s %s, %s %s, %s %s)",
+                        " %s %s, %s %s, %s %s, %s %s, %s %s, %s %s, %s %s, %s %s, %s %s, %s %s)",
                 TABLE_NAME,
                 _ID, TYPE_INT,
                 COLUMN_ROUTEID, TYPE_STRING,
@@ -41,7 +42,8 @@ public interface BusesDbContract {
                 COLUMN_STOPID, TYPE_INT,
                 COLUMN_TIMEPOINT, TYPE_STRING,
                 COLUMN_TRIPID, TYPE_INT,
-                COLUMN_VEHICLE, TYPE_INT
+                COLUMN_VEHICLE, TYPE_INT,
+                COLUMN_FAVORITED, TYPE_INT
         );
 
         public static String[] getColumns() {
@@ -58,7 +60,8 @@ public interface BusesDbContract {
                     COLUMN_STOPID,
                     COLUMN_TIMEPOINT,
                     COLUMN_TRIPID,
-                    COLUMN_VEHICLE
+                    COLUMN_VEHICLE,
+                    COLUMN_FAVORITED, TYPE_INT
             };
         }
     }

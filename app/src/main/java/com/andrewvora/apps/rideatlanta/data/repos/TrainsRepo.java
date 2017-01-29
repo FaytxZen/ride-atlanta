@@ -30,7 +30,7 @@ public class TrainsRepo implements TrainsDataSource {
     private TrainsDataSource mLocalSource;
     private TrainsDataSource mRemoteSource;
 
-    private Map<Long, Train> mCachedTrains;
+    private Map<String, Train> mCachedTrains;
     private boolean mCacheIsDirty;
 
     private TrainsRepo(@NonNull TrainsDataSource remoteSource,
@@ -84,14 +84,16 @@ public class TrainsRepo implements TrainsDataSource {
     }
 
     @Override
-    public void getTrain(@NonNull final Long trainId, @NonNull final GetTrainRouteCallback callback) {
-        final Train cachedTrain = mCachedTrains.get(trainId);
+    public void getTrain(@NonNull final Train train, @NonNull final GetTrainRouteCallback callback)
+    {
+        final long trainId = train.getTrainId();
+        final Train cachedTrain = mCachedTrains.get(trainId + train.getStation());
 
         if(cachedTrain != null) {
             callback.onFinished(cachedTrain);
         }
         else {
-            mLocalSource.getTrain(trainId, new GetTrainRouteCallback() {
+            mLocalSource.getTrain(train, new GetTrainRouteCallback() {
                 @Override
                 public void onFinished(Train train) {
                     callback.onFinished(train);
@@ -100,7 +102,7 @@ public class TrainsRepo implements TrainsDataSource {
 
                 @Override
                 public void onError(Object error) {
-                    mRemoteSource.getTrain(trainId, new GetTrainRouteCallback() {
+                    mRemoteSource.getTrain(train, new GetTrainRouteCallback() {
                         @Override
                         public void onFinished(Train train) {
                             callback.onFinished(train);
@@ -189,10 +191,10 @@ public class TrainsRepo implements TrainsDataSource {
 
     private void cacheTrain(Train train) {
         mCachedTrains = checkNotNull(mCachedTrains);
-        mCachedTrains.put(train.getTrainId(), train);
+        mCachedTrains.put(train.getTrainId() + train.getStation(), train);
     }
 
-    private Map<Long, Train> checkNotNull(Map<Long, Train> trainMap) {
+    private Map<String, Train> checkNotNull(Map<String, Train> trainMap) {
         if(trainMap == null) {
             trainMap = new LinkedHashMap<>();
         }

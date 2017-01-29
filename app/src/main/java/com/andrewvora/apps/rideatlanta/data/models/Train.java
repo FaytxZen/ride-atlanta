@@ -10,6 +10,11 @@ import com.google.gson.annotations.SerializedName;
 
 public class Train extends BaseModel implements FavoriteRouteDataObject {
 
+    public static final String RED_LINE = "RED";
+    public static final String BLUE_LINE = "BLUE";
+    public static final String GOLD_LINE = "GOLD";
+    public static final String GREEN_LINE = "GREEN";
+
     @SerializedName("DESTINATION")
     private String destination;
 
@@ -36,6 +41,8 @@ public class Train extends BaseModel implements FavoriteRouteDataObject {
 
     @SerializedName("WAITING_TIME")
     private String waitingTime;
+
+    private boolean favorited;
 
     @Override
     public String getDestination() {
@@ -108,6 +115,14 @@ public class Train extends BaseModel implements FavoriteRouteDataObject {
 
     public void setWaitingTime(String waitingTime) {
         this.waitingTime = waitingTime;
+    }
+
+    public boolean isFavorited() {
+        return favorited;
+    }
+
+    public void setFavorited(boolean favorited) {
+        this.favorited = favorited;
     }
 
     @Override

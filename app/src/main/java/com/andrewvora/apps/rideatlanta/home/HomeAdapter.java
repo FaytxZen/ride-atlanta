@@ -2,12 +2,10 @@ package com.andrewvora.apps.rideatlanta.home;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
-import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +19,7 @@ import com.andrewvora.apps.rideatlanta.data.contracts.HomeItemModel;
 import com.andrewvora.apps.rideatlanta.data.contracts.InfoItemModel;
 import com.andrewvora.apps.rideatlanta.data.contracts.RouteItemModel;
 import com.andrewvora.apps.rideatlanta.seeandsay.SeeAndSayActivity;
-import com.andrewvora.apps.rideatlanta.utils.CompatUtil;
+import com.andrewvora.apps.rideatlanta.utils.HtmlUtil;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -132,7 +130,7 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private void onBindAlertViewHolder(@NonNull AlertViewHolder holder, int position) {
         AlertItemModel alertItemModel = (AlertItemModel) mItemList.get(position);
 
-        String decodedMsg = CompatUtil.getDecodedHtml(alertItemModel.getAlertMessage());
+        String decodedMsg = HtmlUtil.getDecodedHtml(alertItemModel.getAlertMessage());
 
         holder.messageTextView.setText(decodedMsg);
 

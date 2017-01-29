@@ -32,8 +32,14 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
     private TrainRoutesAdapter mTrainAdapter;
     private TrainItemListener mTrainItemListener = new TrainItemListener() {
         @Override
-        public void onItemClicked(Train clickedTrain) {
+        public void onItemClicked(int position) {
 
+        }
+
+        @Override
+        public void onFavoriteItem(int position) {
+            mPresenter.favoriteRoute(mTrainAdapter.getTrain(position));
+            mTrainAdapter.notifyItemChanged(position);
         }
     };
 
@@ -94,6 +100,7 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
     }
 
     public interface TrainItemListener {
-        void onItemClicked(Train clickedTrain);
+        void onItemClicked(int position);
+        void onFavoriteItem(int position);
     }
 }

@@ -31,7 +31,7 @@ public interface TrainsDataSource {
 
     void getTrains(@NonNull GetTrainRoutesCallback callback);
     void getTrains(@NonNull GetTrainRoutesCallback callback, @NonNull Long... trainIds);
-    void getTrain(@NonNull Long trainId, @NonNull GetTrainRouteCallback callback);
+    void getTrain(@NonNull Train train, @NonNull GetTrainRouteCallback callback);
     void deleteAllTrains(@Nullable DeleteTrainRoutesCallback callback);
     void saveTrain(@NonNull Train route);
     void reloadTrains();

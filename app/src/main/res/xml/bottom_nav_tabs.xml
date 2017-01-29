@@ -6,7 +6,7 @@
         title="@string/title_tab_home" />
     <tab
         id="@+id/tab_fav_routes"
-        icon="@drawable/ic_favorite_24dp"
+        icon="@drawable/ic_favorite_filled_24dp"
         title="@string/title_tab_fav_routes"/>
     <tab
         id="@+id/tab_buses"
