@@ -21,13 +21,20 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * Created by faytx on 10/22/2016.
  * @author Andrew Vorakrajangthiti
  */
 public class BusesRemoteSource implements BusesDataSource {
+
+    private static final String GET_BUSES = "getAllBusesRequest";
 
     private Context mContext;
     private RequestQueue mRequestQueue;
@@ -60,6 +67,7 @@ public class BusesRemoteSource implements BusesDataSource {
                     }
                 });
 
+        arrayRequest.setTag(GET_BUSES);
         addToRequestQueue(arrayRequest);
     }
 
@@ -69,7 +77,7 @@ public class BusesRemoteSource implements BusesDataSource {
     }
 
     @Override
-    public void getBus(@NonNull String routeId, @NonNull GetBusCallback callback) {
+    public void getBus(@NonNull Bus bus, @NonNull GetBusCallback callback) {
 
     }
 
@@ -97,7 +105,16 @@ public class BusesRemoteSource implements BusesDataSource {
     }
 
     private <T> void addToRequestQueue(Request<T> request) {
-        getRequestQueue().add(request);
+        RequestQueue requestQueue = getRequestQueue();
+        requestQueue.cancelAll(request.getTag());
+        requestQueue.add(request);
+    }
+
+    private static class BusComparator implements Comparator<String> {
+        @Override
+        public int compare(String t1, String t2) {
+            return Integer.parseInt(t1) - Integer.parseInt(t2);
+        }
     }
 
     private static class ParseBusJsonTask extends AsyncTask<JSONArray, Void, List<Bus>> {
@@ -111,21 +128,21 @@ public class BusesRemoteSource implements BusesDataSource {
 
         @Override
         protected List<Bus> doInBackground(JSONArray... jsonArrays) {
-            final List<Bus> buses = new ArrayList<>();
+            final SortedMap<String, Bus> busMap = new TreeMap<>(new BusComparator());
             final JSONArray response = jsonArrays[0];
 
             for(int i = 0; i < response.length(); i++) {
                 try {
                     String jsonStr = response.getJSONObject(i).toString();
                     Bus bus = new Gson().fromJson(jsonStr, Bus.class);
-                    buses.add(bus);
+                    busMap.put(bus.getRouteId(), bus);
                 }
                 catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
 
-            return buses;
+            return new ArrayList<>(busMap.values());
         }
 
         @Override

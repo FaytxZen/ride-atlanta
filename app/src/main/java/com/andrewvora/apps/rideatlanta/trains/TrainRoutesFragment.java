@@ -3,11 +3,13 @@ package com.andrewvora.apps.rideatlanta.trains;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.models.Train;
@@ -27,6 +29,8 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
     public static final String TAG = TrainRoutesFragment.class.getSimpleName();
 
     @BindView(R.id.trains_list) RecyclerView mTrainsRecyclerView;
+    @BindView(R.id.loading_train_routes_view) ProgressBar mProgressBar;
+    @BindView(R.id.swipe_to_refresh_layout) SwipeRefreshLayout mSwipeRefreshLayout;
 
     private TrainRoutesContract.Presenter mPresenter;
     private TrainRoutesAdapter mTrainAdapter;
@@ -59,6 +63,14 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_train_routes, container, false);
         ButterKnife.bind(this, view);
+
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                mPresenter.refreshTrainRoutes();
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        });
 
         mTrainsRecyclerView.setAdapter(mTrainAdapter);
         mTrainsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -95,6 +107,9 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
 
     @Override
     public void onTrainRoutesLoaded(List<Train> trainList) {
+        mSwipeRefreshLayout.setRefreshing(false);
+        mProgressBar.setVisibility(View.GONE);
+
         mTrainAdapter.setTrains(trainList);
         mTrainAdapter.notifyDataSetChanged();
     }

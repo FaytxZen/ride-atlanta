@@ -1,33 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginTop="8dp"
     android:layout_marginBottom="12dp">
 
     <TextView
         android:id="@+id/bus_route_text_view"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:text="Route 54"/>
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        android:textSize="16sp"
+        tools:text="54"/>
 
     <TextView
         android:id="@+id/bus_destination_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/bus_route_text_view"
+        android:layout_toRightOf="@id/bus_route_text_view"
+        android:layout_toStartOf="@+id/bus_favorite_button"
+        android:layout_toLeftOf="@+id/bus_favorite_button"
+        android:layout_marginBottom="8dp"
+        android:gravity="start"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:textSize="16sp"
         tools:text="Midtown Station"/>
 
     <TextView
         android:id="@+id/bus_direction_text_view"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@id/bus_route_text_view"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:padding="4dp"
         tools:text="Southwest"/>
 
     <TextView
         android:id="@+id/bus_status_text_view"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@id/bus_route_text_view"
+        android:layout_toEndOf="@id/bus_direction_text_view"
+        android:layout_toRightOf="@id/bus_direction_text_view"
+
+        android:background="@color/md_grey_500"
+        android:padding="4dp"
+        android:textColor="@color/md_white_1000"
         tools:text="3 minutes early"/>
-</LinearLayout>
+
+    <ImageView
+        android:id="@+id/bus_favorite_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:padding="8dp"
+        android:ellipsize="end"
+        android:tint="@color/colorAccent"
+        android:src="@drawable/selector_favorite"
+        android:contentDescription="@string/content_description_favorite_route"/>
+
+</RelativeLayout>

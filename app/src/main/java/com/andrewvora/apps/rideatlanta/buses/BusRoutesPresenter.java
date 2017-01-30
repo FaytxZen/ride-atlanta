@@ -2,15 +2,12 @@ package com.andrewvora.apps.rideatlanta.buses;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 
-import com.andrewvora.apps.rideatlanta.data.models.Bus;
 import com.andrewvora.apps.rideatlanta.data.CachedDataMap;
 import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
+import com.andrewvora.apps.rideatlanta.data.models.Bus;
 import com.andrewvora.apps.rideatlanta.data.repos.BusesRepo;
 
 import java.util.List;
@@ -52,7 +49,18 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter {
 
         useCachedDataIfAvailable(mBusesRepo);
 
-        mBusesRepo.getBuses(new BusesDataSource.GetBusesCallback() {
+        mBusesRepo.getBuses(createGetBusesCallbackInstance());
+    }
+
+    @Override
+    public void refreshBusRoutes() {
+        mBusesRepo.reloadBuses();
+
+        mBusesRepo.getBuses(createGetBusesCallbackInstance());
+    }
+
+    private BusesDataSource.GetBusesCallback createGetBusesCallbackInstance() {
+        return new BusesDataSource.GetBusesCallback() {
             @Override
             public void onFinished(List<Bus> buses) {
                 updateView(buses);
@@ -63,7 +71,7 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter {
             public void onError(Object error) {
 
             }
-        });
+        };
     }
 
     private void updateView(List<Bus> buses) {

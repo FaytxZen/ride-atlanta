@@ -23,6 +23,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * Created by faytx on 10/22/2016.
@@ -30,6 +32,8 @@ import java.util.List;
  */
 
 public class TrainsRemoteSource implements TrainsDataSource {
+
+    private static final String GET_TRAINS = "getTrainsRequest";
 
     private Context mContext;
     private RequestQueue mRequestQueue;
@@ -65,6 +69,7 @@ public class TrainsRemoteSource implements TrainsDataSource {
                     }
                 });
 
+        arrayRequest.setTag(GET_TRAINS);
         addToRequestQueue(arrayRequest);
     }
 
@@ -103,7 +108,9 @@ public class TrainsRemoteSource implements TrainsDataSource {
     }
 
     private <T> void addToRequestQueue(Request<T> request) {
-        getRequestQueue().add(request);
+        RequestQueue requestQueue = getRequestQueue();
+        requestQueue.cancelAll(request.getTag());
+        requestQueue.add(request);
     }
 
     private static class ParseTrainsJsonTask extends AsyncTask<JSONArray, Void, List<Train>> {
@@ -117,20 +124,20 @@ public class TrainsRemoteSource implements TrainsDataSource {
 
         @Override
         protected List<Train> doInBackground(JSONArray... jsonArrays) {
-            final List<Train> trainList = new ArrayList<>();
+            final SortedMap<String, Train> trainMap = new TreeMap<>();
             final JSONArray response = jsonArrays[0];
 
             for(int i = 0; i < response.length(); i++) {
                 try {
                     String jsonStr = response.getJSONObject(i).toString();
                     Train train = new Gson().fromJson(jsonStr, Train.class);
-                    trainList.add(train);
+                    trainMap.put(train.getLine() + train.getStation(), train);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
 
-            return trainList;
+            return new ArrayList<>(trainMap.values());
         }
 
         @Override

@@ -16,6 +16,7 @@ import java.util.List;
 public interface TrainRoutesContract {
 
     interface Presenter extends BasePresenter {
+        void refreshTrainRoutes();
         void loadTrainRoutes();
         void favoriteRoute(@NonNull Train route);
     }

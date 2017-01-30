@@ -47,7 +47,18 @@ public class TrainRoutesPresenter implements TrainRoutesContract.Presenter {
 
         useCachedDataIfAvailable(trainsRepo);
 
-        trainsRepo.getTrains(new TrainsDataSource.GetTrainRoutesCallback() {
+        trainsRepo.getTrains(createGetTrainRoutesCallbackInstance());
+    }
+
+    @Override
+    public void refreshTrainRoutes() {
+        TrainsRepo trainsRepo = TrainsRepo.getInstance(mContext);
+        trainsRepo.reloadTrains();
+        trainsRepo.getTrains(createGetTrainRoutesCallbackInstance());
+    }
+
+    private TrainsDataSource.GetTrainRoutesCallback createGetTrainRoutesCallbackInstance() {
+        return new TrainsDataSource.GetTrainRoutesCallback() {
             @Override
             public void onFinished(List<Train> trainList) {
                 updateViews(trainList);
@@ -58,7 +69,7 @@ public class TrainRoutesPresenter implements TrainRoutesContract.Presenter {
             public void onError(Object error) {
 
             }
-        });
+        };
     }
 
     @Override

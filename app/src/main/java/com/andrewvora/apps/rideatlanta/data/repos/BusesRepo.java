@@ -85,14 +85,14 @@ public class BusesRepo implements BusesDataSource {
     }
 
     @Override
-    public void getBus(@NonNull final String routeId, @NonNull final GetBusCallback callback) {
-        final Bus cachedRoute = mCachedBuses.get(routeId);
+    public void getBus(@NonNull final Bus bus, @NonNull final GetBusCallback callback) {
+        final Bus cachedRoute = mCachedBuses.get(getKeyFor(bus));
 
         if(cachedRoute != null) {
             callback.onFinished(cachedRoute);
         }
         else {
-            mLocalSource.getBus(routeId, new GetBusCallback() {
+            mLocalSource.getBus(bus, new GetBusCallback() {
                 @Override
                 public void onFinished(Bus bus) {
                     callback.onFinished(bus);
@@ -101,7 +101,7 @@ public class BusesRepo implements BusesDataSource {
 
                 @Override
                 public void onError(Object error) {
-                    mRemoteSource.getBus(routeId, new GetBusCallback() {
+                    mRemoteSource.getBus(bus, new GetBusCallback() {
                         @Override
                         public void onFinished(Bus bus) {
                             callback.onFinished(bus);
@@ -194,14 +194,14 @@ public class BusesRepo implements BusesDataSource {
 
     private void cacheBusRoute(@NonNull Bus bus) {
         mCachedBuses = checkNotNull(mCachedBuses);
-        mCachedBuses.put(bus.getRouteId(), bus);
+        mCachedBuses.put(getKeyFor(bus), bus);
     }
 
     private Map<String, Bus> checkNotNull(@Nullable Map<String, Bus> map) {
-        if(map == null) {
-            map = new LinkedHashMap<>();
-        }
+        return map == null ? new LinkedHashMap<String, Bus>() : map;
+    }
 
-        return map;
+    private String getKeyFor(@NonNull Bus bus) {
+        return bus.getRouteId();
     }
 }

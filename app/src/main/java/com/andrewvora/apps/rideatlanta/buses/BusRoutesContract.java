@@ -15,6 +15,7 @@ public interface BusRoutesContract {
 
     interface Presenter extends BasePresenter {
         void loadBusRoutes();
+        void refreshBusRoutes();
     }
 
     interface View extends BaseView<BusRoutesContract.Presenter> {

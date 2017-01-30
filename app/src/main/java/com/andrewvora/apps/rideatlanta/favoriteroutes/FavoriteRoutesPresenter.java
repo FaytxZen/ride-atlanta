@@ -5,6 +5,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
+import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
+import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
+import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
+
+import java.util.List;
+
 /**
  * Created by faytx on 10/22/2016.
  * @author Andrew Vorakrajangthiti
@@ -39,11 +45,23 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
 
     @Override
     public void start() {
-
+        loadFavoriteRoutes();
     }
 
     @Override
     public void loadFavoriteRoutes() {
+        FavoriteRoutesRepo repo = FavoriteRoutesRepo.getInstance(mContext);
 
+        repo.getFavoriteRoutes(new FavoriteRoutesDataSource.GetFavoriteRoutesCallback() {
+            @Override
+            public void onFinished(List<FavoriteRoute> favRoutes) {
+
+            }
+
+            @Override
+            public void onError(Object error) {
+
+            }
+        });
     }
 }

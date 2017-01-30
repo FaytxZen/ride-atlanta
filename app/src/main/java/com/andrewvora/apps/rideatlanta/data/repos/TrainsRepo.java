@@ -86,8 +86,7 @@ public class TrainsRepo implements TrainsDataSource {
     @Override
     public void getTrain(@NonNull final Train train, @NonNull final GetTrainRouteCallback callback)
     {
-        final long trainId = train.getTrainId();
-        final Train cachedTrain = mCachedTrains.get(trainId + train.getStation());
+        final Train cachedTrain = mCachedTrains.get(getKeyFor(train));
 
         if(cachedTrain != null) {
             callback.onFinished(cachedTrain);
@@ -191,7 +190,7 @@ public class TrainsRepo implements TrainsDataSource {
 
     private void cacheTrain(Train train) {
         mCachedTrains = checkNotNull(mCachedTrains);
-        mCachedTrains.put(train.getTrainId() + train.getStation(), train);
+        mCachedTrains.put(getKeyFor(train), train);
     }
 
     private Map<String, Train> checkNotNull(Map<String, Train> trainMap) {
@@ -200,5 +199,9 @@ public class TrainsRepo implements TrainsDataSource {
         }
 
         return trainMap;
+    }
+
+    private String getKeyFor(@NonNull Train train) {
+        return train.getLine() + train.getStation() + train.getDirection();
     }
 }

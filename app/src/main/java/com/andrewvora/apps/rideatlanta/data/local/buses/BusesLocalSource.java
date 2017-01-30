@@ -82,19 +82,19 @@ public class BusesLocalSource implements BusesDataSource {
     }
 
     @Override
-    public void getBus(@NonNull String routeId, @NonNull GetBusCallback callback) {
+    public void getBus(@NonNull Bus bus, @NonNull GetBusCallback callback) {
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
         try {
             String[] columns = BusesTable.getColumns();
             String selection = BusesTable.COLUMN_ROUTEID + "=?";
-            String[] selectionArgs = new String[] { routeId };
+            String[] selectionArgs = new String[] { bus.getRouteId() };
             String numResultsNeeded = "1";
 
             Cursor busCursor = db.query(BusesTable.TABLE_NAME,
                     columns, selection, selectionArgs, null, null, null, numResultsNeeded);
-            Bus bus = getBusFrom(busCursor);
-            callback.onFinished(bus);
+            Bus savedBus = getBusFrom(busCursor);
+            callback.onFinished(savedBus);
         }
         catch (Exception e) {
             e.printStackTrace();

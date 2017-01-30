@@ -3,11 +3,13 @@ package com.andrewvora.apps.rideatlanta.buses;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.models.Bus;
@@ -28,6 +30,8 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
     public static final String TAG = BusRoutesFragment.class.getSimpleName();
 
     @BindView(R.id.buses_list) RecyclerView mBusesRecyclerView;
+    @BindView(R.id.swipe_to_refresh_layout) SwipeRefreshLayout mSwipeRefreshLayout;
+    @BindView(R.id.loading_bus_routes_view) ProgressBar mProgressBar;
 
     private BusRoutesContract.Presenter mPresenter;
     private BusRoutesAdapter mBusAdapter;
@@ -54,6 +58,15 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_bus_routes, container, false);
         ButterKnife.bind(this, view);
+
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                if(mPresenter != null) {
+                    mPresenter.refreshBusRoutes();
+                }
+            }
+        });
 
         mBusesRecyclerView.setAdapter(mBusAdapter);
         mBusesRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -92,6 +105,8 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
 
     @Override
     public void onBusRoutesLoaded(List<Bus> routesList) {
+        mSwipeRefreshLayout.setRefreshing(false);
+        mProgressBar.setVisibility(View.GONE);
         mBusAdapter.setBuses(routesList);
         mBusAdapter.notifyDataSetChanged();
     }

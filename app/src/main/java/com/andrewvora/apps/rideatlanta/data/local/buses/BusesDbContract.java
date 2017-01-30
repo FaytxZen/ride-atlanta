@@ -61,7 +61,7 @@ public interface BusesDbContract {
                     COLUMN_TIMEPOINT,
                     COLUMN_TRIPID,
                     COLUMN_VEHICLE,
-                    COLUMN_FAVORITED, TYPE_INT
+                    COLUMN_FAVORITED
             };
         }
     }
