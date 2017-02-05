@@ -120,9 +120,11 @@ public class FavoriteRoutesLocalSource implements FavoriteRoutesDataSource {
         List<FavoriteRoute> favoriteRoutes = new ArrayList<>();
         boolean hasRecords = cursor.moveToFirst();
 
-        while(hasRecords && cursor.moveToNext()) {
+        while(hasRecords && !cursor.isAfterLast()) {
             FavoriteRoute route = getRouteFrom(cursor);
             favoriteRoutes.add(route);
+
+            cursor.moveToNext();
         }
 
         return favoriteRoutes;

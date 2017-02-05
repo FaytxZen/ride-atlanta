@@ -47,4 +47,16 @@
     <string name="text_bus_adherence_suffix_late">
         minutes late
     </string>
+
+    <string name="text_no_buses_running">
+        There are no running buses
+    </string>
+
+    <string name="text_no_trains_running">
+        There are no running trains
+    </string>
+
+    <string name="text_no_favorited_routes">
+        You haven\'t favorited any routes, yet
+    </string>
 </resources>

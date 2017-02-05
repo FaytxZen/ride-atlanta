@@ -186,9 +186,11 @@ public class TrainsLocalSource implements TrainsDataSource {
         List<Train> trains = new ArrayList<>();
         boolean hasRecords = cursor.moveToFirst();
 
-        while(hasRecords && cursor.moveToNext()) {
+        while(hasRecords && !cursor.isAfterLast()) {
             Train train = getTrainFrom(cursor);
             trains.add(train);
+
+            cursor.moveToNext();
         }
 
         return trains;

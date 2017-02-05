@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
 import com.andrewvora.apps.rideatlanta.data.local.routes.FavoriteRoutesLocalSource;
+import com.andrewvora.apps.rideatlanta.data.remote.routes.FavoriteRoutesRemoteSource;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -53,9 +54,6 @@ public class FavoriteRoutesRepo implements FavoriteRoutesDataSource {
     public void getFavoriteRoutes(@NonNull final GetFavoriteRoutesCallback callback) {
         if(mCachedRoutes != null && !mCacheIsDirty) {
             callback.onFinished(new ArrayList<>(mCachedRoutes.values()));
-        }
-        else if(mCacheIsDirty) {
-            callback.onFinished(new ArrayList<FavoriteRoute>());
         }
         else {
             mLocalSource.getFavoriteRoutes(new GetFavoriteRoutesCallback() {

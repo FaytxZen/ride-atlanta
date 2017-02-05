@@ -23,7 +23,6 @@ import butterknife.ButterKnife;
  * Created by faytx on 10/22/2016.
  * @author Andrew Vorakrajangthiti
  */
-
 public class TrainRoutesFragment extends Fragment implements TrainRoutesContract.View {
 
     public static final String TAG = TrainRoutesFragment.class.getSimpleName();
@@ -31,6 +30,7 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
     @BindView(R.id.trains_list) RecyclerView mTrainsRecyclerView;
     @BindView(R.id.loading_train_routes_view) ProgressBar mProgressBar;
     @BindView(R.id.swipe_to_refresh_layout) SwipeRefreshLayout mSwipeRefreshLayout;
+    @BindView(R.id.no_trains_running_view) View mEmptyStateView;
 
     private TrainRoutesContract.Presenter mPresenter;
     private TrainRoutesAdapter mTrainAdapter;
@@ -112,6 +112,13 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
 
         mTrainAdapter.setTrains(trainList);
         mTrainAdapter.notifyDataSetChanged();
+
+        if(trainList.isEmpty()) {
+            mEmptyStateView.setVisibility(View.VISIBLE);
+        }
+        else {
+            mEmptyStateView.setVisibility(View.GONE);
+        }
     }
 
     public interface TrainItemListener {

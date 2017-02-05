@@ -107,9 +107,11 @@ public class NotificationsLocalSource implements NotificationsDataSource {
         List<Notification> notifications = new ArrayList<>();
         boolean hasRecords = cursor.moveToFirst();
 
-        while(hasRecords && cursor.moveToNext()) {
+        while(hasRecords && !cursor.isAfterLast()) {
             Notification notification = getNotificationFrom(cursor);
             notifications.add(notification);
+
+            cursor.moveToNext();
         }
 
         return notifications;

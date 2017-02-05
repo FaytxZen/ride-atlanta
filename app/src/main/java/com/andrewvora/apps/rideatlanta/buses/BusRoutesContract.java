@@ -1,5 +1,7 @@
 package com.andrewvora.apps.rideatlanta.buses;
 
+import android.support.annotation.NonNull;
+
 import com.andrewvora.apps.rideatlanta.common.BasePresenter;
 import com.andrewvora.apps.rideatlanta.common.BaseView;
 import com.andrewvora.apps.rideatlanta.data.models.Bus;
@@ -16,6 +18,7 @@ public interface BusRoutesContract {
     interface Presenter extends BasePresenter {
         void loadBusRoutes();
         void refreshBusRoutes();
+        void favoriteRoute(@NonNull Bus bus);
     }
 
     interface View extends BaseView<BusRoutesContract.Presenter> {

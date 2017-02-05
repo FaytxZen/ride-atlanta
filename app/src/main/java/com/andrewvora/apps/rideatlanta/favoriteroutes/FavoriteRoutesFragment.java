@@ -3,6 +3,7 @@ package com.andrewvora.apps.rideatlanta.favoriteroutes;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,12 +26,21 @@ public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesCo
 
     public static final String TAG = FavoriteRoutesFragment.class.getSimpleName();
 
-    @BindView(R.id.favorite_routes_recycler_view) RecyclerView FavoriteRoutesRecyclerView;
+    @BindView(R.id.favorite_routes_recycler_view) RecyclerView mFavoriteRoutesRecyclerView;
+    @BindView(R.id.no_favorited_routes_view) View mEmptyStateView;
 
     private FavoriteRoutesContract.Presenter mPresenter;
+    private FavoriteRoutesAdapter mFavRoutesAdapter;
 
     public static FavoriteRoutesFragment newInstance() {
         return new FavoriteRoutesFragment();
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        mFavRoutesAdapter = new FavoriteRoutesAdapter(null);
     }
 
     @Nullable
@@ -38,6 +48,9 @@ public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesCo
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_favorite_routes, container, false);
         ButterKnife.bind(this, view);
+
+        mFavoriteRoutesRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mFavoriteRoutesRecyclerView.setAdapter(mFavRoutesAdapter);
 
         return view;
     }
@@ -58,6 +71,28 @@ public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesCo
 
     @Override
     public void onFavoriteRoutesLoaded(List<FavoriteRouteDataObject> favRoutes) {
+        mFavRoutesAdapter.setFavoriteRoutes(favRoutes);
+        mFavRoutesAdapter.notifyDataSetChanged();
 
+        if(favRoutes.isEmpty()) {
+            mEmptyStateView.setVisibility(View.VISIBLE);
+        }
+        else {
+            mEmptyStateView.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void onRouteInformationLoaded(FavoriteRouteDataObject favRoute) {
+        int curPosition = mFavRoutesAdapter.getPosition(favRoute);
+        mFavRoutesAdapter.addFavoriteRoute(favRoute);
+
+        if(curPosition >= 0) {
+            mFavRoutesAdapter.notifyItemChanged(curPosition);
+        }
+        else {
+            curPosition = mFavRoutesAdapter.getPosition(favRoute);
+            mFavRoutesAdapter.notifyItemInserted(curPosition);
+        }
     }
 }

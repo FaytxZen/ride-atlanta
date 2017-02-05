@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.andrewvora.apps.rideatlanta.R;
@@ -45,7 +46,7 @@ public class BusRoutesAdapter extends RecyclerView.Adapter<BusRoutesAdapter.BusR
 
     @Override
     public void onBindViewHolder(BusRoutesViewHolder holder, int position) {
-        Bus bus = mBusList.get(position);
+        final Bus bus = mBusList.get(position);
 
         holder.vehicleIdTextView.setText(String.valueOf(bus.getRouteId()));
 
@@ -77,6 +78,15 @@ public class BusRoutesAdapter extends RecyclerView.Adapter<BusRoutesAdapter.BusR
         }
 
         holder.statusTextView.setText(status);
+
+        holder.favoriteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(mListener != null) {
+                    mListener.onFavoriteBus(bus);
+                }
+            }
+        });
     }
 
     @Override
@@ -94,6 +104,7 @@ public class BusRoutesAdapter extends RecyclerView.Adapter<BusRoutesAdapter.BusR
         @BindView(R.id.bus_destination_text_view) TextView destinationTextView;
         @BindView(R.id.bus_direction_text_view) TextView directionTextView;
         @BindView(R.id.bus_status_text_view) TextView statusTextView;
+        @BindView(R.id.bus_favorite_button) ImageView favoriteButton;
 
         BusRoutesViewHolder(@NonNull View view) {
             super(view);

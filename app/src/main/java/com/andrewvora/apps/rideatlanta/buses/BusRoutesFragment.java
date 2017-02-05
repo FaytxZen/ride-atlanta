@@ -32,6 +32,7 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
     @BindView(R.id.buses_list) RecyclerView mBusesRecyclerView;
     @BindView(R.id.swipe_to_refresh_layout) SwipeRefreshLayout mSwipeRefreshLayout;
     @BindView(R.id.loading_bus_routes_view) ProgressBar mProgressBar;
+    @BindView(R.id.no_bus_routes_view) View mEmptyStateView;
 
     private BusRoutesContract.Presenter mPresenter;
     private BusRoutesAdapter mBusAdapter;
@@ -39,6 +40,11 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
         @Override
         public void onItemClicked(Bus bus) {
 
+        }
+
+        @Override
+        public void onFavoriteBus(Bus bus) {
+            mPresenter.favoriteRoute(bus);
         }
     };
 
@@ -109,6 +115,12 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
         mProgressBar.setVisibility(View.GONE);
         mBusAdapter.setBuses(routesList);
         mBusAdapter.notifyDataSetChanged();
+
+        if(routesList.isEmpty()) {
+            mEmptyStateView.setVisibility(View.VISIBLE);
+        } else {
+            mEmptyStateView.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -118,5 +130,6 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
 
     public interface BusItemListener {
         void onItemClicked(Bus bus);
+        void onFavoriteBus(Bus bus);
     }
 }

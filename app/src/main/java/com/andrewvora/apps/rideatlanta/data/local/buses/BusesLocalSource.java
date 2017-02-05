@@ -166,9 +166,11 @@ public class BusesLocalSource implements BusesDataSource {
         List<Bus> buses = new ArrayList<>();
         boolean hasRecords = cursor.moveToFirst();
 
-        while(hasRecords && cursor.moveToNext()) {
+        while(hasRecords && !cursor.isAfterLast()) {
             Bus bus = getBusFrom(cursor);
             buses.add(bus);
+
+            cursor.moveToNext();
         }
 
         return buses;

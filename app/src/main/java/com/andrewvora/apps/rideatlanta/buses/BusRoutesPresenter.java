@@ -8,7 +8,9 @@ import android.support.annotation.NonNull;
 import com.andrewvora.apps.rideatlanta.data.CachedDataMap;
 import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
 import com.andrewvora.apps.rideatlanta.data.models.Bus;
+import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
 import com.andrewvora.apps.rideatlanta.data.repos.BusesRepo;
+import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
 
 import java.util.List;
 
@@ -57,6 +59,15 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter {
         mBusesRepo.reloadBuses();
 
         mBusesRepo.getBuses(createGetBusesCallbackInstance());
+    }
+
+    @Override
+    public void favoriteRoute(@NonNull Bus bus) {
+        bus.setFavorited(!bus.isFavorited());
+
+        mBusesRepo.saveBus(bus);
+
+        FavoriteRoutesRepo.getInstance(mContext).saveRoute(new FavoriteRoute(bus));
     }
 
     private BusesDataSource.GetBusesCallback createGetBusesCallbackInstance() {

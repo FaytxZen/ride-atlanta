@@ -7,7 +7,9 @@ import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.data.CachedDataMap;
 import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
+import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
 import com.andrewvora.apps.rideatlanta.data.models.Train;
+import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
 import com.andrewvora.apps.rideatlanta.data.repos.TrainsRepo;
 
 import java.util.List;
@@ -78,6 +80,8 @@ public class TrainRoutesPresenter implements TrainRoutesContract.Presenter {
 
         TrainsRepo trainsRepo = TrainsRepo.getInstance(mContext);
         trainsRepo.saveTrain(route);
+
+        FavoriteRoutesRepo.getInstance(mContext).saveRoute(new FavoriteRoute(route));
     }
 
     private void updateViews(List<Train> trains) {

@@ -1,5 +1,7 @@
 package com.andrewvora.apps.rideatlanta.data.models;
 
+import android.support.annotation.NonNull;
+
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 import com.andrewvora.apps.rideatlanta.data.contracts.HomeItemModel;
 import com.andrewvora.apps.rideatlanta.data.contracts.RouteItemModel;
@@ -16,6 +18,26 @@ public class FavoriteRoute extends BaseModel implements FavoriteRouteDataObject,
     private String name;
     private String destination;
     private String timeTilArrival;
+
+    public FavoriteRoute() {
+
+    }
+
+    public FavoriteRoute(@NonNull Train train) {
+        routeId = train.getRouteId();
+        type = FavoriteRouteDataObject.TYPE_TRAIN;
+        name = train.getLine();
+        destination = train.getDestination();
+        timeTilArrival = train.getTimeTilArrival();
+    }
+
+    public FavoriteRoute(@NonNull Bus bus) {
+        routeId = bus.getRouteId();
+        type = FavoriteRouteDataObject.TYPE_BUS;
+        name = bus.getName();
+        destination = bus.getDestination();
+        timeTilArrival = bus.getTimeTilArrival();
+    }
 
     @Override
     public int getViewType() {
