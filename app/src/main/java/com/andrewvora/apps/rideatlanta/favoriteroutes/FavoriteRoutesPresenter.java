@@ -60,6 +60,7 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
     @Override
     public void loadFavoriteRoutes() {
         FavoriteRoutesRepo repo = FavoriteRoutesRepo.getInstance(mContext);
+        repo.reloadRoutes();
 
         repo.getFavoriteRoutes(new FavoriteRoutesDataSource.GetFavoriteRoutesCallback() {
             @Override
@@ -88,7 +89,9 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
             Bus bus = new Bus();
             bus.setRouteId(route.getRouteId());
 
-            BusesRepo.getInstance(mContext).getBus(bus, new BusesDataSource.GetBusCallback() {
+            BusesRepo busesRepo = BusesRepo.getInstance(mContext);
+            busesRepo.reloadBuses();
+            busesRepo.getBus(bus, new BusesDataSource.GetBusCallback() {
                 @Override
                 public void onFinished(Bus bus) {
                     mView.onRouteInformationLoaded(bus);
@@ -104,7 +107,9 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
             Train train = new Train();
             train.setTrainId(Long.parseLong(route.getRouteId()));
 
-            TrainsRepo.getInstance(mContext).getTrain(train, new TrainsDataSource.GetTrainRouteCallback() {
+            TrainsRepo trainsRepo = TrainsRepo.getInstance(mContext);
+            trainsRepo.reloadTrains();
+            trainsRepo.getTrain(train, new TrainsDataSource.GetTrainRouteCallback() {
                 @Override
                 public void onFinished(Train train) {
                     mView.onRouteInformationLoaded(train);

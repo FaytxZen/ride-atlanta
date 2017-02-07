@@ -88,11 +88,15 @@ public class FavoriteRoutesLocalSource implements FavoriteRoutesDataSource {
         ContentValues contentValues = new ContentValues();
         contentValues.put(FavoriteRoutesTable.COLUMN_ROUTE_ID, route.getRouteId());
         contentValues.put(FavoriteRoutesTable.COLUMN_TYPE, route.getType());
+        contentValues.put(FavoriteRoutesTable.COLUMN_NAME, route.getName());
+        contentValues.put(FavoriteRoutesTable.COLUMN_DESTINATION, route.getName());
+        contentValues.put(FavoriteRoutesTable.COLUMN_TIME_TIL_ARRIVAL, route.getTimeTilArrival());
 
         if(isNewRecord) {
-
-            db.insertWithOnConflict(FavoriteRoutesTable.TABLE_NAME,
+            long id = db.insertWithOnConflict(FavoriteRoutesTable.TABLE_NAME,
                     null, contentValues, SQLiteDatabase.CONFLICT_ROLLBACK);
+
+            route.setId(id);
         }
         else {
             contentValues.put(FavoriteRoutesTable._ID, route.getId());

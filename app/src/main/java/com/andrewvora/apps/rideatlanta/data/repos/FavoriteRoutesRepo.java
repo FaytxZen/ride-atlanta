@@ -3,10 +3,9 @@ package com.andrewvora.apps.rideatlanta.data.repos;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
 import com.andrewvora.apps.rideatlanta.data.local.routes.FavoriteRoutesLocalSource;
-import com.andrewvora.apps.rideatlanta.data.remote.routes.FavoriteRoutesRemoteSource;
+import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

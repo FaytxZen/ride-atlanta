@@ -132,7 +132,7 @@ public class Train extends BaseModel implements FavoriteRouteDataObject {
 
     @Override
     public String getRouteId() {
-        return getId().toString();
+        return getTrainId().toString();
     }
 
     @Override

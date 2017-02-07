@@ -93,8 +93,13 @@ public class BusesLocalSource implements BusesDataSource {
 
             Cursor busCursor = db.query(BusesTable.TABLE_NAME,
                     columns, selection, selectionArgs, null, null, null, numResultsNeeded);
-            Bus savedBus = getBusFrom(busCursor);
-            callback.onFinished(savedBus);
+
+            if(busCursor.getColumnCount() > 0) {
+                busCursor.moveToFirst();
+
+                Bus savedBus = getBusFrom(busCursor);
+                callback.onFinished(savedBus);
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -143,8 +148,10 @@ public class BusesLocalSource implements BusesDataSource {
         contentValues.put(BusesTable.COLUMN_FAVORITED, route.isFavorited() ? 1 : 0);
 
         if(newRecord) {
-            db.insertWithOnConflict(BusesTable.TABLE_NAME,
+            long id = db.insertWithOnConflict(BusesTable.TABLE_NAME,
                     null, contentValues, SQLiteDatabase.CONFLICT_ROLLBACK);
+
+            route.setId(id);
         }
         else {
             contentValues.put(BusesTable._ID, route.getId());

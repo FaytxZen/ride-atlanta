@@ -43,8 +43,9 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
         }
 
         @Override
-        public void onFavoriteBus(Bus bus) {
-            mPresenter.favoriteRoute(bus);
+        public void onFavoriteBus(int position) {
+            mPresenter.favoriteRoute(mBusAdapter.getItemAtPosition(position));
+            mBusAdapter.notifyItemChanged(position);
         }
     };
 
@@ -130,6 +131,6 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
 
     public interface BusItemListener {
         void onItemClicked(Bus bus);
-        void onFavoriteBus(Bus bus);
+        void onFavoriteBus(int position);
     }
 }

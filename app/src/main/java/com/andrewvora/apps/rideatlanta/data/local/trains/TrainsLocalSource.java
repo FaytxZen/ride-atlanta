@@ -107,14 +107,19 @@ public class TrainsLocalSource implements TrainsDataSource {
 
         try {
             String[] columns = TrainsTable.getColumns();
-            String selection = TrainsTable.COLUMN_TRAIN_ID+ "=?";
+            String selection = TrainsTable.COLUMN_TRAIN_ID + "=?";
             String[] selectionArgs = new String[] { train.getTrainId().toString() };
             String numResultsNeeded = "1";
 
             Cursor trainCursor = db.query(TrainsTable.TABLE_NAME,
                     columns, selection, selectionArgs, null, null, null, numResultsNeeded);
-            Train savedTrain = getTrainFrom(trainCursor);
-            callback.onFinished(savedTrain);
+
+            if(trainCursor.getCount() > 0) {
+                trainCursor.moveToFirst();
+
+                Train savedTrain = getTrainFrom(trainCursor);
+                callback.onFinished(savedTrain);
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -160,8 +165,10 @@ public class TrainsLocalSource implements TrainsDataSource {
         contentValues.put(TrainsTable.COLUMN_FAVORITED, route.isFavorited() ? 1 : 0);
 
         if(newRecord) {
-            db.insertWithOnConflict(TrainsTable.TABLE_NAME,
+            long id = db.insertWithOnConflict(TrainsTable.TABLE_NAME,
                     null, contentValues, SQLiteDatabase.CONFLICT_ROLLBACK);
+
+            route.setId(id);
         }
         else {
             contentValues.put(TrainsTable._ID, route.getId());

@@ -45,7 +45,7 @@ public class BusRoutesAdapter extends RecyclerView.Adapter<BusRoutesAdapter.BusR
     }
 
     @Override
-    public void onBindViewHolder(BusRoutesViewHolder holder, int position) {
+    public void onBindViewHolder(final BusRoutesViewHolder holder, int position) {
         final Bus bus = mBusList.get(position);
 
         holder.vehicleIdTextView.setText(String.valueOf(bus.getRouteId()));
@@ -79,11 +79,12 @@ public class BusRoutesAdapter extends RecyclerView.Adapter<BusRoutesAdapter.BusR
 
         holder.statusTextView.setText(status);
 
+        holder.favoriteButton.setSelected(bus.isFavorited());
         holder.favoriteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(mListener != null) {
-                    mListener.onFavoriteBus(bus);
+                    mListener.onFavoriteBus(holder.getAdapterPosition());
                 }
             }
         });
@@ -92,6 +93,10 @@ public class BusRoutesAdapter extends RecyclerView.Adapter<BusRoutesAdapter.BusR
     @Override
     public int getItemCount() {
         return mBusList.size();
+    }
+
+    public Bus getItemAtPosition(int position) {
+        return mBusList.get(position);
     }
 
     public void setBuses(List<Bus> buses) {

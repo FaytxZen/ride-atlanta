@@ -160,16 +160,16 @@ public class Bus extends BaseModel implements FavoriteRouteDataObject {
 
     @Override
     public String getName() {
-        return null;
+        return getRouteId();
     }
 
     @Override
     public String getDestination() {
-        return null;
+        return getTimePoint();
     }
 
     @Override
     public String getTimeTilArrival() {
-        return null;
+        return String.valueOf(getAdherence());
     }
 }

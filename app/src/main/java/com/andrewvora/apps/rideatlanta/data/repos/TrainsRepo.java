@@ -86,6 +86,7 @@ public class TrainsRepo implements TrainsDataSource {
     @Override
     public void getTrain(@NonNull final Train train, @NonNull final GetTrainRouteCallback callback)
     {
+        mCachedTrains = checkNotNull(mCachedTrains);
         final Train cachedTrain = mCachedTrains.get(getKeyFor(train));
 
         if(cachedTrain != null) {
@@ -146,6 +147,7 @@ public class TrainsRepo implements TrainsDataSource {
         mRemoteSource.getTrains(new GetTrainRoutesCallback() {
             @Override
             public void onFinished(List<Train> trainList) {
+                restoreFavoritedTrains(trainList);
                 reloadCachedTrains(trainList);
                 reloadLocalTrains(trainList);
 
@@ -155,6 +157,32 @@ public class TrainsRepo implements TrainsDataSource {
             @Override
             public void onError(Object error) {
                 callback.onError(error);
+            }
+        });
+    }
+
+    private void restoreFavoritedTrains(@NonNull final List<Train> favoritedTrains) {
+        mLocalSource.getTrains(new GetTrainRoutesCallback() {
+            @Override
+            public void onFinished(List<Train> trainList) {
+                if(trainList != null) {
+                    for(Train train : favoritedTrains) {
+                        for(Train localTrain : trainList) {
+                            boolean matched = train.getStation().equals(localTrain.getStation()) &&
+                                    train.getLine().equals(localTrain.getLine());
+
+                            if(matched) {
+                                train.setFavorited(localTrain.isFavorited());
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onError(Object error) {
+
             }
         });
     }

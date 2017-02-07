@@ -86,6 +86,8 @@ public class BusesRepo implements BusesDataSource {
 
     @Override
     public void getBus(@NonNull final Bus bus, @NonNull final GetBusCallback callback) {
+        mCachedBuses = checkNotNull(mCachedBuses);
+
         final Bus cachedRoute = mCachedBuses.get(getKeyFor(bus));
 
         if(cachedRoute != null) {
@@ -150,6 +152,8 @@ public class BusesRepo implements BusesDataSource {
         mRemoteSource.getBuses(new GetBusesCallback() {
             @Override
             public void onFinished(List<Bus> buses) {
+
+                restoreFavoritedBuses(buses);
                 reloadCachedBusRoutes(buses);
                 reloadLocalBusRoutes(buses);
 
@@ -159,6 +163,29 @@ public class BusesRepo implements BusesDataSource {
             @Override
             public void onError(Object error) {
                 callback.onError(error);
+            }
+        });
+    }
+
+    private void restoreFavoritedBuses(@NonNull final List<Bus> buses) {
+        mLocalSource.getBuses(new GetBusesCallback() {
+            @Override
+            public void onFinished(List<Bus> savedBuses) {
+                if(savedBuses != null) {
+                    for(Bus bus : buses) {
+                        for(Bus savedBus : savedBuses) {
+                            if(bus.getRouteId().equals(savedBus.getRouteId())) {
+                                bus.setFavorited(savedBus.isFavorited());
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onError(Object error) {
+
             }
         });
     }
