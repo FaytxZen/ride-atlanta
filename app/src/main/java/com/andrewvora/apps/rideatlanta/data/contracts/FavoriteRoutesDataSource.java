@@ -26,6 +26,7 @@ public interface FavoriteRoutesDataSource {
     void getFavoriteRoutes(@NonNull GetFavoriteRoutesCallback callback);
     void getFavoriteRoute(@NonNull String routeId, @NonNull GetFavoriteRouteCallback callback);
     void saveRoute(@NonNull FavoriteRoute route);
+    void deleteRoute(@NonNull FavoriteRouteDataObject route);
     void deleteAllRoutes();
     void reloadRoutes();
 }

@@ -69,7 +69,7 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
 
                 for(FavoriteRoute route : favRoutes) {
                     routes.add(route);
-                    loadRouteInformationAsync(routes);
+                    //loadRouteInformationAsync(routes);
                 }
 
                 mView.onFavoriteRoutesLoaded(routes);

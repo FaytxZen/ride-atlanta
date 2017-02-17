@@ -98,6 +98,7 @@ public class HomeFragment extends Fragment implements HomeContract.View {
     private void notifyItemInserted(int position) {
         if(position != HomeAdapter.UNSUCCESSFUL_INSERT) {
             mHomeAdapter.notifyItemInserted(position);
+            mHomeRecyclerView.smoothScrollToPosition(0);
         }
     }
 }

@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 
+import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
 import com.andrewvora.apps.rideatlanta.data.local.RideAtlantaDbHelper;
@@ -89,7 +90,7 @@ public class FavoriteRoutesLocalSource implements FavoriteRoutesDataSource {
         contentValues.put(FavoriteRoutesTable.COLUMN_ROUTE_ID, route.getRouteId());
         contentValues.put(FavoriteRoutesTable.COLUMN_TYPE, route.getType());
         contentValues.put(FavoriteRoutesTable.COLUMN_NAME, route.getName());
-        contentValues.put(FavoriteRoutesTable.COLUMN_DESTINATION, route.getName());
+        contentValues.put(FavoriteRoutesTable.COLUMN_DESTINATION, route.getDestination());
         contentValues.put(FavoriteRoutesTable.COLUMN_TIME_TIL_ARRIVAL, route.getTimeTilArrival());
 
         if(isNewRecord) {
@@ -113,6 +114,15 @@ public class FavoriteRoutesLocalSource implements FavoriteRoutesDataSource {
     public void deleteAllRoutes() {
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
         db.delete(FavoriteRoutesTable.TABLE_NAME, "1=1", null);
+    }
+
+    @Override
+    public void deleteRoute(@NonNull FavoriteRouteDataObject route) {
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+        String whereClause = FavoriteRoutesTable.COLUMN_ROUTE_ID + "=?";
+        String[] whereArgs = { route.getRouteId() };
+        db.delete(FavoriteRoutesTable.TABLE_NAME, whereClause, whereArgs);
     }
 
     @Override

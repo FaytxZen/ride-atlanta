@@ -64,9 +64,16 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter {
     @Override
     public void favoriteRoute(@NonNull Bus bus) {
         bus.setFavorited(!bus.isFavorited());
-
         mBusesRepo.saveBus(bus);
-        FavoriteRoutesRepo.getInstance(mContext).saveRoute(new FavoriteRoute(bus));
+
+        FavoriteRoute favoriteRoute = new FavoriteRoute(bus);
+
+        if(bus.isFavorited()) {
+            FavoriteRoutesRepo.getInstance(mContext).saveRoute(favoriteRoute);
+        }
+        else {
+            FavoriteRoutesRepo.getInstance(mContext).deleteRoute(favoriteRoute);
+        }
     }
 
     private BusesDataSource.GetBusesCallback createGetBusesCallbackInstance() {

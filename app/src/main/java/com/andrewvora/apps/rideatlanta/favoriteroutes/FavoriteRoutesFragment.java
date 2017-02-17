@@ -87,12 +87,16 @@ public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesCo
         int curPosition = mFavRoutesAdapter.getPosition(favRoute);
         mFavRoutesAdapter.addFavoriteRoute(favRoute);
 
-        if(curPosition >= 0) {
-            mFavRoutesAdapter.notifyItemChanged(curPosition);
-        }
-        else {
+        if(curPosition < 0) {
             curPosition = mFavRoutesAdapter.getPosition(favRoute);
-            mFavRoutesAdapter.notifyItemInserted(curPosition);
+        }
+
+        notifyItemChanged(curPosition);
+    }
+
+    private void notifyItemChanged(int position) {
+        if(isAdded()) {
+            mFavRoutesAdapter.notifyItemInserted(position);
         }
     }
 }

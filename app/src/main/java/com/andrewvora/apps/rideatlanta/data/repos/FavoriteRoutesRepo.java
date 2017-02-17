@@ -3,6 +3,7 @@ package com.andrewvora.apps.rideatlanta.data.repos;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
+import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
 import com.andrewvora.apps.rideatlanta.data.local.routes.FavoriteRoutesLocalSource;
 import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
@@ -115,6 +116,14 @@ public class FavoriteRoutesRepo implements FavoriteRoutesDataSource {
     }
 
     @Override
+    public void deleteRoute(@NonNull FavoriteRouteDataObject route) {
+        mLocalSource.deleteRoute(route);
+
+        mCachedRoutes = checkNotNull(mCachedRoutes);
+        mCachedRoutes.remove(getMapKeyFor(route));
+    }
+
+    @Override
     public void reloadRoutes() {
         mCacheIsDirty = true;
     }
@@ -133,7 +142,11 @@ public class FavoriteRoutesRepo implements FavoriteRoutesDataSource {
     private void cacheRoute(FavoriteRoute route) {
         mCachedRoutes = checkNotNull(mCachedRoutes);
 
-        mCachedRoutes.put(route.getId().toString(), route);
+        mCachedRoutes.put(getMapKeyFor(route), route);
+    }
+
+    private String getMapKeyFor(@NonNull FavoriteRouteDataObject route) {
+        return route.getRouteId();
     }
 
     private Map<String, FavoriteRoute> checkNotNull(Map<String, FavoriteRoute> favRoutesMap) {

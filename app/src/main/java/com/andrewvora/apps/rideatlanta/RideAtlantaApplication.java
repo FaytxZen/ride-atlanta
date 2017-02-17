@@ -2,6 +2,12 @@ package com.andrewvora.apps.rideatlanta;
 
 import android.app.Application;
 
+import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
+import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
+import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
+import com.andrewvora.apps.rideatlanta.data.repos.BusesRepo;
+import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
+import com.andrewvora.apps.rideatlanta.data.repos.TrainsRepo;
 import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.TwitterAuthConfig;
 
@@ -14,6 +20,15 @@ import io.fabric.sdk.android.Fabric;
 
 public class RideAtlantaApplication extends Application {
 
+    @SuppressWarnings({"FieldCanBeLocal", "unused"})
+    private static BusesDataSource sBusRepo;
+
+    @SuppressWarnings({"FieldCanBeLocal", "unused"})
+    private static TrainsDataSource sTrainRepo;
+
+    @SuppressWarnings({"FieldCanBeLocal", "unused"})
+    private static FavoriteRoutesDataSource sFavRouteRepo;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -24,5 +39,9 @@ public class RideAtlantaApplication extends Application {
         TwitterAuthConfig twitterAuthConfig = new TwitterAuthConfig(twitterKey, twitterSecret);
 
         Fabric.with(this, new Twitter(twitterAuthConfig));
+
+        sBusRepo = BusesRepo.getInstance(this);
+        sTrainRepo = TrainsRepo.getInstance(this);
+        sFavRouteRepo = FavoriteRoutesRepo.getInstance(this);
     }
 }

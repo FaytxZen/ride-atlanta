@@ -136,6 +136,7 @@ public class TrainsRepo implements TrainsDataSource {
     public void saveTrain(@NonNull Train route) {
         // only save trains locally
         mLocalSource.saveTrain(route);
+        cacheTrain(route);
     }
 
     @Override
@@ -230,6 +231,6 @@ public class TrainsRepo implements TrainsDataSource {
     }
 
     private String getKeyFor(@NonNull Train train) {
-        return train.getLine() + train.getStation() + train.getDirection();
+        return train.getLine() + train.getStation();
     }
 }

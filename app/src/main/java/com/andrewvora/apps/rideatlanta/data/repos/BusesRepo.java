@@ -57,10 +57,7 @@ public class BusesRepo implements BusesDataSource {
 
     @Override
     public void getBuses(@NonNull final GetBusesCallback callback) {
-        if(mCachedBuses != null && !mCacheIsDirty) {
-            callback.onFinished(new ArrayList<>(mCachedBuses.values()));
-        }
-        else if(mCacheIsDirty) {
+        if(mCacheIsDirty) {
             getBusRoutesFromRemote(callback);
         }
         else {
@@ -138,6 +135,7 @@ public class BusesRepo implements BusesDataSource {
         // only saves the routes locally since we're pulling from a read-only API
         try {
             mLocalSource.saveBus(route);
+            cacheBusRoute(route);
         } catch (Exception e) {
             e.printStackTrace();
         }

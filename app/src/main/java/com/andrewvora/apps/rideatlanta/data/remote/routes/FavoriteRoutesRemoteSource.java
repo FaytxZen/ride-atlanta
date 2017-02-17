@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
+import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
 import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
@@ -54,6 +55,11 @@ public class FavoriteRoutesRemoteSource implements FavoriteRoutesDataSource {
     @Override
     public void deleteAllRoutes() {
         // no route is stored on a remote server
+    }
+
+    @Override
+    public void deleteRoute(@NonNull FavoriteRouteDataObject route) {
+
     }
 
     @Override

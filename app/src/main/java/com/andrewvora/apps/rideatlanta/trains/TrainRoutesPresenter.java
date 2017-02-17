@@ -81,7 +81,14 @@ public class TrainRoutesPresenter implements TrainRoutesContract.Presenter {
         TrainsRepo trainsRepo = TrainsRepo.getInstance(mContext);
         trainsRepo.saveTrain(route);
 
-        FavoriteRoutesRepo.getInstance(mContext).saveRoute(new FavoriteRoute(route));
+        FavoriteRoute favoriteRoute = new FavoriteRoute(route);
+
+        if(route.isFavorited()) {
+            FavoriteRoutesRepo.getInstance(mContext).saveRoute(favoriteRoute);
+        }
+        else {
+            FavoriteRoutesRepo.getInstance(mContext).deleteRoute(favoriteRoute);
+        }
     }
 
     private void updateViews(List<Train> trains) {

@@ -27,7 +27,7 @@ public class FavoriteRoute extends BaseModel implements FavoriteRouteDataObject,
         routeId = train.getRouteId();
         type = FavoriteRouteDataObject.TYPE_TRAIN;
         name = train.getLine();
-        destination = train.getDestination();
+        destination = train.getStation();
         timeTilArrival = train.getTimeTilArrival();
     }
 
