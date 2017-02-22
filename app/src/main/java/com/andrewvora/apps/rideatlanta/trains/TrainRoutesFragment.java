@@ -1,8 +1,13 @@
 package com.andrewvora.apps.rideatlanta.trains;
 
 import android.app.Fragment;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,7 +17,12 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.andrewvora.apps.rideatlanta.R;
+import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
+import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
 import com.andrewvora.apps.rideatlanta.data.models.Train;
+import com.andrewvora.apps.rideatlanta.data.remote.trains.GetTrainsIntentService;
+import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
+import com.andrewvora.apps.rideatlanta.data.repos.TrainsRepo;
 
 import java.util.List;
 
@@ -92,6 +102,15 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+
+        if(mPresenter != null) {
+            mPresenter.stop();
+        }
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
@@ -119,6 +138,36 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
         else {
             mEmptyStateView.setVisibility(View.GONE);
         }
+    }
+
+    @Override
+    public void subscribeReceiver(@NonNull BroadcastReceiver receiver) {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(GetTrainsIntentService.ACTION_TRAINS_UPDATED);
+
+        LocalBroadcastManager.getInstance(getViewContext())
+                .registerReceiver(receiver, intentFilter);
+    }
+
+    @Override
+    public void unsubscribeReceiver(@NonNull BroadcastReceiver receiver) {
+        LocalBroadcastManager.getInstance(getViewContext())
+                .unregisterReceiver(receiver);
+    }
+
+    @Override
+    public Context getViewContext() {
+        return getActivity().getApplication();
+    }
+
+    @Override
+    public TrainsDataSource getTrainDataSource() {
+        return TrainsRepo.getInstance(getViewContext());
+    }
+
+    @Override
+    public FavoriteRoutesDataSource getFavRouteDataSource() {
+        return FavoriteRoutesRepo.getInstance(getViewContext());
     }
 
     public interface TrainItemListener {

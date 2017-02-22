@@ -1,16 +1,16 @@
 package com.andrewvora.apps.rideatlanta.trains;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.data.CachedDataMap;
+import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
 import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
 import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
 import com.andrewvora.apps.rideatlanta.data.models.Train;
-import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
-import com.andrewvora.apps.rideatlanta.data.repos.TrainsRepo;
 
 import java.util.List;
 
@@ -18,19 +18,21 @@ import java.util.List;
  * Created by faytx on 10/22/2016.
  * @author Andrew Vorakrajangthiti
  */
-
 public class TrainRoutesPresenter implements TrainRoutesContract.Presenter {
 
-    private Context mContext;
     private TrainRoutesContract.View mView;
+    private TrainsDataSource mTrainRepo;
+    private FavoriteRoutesDataSource mFavoriteDataSource;
+    private BroadcastReceiver mTrainReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            loadTrainRoutes();
+        }
+    };
 
-    public TrainRoutesPresenter(@NonNull Context context, @NonNull TrainRoutesContract.View view) {
-        mContext = context;
+    public TrainRoutesPresenter(@NonNull TrainRoutesContract.View view) {
         mView = view;
     }
-
-    @Override
-    public void onResult(int requestCode, int resultCode, Intent data) { }
 
     @Override
     public void onSaveState(Bundle outState) { }
@@ -40,23 +42,30 @@ public class TrainRoutesPresenter implements TrainRoutesContract.Presenter {
 
     @Override
     public void start() {
+        mTrainRepo = mView.getTrainDataSource();
+        mFavoriteDataSource = mView.getFavRouteDataSource();
+
+        mView.subscribeReceiver(mTrainReceiver);
+
         loadTrainRoutes();
     }
 
     @Override
+    public void stop() {
+        mView.unsubscribeReceiver(mTrainReceiver);
+    }
+
+    @Override
     public void loadTrainRoutes() {
-        TrainsRepo trainsRepo = TrainsRepo.getInstance(mContext);
+        useCachedDataIfAvailable(mTrainRepo);
 
-        useCachedDataIfAvailable(trainsRepo);
-
-        trainsRepo.getTrains(createGetTrainRoutesCallbackInstance());
+        mTrainRepo.getTrains(createGetTrainRoutesCallbackInstance());
     }
 
     @Override
     public void refreshTrainRoutes() {
-        TrainsRepo trainsRepo = TrainsRepo.getInstance(mContext);
-        trainsRepo.reloadTrains();
-        trainsRepo.getTrains(createGetTrainRoutesCallbackInstance());
+        mTrainRepo.reloadTrains();
+        mTrainRepo.getTrains(createGetTrainRoutesCallbackInstance());
     }
 
     private TrainsDataSource.GetTrainRoutesCallback createGetTrainRoutesCallbackInstance() {
@@ -78,16 +87,15 @@ public class TrainRoutesPresenter implements TrainRoutesContract.Presenter {
     public void favoriteRoute(@NonNull Train route) {
         route.setFavorited(!route.isFavorited());
 
-        TrainsRepo trainsRepo = TrainsRepo.getInstance(mContext);
-        trainsRepo.saveTrain(route);
+        mTrainRepo.saveTrain(route);
 
         FavoriteRoute favoriteRoute = new FavoriteRoute(route);
 
         if(route.isFavorited()) {
-            FavoriteRoutesRepo.getInstance(mContext).saveRoute(favoriteRoute);
+            mFavoriteDataSource.saveRoute(favoriteRoute);
         }
         else {
-            FavoriteRoutesRepo.getInstance(mContext).deleteRoute(favoriteRoute);
+            mFavoriteDataSource.deleteRoute(favoriteRoute);
         }
     }
 
@@ -103,7 +111,7 @@ public class TrainRoutesPresenter implements TrainRoutesContract.Presenter {
         CachedDataMap.getInstance().put(getCachedDataTag(), true);
     }
 
-    private void useCachedDataIfAvailable(TrainsRepo repo) {
+    private void useCachedDataIfAvailable(TrainsDataSource repo) {
         if(hasNoCachedData()) {
             repo.reloadTrains();
         }

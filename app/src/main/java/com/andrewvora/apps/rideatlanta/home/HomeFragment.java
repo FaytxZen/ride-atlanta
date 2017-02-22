@@ -24,7 +24,6 @@ import butterknife.ButterKnife;
  * Created by faytx on 10/22/2016.
  * @author Andrew Vorakrajangthiti
  */
-
 public class HomeFragment extends Fragment implements HomeContract.View {
 
     public static final String TAG = HomeFragment.class.getSimpleName();

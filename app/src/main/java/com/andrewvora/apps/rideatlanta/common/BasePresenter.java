@@ -9,8 +9,8 @@ import android.os.Bundle;
  */
 public interface BasePresenter {
 
-    void onResult(int requestCode, int resultCode, Intent data);
     void onSaveState(Bundle outState);
     void onRestoreState(Bundle savedState);
     void start();
+    void stop();
 }

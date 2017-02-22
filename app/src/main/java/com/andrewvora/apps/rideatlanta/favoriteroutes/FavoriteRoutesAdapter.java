@@ -34,6 +34,8 @@ import butterknife.ButterKnife;
 public class FavoriteRoutesAdapter extends
         RecyclerView.Adapter<FavoriteRoutesAdapter.FavoriteRoutesViewHolder>
 {
+    public static final int NEW_INDEX = -1;
+
     private List<FavoriteRouteDataObject> mFavoriteRoutesList;
     private Map<String, Integer> mFavoriteRoutesMap;
 
@@ -83,24 +85,21 @@ public class FavoriteRoutesAdapter extends
         addRoutesToMap(routes);
     }
 
-    public void addFavoriteRoute(FavoriteRouteDataObject route) {
+    public void setFavoriteRoute(FavoriteRouteDataObject route) {
         String key = getMapKeyForRoute(route);
 
         if(mFavoriteRoutesMap.containsKey(key)) {
             int position = mFavoriteRoutesMap.get(key);
             mFavoriteRoutesList.set(position, route);
-
-        }
-        else {
-            mFavoriteRoutesList.add(route);
-
-            addRouteToMap(route, mFavoriteRoutesList.size() - 1);
-            notifyItemInserted(mFavoriteRoutesList.size() - 1);
         }
     }
 
     public int getPosition(@NonNull FavoriteRouteDataObject route) {
-        return mFavoriteRoutesMap.get(getMapKeyForRoute(route));
+        String key = getMapKeyForRoute(route);
+
+        return mFavoriteRoutesMap.containsKey(key) ?
+                mFavoriteRoutesMap.get(key) :
+                NEW_INDEX;
     }
 
     private String getMapKeyForRoute(@NonNull FavoriteRouteDataObject route) {

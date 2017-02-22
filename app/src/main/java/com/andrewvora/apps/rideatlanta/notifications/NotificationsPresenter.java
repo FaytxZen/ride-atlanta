@@ -1,13 +1,12 @@
 package com.andrewvora.apps.rideatlanta.notifications;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
-import com.andrewvora.apps.rideatlanta.data.models.Notification;
 import com.andrewvora.apps.rideatlanta.data.CachedDataMap;
 import com.andrewvora.apps.rideatlanta.data.contracts.NotificationsDataSource;
+import com.andrewvora.apps.rideatlanta.data.models.Notification;
 import com.andrewvora.apps.rideatlanta.data.repos.NotificationsRepo;
 
 import java.util.List;
@@ -30,11 +29,6 @@ public class NotificationsPresenter implements NotificationsContract.Presenter {
     }
 
     @Override
-    public void onResult(int requestCode, int resultCode, Intent data) {
-
-    }
-
-    @Override
     public void onSaveState(Bundle outState) { }
 
     @Override
@@ -43,6 +37,11 @@ public class NotificationsPresenter implements NotificationsContract.Presenter {
     @Override
     public void start() {
         loadNotifications();
+    }
+
+    @Override
+    public void stop() {
+
     }
 
     @Override

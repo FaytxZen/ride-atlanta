@@ -1,8 +1,13 @@
 package com.andrewvora.apps.rideatlanta.buses;
 
 import android.app.Fragment;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,8 +17,12 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.andrewvora.apps.rideatlanta.R;
+import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
+import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
 import com.andrewvora.apps.rideatlanta.data.models.Bus;
+import com.andrewvora.apps.rideatlanta.data.remote.buses.GetBusesIntentService;
 import com.andrewvora.apps.rideatlanta.data.repos.BusesRepo;
+import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
 
 import java.util.List;
 
@@ -95,19 +104,12 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        if(mPresenter != null) {
-            mPresenter.onSaveState(outState);
-        }
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
 
-        BusesRepo.destroyInstance();
+        if(mPresenter != null) {
+            mPresenter.stop();
+        }
     }
 
     @Override
@@ -127,6 +129,36 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
     @Override
     public void setPresenter(BusRoutesContract.Presenter presenter) {
         mPresenter = presenter;
+    }
+
+    @Override
+    public void subscribeReceiver(@NonNull BroadcastReceiver receiver) {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(GetBusesIntentService.ACTION_BUSES_UPDATED);
+
+        LocalBroadcastManager.getInstance(getViewContext())
+                .registerReceiver(receiver, intentFilter);
+    }
+
+    @Override
+    public void unsubscribeReceiver(@NonNull BroadcastReceiver receiver) {
+        LocalBroadcastManager.getInstance(getViewContext())
+                .unregisterReceiver(receiver);
+    }
+
+    @Override
+    public Context getViewContext() {
+        return getActivity().getApplication();
+    }
+
+    @Override
+    public BusesDataSource getBusesDataSource() {
+        return BusesRepo.getInstance(getViewContext());
+    }
+
+    @Override
+    public FavoriteRoutesDataSource getFavRoutesDataSource() {
+        return FavoriteRoutesRepo.getInstance(getViewContext());
     }
 
     public interface BusItemListener {

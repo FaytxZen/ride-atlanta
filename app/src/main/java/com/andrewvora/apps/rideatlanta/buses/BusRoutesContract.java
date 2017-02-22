@@ -1,9 +1,13 @@
 package com.andrewvora.apps.rideatlanta.buses;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.common.BasePresenter;
 import com.andrewvora.apps.rideatlanta.common.BaseView;
+import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
+import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
 import com.andrewvora.apps.rideatlanta.data.models.Bus;
 
 import java.util.List;
@@ -23,5 +27,11 @@ public interface BusRoutesContract {
 
     interface View extends BaseView<BusRoutesContract.Presenter> {
         void onBusRoutesLoaded(List<Bus> routesList);
+        void subscribeReceiver(@NonNull BroadcastReceiver receiver);
+        void unsubscribeReceiver(@NonNull BroadcastReceiver receiver);
+
+        Context getViewContext();
+        BusesDataSource getBusesDataSource();
+        FavoriteRoutesDataSource getFavRoutesDataSource();
     }
 }

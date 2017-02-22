@@ -1,5 +1,6 @@
 package com.andrewvora.apps.rideatlanta.buses;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,10 +8,9 @@ import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.data.CachedDataMap;
 import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
+import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
 import com.andrewvora.apps.rideatlanta.data.models.Bus;
 import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
-import com.andrewvora.apps.rideatlanta.data.repos.BusesRepo;
-import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
 
 import java.util.List;
 
@@ -18,20 +18,21 @@ import java.util.List;
  * Created by faytx on 10/22/2016.
  * @author Andrew Vorakrajangthiti
  */
-
 public class BusRoutesPresenter implements BusRoutesContract.Presenter {
 
-    private Context mContext;
     private BusRoutesContract.View mView;
-    private BusesRepo mBusesRepo;
+    private BusesDataSource mBusesRepo;
+    private FavoriteRoutesDataSource mFavRoutesRepo;
+    private BroadcastReceiver mBusesReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            loadBusRoutes();
+        }
+    };
 
-    public BusRoutesPresenter(@NonNull Context context, @NonNull BusRoutesContract.View view) {
-        mContext = context;
+    public BusRoutesPresenter(@NonNull BusRoutesContract.View view) {
         mView = view;
     }
-
-    @Override
-    public void onResult(int requestCode, int resultCode, Intent data) { }
 
     @Override
     public void onSaveState(Bundle outState) { }
@@ -41,14 +42,21 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter {
 
     @Override
     public void start() {
-        mBusesRepo = BusesRepo.getInstance(mContext);
+        mBusesRepo = mView.getBusesDataSource();
+        mFavRoutesRepo = mView.getFavRoutesDataSource();
 
+        mView.subscribeReceiver(mBusesReceiver);
         loadBusRoutes();
     }
 
     @Override
-    public void loadBusRoutes() {
+    public void stop() {
+        mBusesRepo = null;
+        mView.unsubscribeReceiver(mBusesReceiver);
+    }
 
+    @Override
+    public void loadBusRoutes() {
         useCachedDataIfAvailable(mBusesRepo);
 
         mBusesRepo.getBuses(createGetBusesCallbackInstance());
@@ -69,10 +77,10 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter {
         FavoriteRoute favoriteRoute = new FavoriteRoute(bus);
 
         if(bus.isFavorited()) {
-            FavoriteRoutesRepo.getInstance(mContext).saveRoute(favoriteRoute);
+            mFavRoutesRepo.saveRoute(favoriteRoute);
         }
         else {
-            FavoriteRoutesRepo.getInstance(mContext).deleteRoute(favoriteRoute);
+            mFavRoutesRepo.deleteRoute(favoriteRoute);
         }
     }
 
@@ -103,7 +111,7 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter {
         CachedDataMap.getInstance().put(getCachedDataTag(), true);
     }
 
-    private void useCachedDataIfAvailable(BusesRepo repo) {
+    private void useCachedDataIfAvailable(BusesDataSource repo) {
         if(hasNoCachedData()) {
             repo.reloadBuses();
         }

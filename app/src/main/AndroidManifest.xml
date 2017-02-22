@@ -33,6 +33,14 @@
             android:name=".seeandsay.SeeAndSayActivity"
             android:alwaysRetainTaskState="true"/>
 
+        <service
+            android:name=".data.remote.buses.GetBusesIntentService"
+            android:exported="false"/>
+
+        <service
+            android:name=".data.remote.trains.GetTrainsIntentService"
+            android:exported="false"/>
+
     </application>
 
 </manifest>

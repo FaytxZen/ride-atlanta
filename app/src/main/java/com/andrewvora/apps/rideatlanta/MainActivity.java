@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
@@ -23,6 +24,8 @@ import com.andrewvora.apps.rideatlanta.buses.BusRoutesFragment;
 import com.andrewvora.apps.rideatlanta.buses.BusRoutesPresenter;
 import com.andrewvora.apps.rideatlanta.common.BasePresenter;
 import com.andrewvora.apps.rideatlanta.common.BaseView;
+import com.andrewvora.apps.rideatlanta.data.remote.buses.GetBusesIntentService;
+import com.andrewvora.apps.rideatlanta.data.remote.trains.GetTrainsIntentService;
 import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesContract;
 import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesFragment;
 import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesPresenter;
@@ -44,6 +47,8 @@ import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final long POLLING_INTERVAL_IN_MILLIS = 30 * 1000;
+
     @BindView(R.id.toolbar_icon) ImageButton mToolbarIconView;
     @BindView(R.id.toolbar_title) TextView mToolbarTitleView;
     @BindView(R.id.toolbar) Toolbar mToolbar;
@@ -51,6 +56,19 @@ public class MainActivity extends AppCompatActivity {
 
     private BaseView mActiveView;
     private BasePresenter mActivePresenter;
+    private Handler mPollingHandler;
+    private Runnable mPollingTask = new Runnable() {
+        @Override
+        public void run() {
+            Intent getBusesIntent = new Intent(getApplication(), GetBusesIntentService.class);
+            Intent getTrainsIntent = new Intent(getApplication(), GetTrainsIntentService.class);
+
+            startService(getBusesIntent);
+            startService(getTrainsIntent);
+
+            mPollingHandler.postDelayed(this, POLLING_INTERVAL_IN_MILLIS);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
 
         setSupportActionBar(mToolbar);
 
+        mPollingHandler = new Handler();
         mBottomBar.setOnTabSelectListener(new OnTabSelectListener() {
             @Override
             public void onTabSelected(@IdRes int tabId) {
@@ -92,6 +111,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        mPollingHandler.postDelayed(mPollingTask, POLLING_INTERVAL_IN_MILLIS);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mPollingHandler.removeCallbacks(mPollingTask);
     }
 
     @Override
@@ -130,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
             fragment = BusRoutesFragment.newInstance();
         }
 
-        BusRoutesContract.Presenter presenter = new BusRoutesPresenter(this, fragment);
+        BusRoutesContract.Presenter presenter = new BusRoutesPresenter(fragment);
         fragment.setPresenter(presenter);
         setActiveViewAndPresenter(fragment, presenter);
 
@@ -147,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
             fragment = TrainRoutesFragment.newInstance();
         }
 
-        TrainRoutesContract.Presenter presenter = new TrainRoutesPresenter(this, fragment);
+        TrainRoutesContract.Presenter presenter = new TrainRoutesPresenter(fragment);
         fragment.setPresenter(presenter);
         setActiveViewAndPresenter(fragment, presenter);
 
@@ -183,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
             fragment = FavoriteRoutesFragment.newInstance();
         }
 
-        FavoriteRoutesContract.Presenter presenter = new FavoriteRoutesPresenter(this, fragment);
+        FavoriteRoutesContract.Presenter presenter = new FavoriteRoutesPresenter(fragment);
         fragment.setPresenter(presenter);
         setActiveViewAndPresenter(fragment, presenter);
 

@@ -1,20 +1,19 @@
 package com.andrewvora.apps.rideatlanta.home;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.R;
-import com.andrewvora.apps.rideatlanta.data.contracts.AlertItemModel;
-import com.andrewvora.apps.rideatlanta.data.contracts.InfoItemModel;
-import com.andrewvora.apps.rideatlanta.data.contracts.RouteItemModel;
 import com.andrewvora.apps.rideatlanta.data.CachedDataMap;
+import com.andrewvora.apps.rideatlanta.data.contracts.AlertItemModel;
+import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
+import com.andrewvora.apps.rideatlanta.data.contracts.InfoItemModel;
+import com.andrewvora.apps.rideatlanta.data.contracts.NotificationsDataSource;
+import com.andrewvora.apps.rideatlanta.data.contracts.RouteItemModel;
 import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
 import com.andrewvora.apps.rideatlanta.data.models.InfoAlert;
 import com.andrewvora.apps.rideatlanta.data.models.Notification;
-import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
-import com.andrewvora.apps.rideatlanta.data.contracts.NotificationsDataSource;
 import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
 import com.andrewvora.apps.rideatlanta.data.repos.NotificationsRepo;
 import com.andrewvora.apps.rideatlanta.notifications.NotificationsPresenter;
@@ -26,7 +25,6 @@ import java.util.List;
  * Created by faytx on 10/22/2016.
  * @author Andrew Vorakrajangthiti
  */
-
 public class HomePresenter implements HomeContract.Presenter {
 
     private static final int MAX_NOTIFICATIONS = 2;
@@ -40,9 +38,6 @@ public class HomePresenter implements HomeContract.Presenter {
     }
 
     @Override
-    public void onResult(int requestCode, int resultCode, Intent data) { }
-
-    @Override
     public void onSaveState(Bundle outState) { }
 
     @Override
@@ -54,6 +49,11 @@ public class HomePresenter implements HomeContract.Presenter {
         loadAlerts();
         loadInfoItems();
         loadFavoriteRoutes();
+    }
+
+    @Override
+    public void stop() {
+
     }
 
     @Override
