@@ -38,10 +38,13 @@ public class FavoriteRoutesAdapter extends
 
     private List<FavoriteRouteDataObject> mFavoriteRoutesList;
     private Map<String, Integer> mFavoriteRoutesMap;
+    private FavoriteRoutesFragment.AdapterCallback mListener;
 
-    public FavoriteRoutesAdapter(@Nullable List<FavoriteRouteDataObject> favoriteRoutes) {
+    public FavoriteRoutesAdapter(@Nullable List<FavoriteRouteDataObject> favoriteRoutes,
+                                 @NonNull FavoriteRoutesFragment.AdapterCallback listener) {
         mFavoriteRoutesList = checkNotNull(favoriteRoutes);
         mFavoriteRoutesMap = new LinkedHashMap<>();
+        mListener = listener;
 
         if(favoriteRoutes != null) {
             addRoutesToMap(favoriteRoutes);
@@ -153,11 +156,15 @@ public class FavoriteRoutesAdapter extends
                 // remove from map
                 mFavoriteRoutesMap.remove(getMapKeyForRoute(route));
 
+                // update map
+                addRoutesToMap(mFavoriteRoutesList);
+
                 // remove from database
                 updateRouteInDatabase(view.getContext(), route);
 
                 // update the UI
                 notifyItemRemoved(position);
+                mListener.onUnfavorited(position);
             }
         };
     }

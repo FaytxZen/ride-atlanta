@@ -131,6 +131,8 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
     private void loadTrainInformation(@NonNull FavoriteRoute favoriteRoute) {
         Train train = new Train();
         train.setTrainId(Long.parseLong(favoriteRoute.getRouteId()));
+        train.setLine(favoriteRoute.getName());
+        train.setStation(favoriteRoute.getDestination());
 
         TrainsDataSource trainsRepo = mView.getTrainDataSource();
         trainsRepo.getTrain(train, new TrainsDataSource.GetTrainRouteCallback() {

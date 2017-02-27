@@ -1,5 +1,7 @@
 package com.andrewvora.apps.rideatlanta.home;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.data.contracts.AlertItemModel;
@@ -21,11 +23,17 @@ public interface HomeContract {
         void loadAlerts();
         void loadInfoItems();
         void loadFavoriteRoutes();
+        void loadUpdatedRouteInformation();
     }
 
     interface View extends BaseView<HomeContract.Presenter> {
+        Context getViewContext();
+
         void displayAlerts(@NonNull List<AlertItemModel> alertItems);
         void displayInfoItems(@NonNull List<InfoItemModel> infoItems);
         void displayRouteItems(@NonNull List<RouteItemModel> routeItems);
+
+        void subscribeReceiver(@NonNull BroadcastReceiver receiver);
+        void unsubscribeReceiver(@NonNull BroadcastReceiver receiver);
     }
 }

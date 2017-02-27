@@ -35,8 +35,6 @@ import butterknife.ButterKnife;
  */
 public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    public static final int UNSUCCESSFUL_INSERT = -1;
-
     @NonNull private Map<String, HomeItemModel> mItemMap;
     @NonNull private List<HomeItemModel> mItemList;
 
@@ -99,7 +97,22 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     public int addListItem(@NonNull HomeItemModel model) {
-        if(!mItemMap.containsKey(model.getIdentifier())) {
+        if(mItemMap.containsKey(model.getIdentifier())) {
+            int position = -1;
+
+            for(int i = 0; i < getItemCount(); i++) {
+                if(mItemList.get(i).getIdentifier().equals(model.getIdentifier())) {
+                    position = i;
+                    break;
+                }
+            }
+
+            mItemMap.put(model.getIdentifier(), model);
+            mItemList.set(position, model);
+
+            return (position + 1) * -1;
+        }
+        else {
             // determine where to insert
             int indexToInsertAt = determineIndexToInsert(model);
             mItemMap.put(model.getIdentifier(), model);
@@ -107,12 +120,29 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
             return indexToInsertAt;
         }
-
-        return UNSUCCESSFUL_INSERT;
     }
 
     private int determineIndexToInsert(@NonNull HomeItemModel model) {
-        return 0;
+        if(model.getViewType() == HomeItemModel.VIEW_TYPE_ALERT_ITEM) {
+
+            for(int i = 0; i < mItemList.size(); i++) {
+                HomeItemModel homeItem = mItemList.get(i);
+                final boolean isNotRoute = homeItem.getViewType() !=
+                        HomeItemModel.VIEW_TYPE_ROUTE_ITEM;
+
+                if(isNotRoute) {
+                    return i;
+                }
+            }
+
+            return 0;
+        }
+        else if(model.getViewType() == HomeItemModel.VIEW_TYPE_INFO_ITEM) {
+            return getItemCount();
+        }
+        else {
+            return 0;
+        }
     }
 
     private void onBindInfoViewHolder(@NonNull InfoViewHolder holder, int position) {

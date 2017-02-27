@@ -43,6 +43,16 @@ public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesCo
 
     private FavoriteRoutesContract.Presenter mPresenter;
     private FavoriteRoutesAdapter mFavRoutesAdapter;
+    private AdapterCallback mCallback = new AdapterCallback() {
+        @Override
+        public void onUnfavorited(int position) {
+            updateRecyclerView();
+        }
+    };
+
+    public interface AdapterCallback {
+        void onUnfavorited(int position);
+    }
 
     public static FavoriteRoutesFragment newInstance() {
         return new FavoriteRoutesFragment();
@@ -52,7 +62,7 @@ public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesCo
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mFavRoutesAdapter = new FavoriteRoutesAdapter(null);
+        mFavRoutesAdapter = new FavoriteRoutesAdapter(null, mCallback);
     }
 
     @Nullable
@@ -131,12 +141,7 @@ public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesCo
         mFavRoutesAdapter.setFavoriteRoutes(favRoutes);
         mFavRoutesAdapter.notifyDataSetChanged();
 
-        if(favRoutes.isEmpty()) {
-            mEmptyStateView.setVisibility(View.VISIBLE);
-        }
-        else {
-            mEmptyStateView.setVisibility(View.GONE);
-        }
+        updateRecyclerView();
     }
 
     @Override
@@ -149,6 +154,15 @@ public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesCo
         int position = mFavRoutesAdapter.getPosition(favRoute);
         if(isExistingRoute) {
             notifyItemChanged(position);
+        }
+    }
+
+    private void updateRecyclerView() {
+        if(mFavRoutesAdapter.getItemCount() == 0) {
+            mEmptyStateView.setVisibility(View.VISIBLE);
+        }
+        else {
+            mEmptyStateView.setVisibility(View.GONE);
         }
     }
 

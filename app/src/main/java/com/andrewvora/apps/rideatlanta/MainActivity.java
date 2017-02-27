@@ -192,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
             fragment = HomeFragment.newInstance();
         }
 
-        HomeContract.Presenter presenter = new HomePresenter(this, fragment);
+        HomeContract.Presenter presenter = new HomePresenter(fragment);
         fragment.setPresenter(presenter);
         setActiveViewAndPresenter(fragment, presenter);
 
