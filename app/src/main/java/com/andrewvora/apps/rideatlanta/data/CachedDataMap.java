@@ -42,4 +42,8 @@ public final class CachedDataMap {
     public void put(String tag, Boolean hasCachedData) {
         mHasCachedDataMap.put(tag, hasCachedData);
     }
+
+    public void clear() {
+        mHasCachedDataMap.clear();
+    }
 }

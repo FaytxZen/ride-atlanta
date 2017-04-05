@@ -10,7 +10,7 @@ import android.support.annotation.NonNull;
  * @author Andrew Vorakrajangthiti
  */
 
-public class NetworkUtil {
+public final class NetworkUtil {
 
     public static boolean connectedToInternet(@NonNull Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager)

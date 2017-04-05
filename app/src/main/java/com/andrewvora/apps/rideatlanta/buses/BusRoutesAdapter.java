@@ -95,12 +95,12 @@ public class BusRoutesAdapter extends RecyclerView.Adapter<BusRoutesAdapter.BusR
         return mBusList.size();
     }
 
-    public Bus getItemAtPosition(int position) {
+    Bus getItemAtPosition(int position) {
         return mBusList.get(position);
     }
 
-    public void setBuses(List<Bus> buses) {
-        mBusList = buses;
+    public void setBuses(@Nullable List<Bus> buses) {
+        mBusList = buses == null ? new ArrayList<Bus>() : buses;
     }
 
     static class BusRoutesViewHolder extends RecyclerView.ViewHolder {

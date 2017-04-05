@@ -24,7 +24,6 @@ import butterknife.ButterKnife;
  * Created by faytx on 11/10/2016.
  * @author Andrew Vorakrajangthiti
  */
-
 public class TrainRoutesAdapter extends
         RecyclerView.Adapter<TrainRoutesAdapter.TrainRoutesViewHolder>
 {

@@ -20,6 +20,8 @@ import java.util.List;
  */
 public class BusRoutesPresenter implements BusRoutesContract.Presenter {
 
+    static final String TAG = BusRoutesPresenter.class.getSimpleName();
+
     private BusRoutesContract.View mView;
     private BusesDataSource mBusesRepo;
     private FavoriteRoutesDataSource mFavRoutesRepo;
@@ -104,20 +106,16 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter {
     }
 
     private boolean hasNoCachedData() {
-        return !CachedDataMap.getInstance().hasCachedData(getCachedDataTag());
+        return !CachedDataMap.getInstance().hasCachedData(TAG);
     }
 
     private void makeCachedDataAvailable() {
-        CachedDataMap.getInstance().put(getCachedDataTag(), true);
+        CachedDataMap.getInstance().put(TAG, true);
     }
 
     private void useCachedDataIfAvailable(BusesDataSource repo) {
         if(hasNoCachedData()) {
             repo.reloadBuses();
         }
-    }
-
-    private String getCachedDataTag() {
-        return BusRoutesPresenter.class.getSimpleName();
     }
 }
