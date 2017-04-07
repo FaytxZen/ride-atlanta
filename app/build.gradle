@@ -21,6 +21,7 @@ android {
         debug {
             minifyEnabled false
             shrinkResources false
+            testCoverageEnabled true
 
             buildConfigField "String", "MARTA_API_KEY", "\"$System.env.RIDEATLANTA_MARTA_API_KEY\""
             buildConfigField "String", "FABRIC_API_KEY", "\"$System.env.RIDEATLANTA_FABRIC_API_KEY\""
