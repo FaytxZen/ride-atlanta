@@ -90,7 +90,7 @@ jacoco {
     reportsDir = file("$buildDir/jacocoReports")
 }
 
-task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest']) {
+task jacocoTestReport(type: JacocoReport, dependsOn: ['test']) {
 
     reports {
         xml.enabled = true
