@@ -1,5 +1,9 @@
 package com.andrewvora.apps.rideatlanta.data.models;
 
+import android.content.Context;
+import android.support.annotation.NonNull;
+
+import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 import com.google.gson.annotations.SerializedName;
 
@@ -171,5 +175,40 @@ public class Bus extends BaseModel implements FavoriteRouteDataObject {
     @Override
     public String getTimeTilArrival() {
         return String.valueOf(getAdherence());
+    }
+
+    public static int parseAdherence(String adherence) {
+        int arrivalTime;
+
+        try {
+            arrivalTime = Integer.parseInt(adherence);
+        }
+        catch (Exception e) {
+            arrivalTime = 0;
+        }
+
+        return arrivalTime;
+    }
+
+    public static String getFormattedAdherence(@NonNull Context context, int adherence) {
+        final boolean isOnTime = adherence == 0;
+        final boolean isEarly = adherence < 0;
+        String status;
+
+        if(isOnTime) {
+            status = context.getString(R.string.text_bus_adherence_suffix_on_time);
+        }
+        else if(isEarly) {
+            status = String.format("%s %s",
+                    Math.abs(adherence),
+                    context.getString(R.string.text_bus_adherence_suffix_early));
+        }
+        else {
+            status = String.format("%s %s",
+                    adherence,
+                    context.getString(R.string.text_bus_adherence_suffix_late));
+        }
+
+        return status;
     }
 }

@@ -100,10 +100,8 @@ public class FavoriteRoutesLocalSource implements FavoriteRoutesDataSource {
             route.setId(id);
         }
         else {
-            contentValues.put(FavoriteRoutesTable._ID, route.getId());
-
-            String whereClause = FavoriteRoutesTable._ID + "=?";
-            String[] whereArgs = new String[] { route.getId().toString() };
+            String whereClause = FavoriteRoutesTable.COLUMN_ROUTE_ID + "=?";
+            String[] whereArgs = new String[] { route.getRouteId() };
 
             db.updateWithOnConflict(FavoriteRoutesTable.TABLE_NAME,
                     contentValues, whereClause, whereArgs, SQLiteDatabase.CONFLICT_ROLLBACK);

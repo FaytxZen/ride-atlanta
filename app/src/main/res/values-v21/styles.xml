@@ -4,4 +4,7 @@
         <item name="android:elevation">4dp</item>
     </style>
 
+    <style name="WebProgressBarStyle" parent="Widget.AppCompat.ProgressBar.Horizontal">
+        <item name="android:progressTint">@color/primary_orange</item>
+    </style>
 </resources>

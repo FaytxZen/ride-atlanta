@@ -17,9 +17,9 @@
         android:layout_marginBottom="@dimen/bottom_bar_content_margin"/>
 
     <android.support.design.widget.AppBarLayout
+        style="@style/LowElevationStyle"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:elevation="4dp">
+        android:layout_height="wrap_content">
 
         <include layout="@layout/element_toolbar"/>
 
@@ -30,8 +30,8 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/bottom_bar_height"
         android:layout_gravity="bottom"
-        app:bb_activeTabColor="@color/colorAccent"
-        app:bb_inActiveTabAlpha="0.75"
+        app:bb_activeTabColor="@color/primary_orange"
+        app:bb_inActiveTabAlpha="1"
         app:bb_activeTabAlpha="1"
         app:bb_tabXmlResource="@xml/bottom_nav_tabs"/>
 

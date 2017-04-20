@@ -3,6 +3,7 @@ package com.andrewvora.apps.rideatlanta.favoriteroutes;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
@@ -118,6 +119,7 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
         busesRepo.getBus(bus, new BusesDataSource.GetBusCallback() {
             @Override
             public void onFinished(Bus bus) {
+                updateRouteOnDatabase(new FavoriteRoute(bus));
                 mView.onRouteInformationLoaded(bus);
             }
 
@@ -138,12 +140,27 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
         trainsRepo.getTrain(train, new TrainsDataSource.GetTrainRouteCallback() {
             @Override
             public void onFinished(Train train) {
+                updateRouteOnDatabase(new FavoriteRoute(train));
                 mView.onRouteInformationLoaded(train);
             }
 
             @Override
             public void onError(Object error) {
 
+            }
+        });
+    }
+
+    private void updateRouteOnDatabase(@NonNull final FavoriteRoute favoriteRoute) {
+        // make sure it's not identified as a new route
+        if(favoriteRoute.getId() == null) {
+            favoriteRoute.setId(1L);
+        }
+
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                mFavRouteRepo.saveRoute(favoriteRoute);
             }
         });
     }

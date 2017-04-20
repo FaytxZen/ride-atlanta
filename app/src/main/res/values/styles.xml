@@ -15,4 +15,40 @@
 
     <style name="ToolbarPopupTheme" parent="ThemeOverlay.AppCompat.Light">
     </style>
+
+    <style name="WebProgressBarStyle" parent="Widget.AppCompat.ProgressBar.Horizontal">
+    </style>
+
+    <style name="BaseTextViewStyle">
+        <item name="android:textColor">@color/md_grey_800</item>
+    </style>
+
+    <style name="RouteTitleTextStyle" parent="BaseTextViewStyle">
+        <item name="android:textSize">@dimen/train_title_text_size</item>
+    </style>
+
+    <style name="RouteSubtitleTextStyle" parent="BaseTextViewStyle">
+        <item name="android:textSize">@dimen/train_subtitle_text_size</item>
+        <item name="android:textColor">@color/md_grey_600</item>
+    </style>
+
+    <style name="RouteLabelTextStyle" parent="BaseTextViewStyle">
+        <item name="android:textColor">@color/md_white_1000</item>
+        <item name="android:textSize">@dimen/train_label_text_size</item>
+    </style>
+
+    <style name="NotificationTextStyle" parent="BaseTextViewStyle">
+        <item name="android:textSize">@dimen/notification_text_size</item>
+    </style>
+
+    <style name="NotificationSubtitleTextStyle" parent="BaseTextViewStyle">
+        <item name="android:textColor">@color/md_grey_500</item>
+        <item name="android:textSize">@dimen/notification_subtitle_text_size</item>
+    </style>
+
+    <style name="FavoriteButtonStyle">
+        <item name="android:src">@drawable/selector_favorite</item>
+        <item name="android:tint">@color/colorAccent</item>
+        <item name="android:contentDescription">@string/content_description_favorite_route</item>
+    </style>
 </resources>

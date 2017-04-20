@@ -3,14 +3,18 @@ package com.andrewvora.apps.rideatlanta.notifications;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.models.Notification;
+import com.andrewvora.apps.rideatlanta.views.SimpleDividerItemDecoration;
 
 import java.util.List;
 
@@ -27,6 +31,7 @@ public class NotificationsFragment extends Fragment implements NotificationsCont
     public static final String TAG = NotificationsFragment.class.getSimpleName();
 
     @BindView(R.id.notifications_list) RecyclerView mNotificationsRecyclerView;
+    @BindView(R.id.loading_notifications_view) ProgressBar mLoadingView;
 
     private NotificationsContract.Presenter mPresenter;
     private NotificationsAdapter mNotificationsAdapter;
@@ -51,6 +56,8 @@ public class NotificationsFragment extends Fragment implements NotificationsCont
         mNotificationsRecyclerView.setAdapter(mNotificationsAdapter);
         mNotificationsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
+        mNotificationsRecyclerView.addItemDecoration(new SimpleDividerItemDecoration(getActivity()));
+
         return view;
     }
 
@@ -70,6 +77,8 @@ public class NotificationsFragment extends Fragment implements NotificationsCont
 
     @Override
     public void onNotificationsLoaded(List<Notification> notificationList) {
+        mLoadingView.setVisibility(View.GONE);
+
         mNotificationsAdapter.setNotifications(notificationList);
         mNotificationsAdapter.notifyDataSetChanged();
     }

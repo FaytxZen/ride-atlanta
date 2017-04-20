@@ -3,6 +3,7 @@ package com.andrewvora.apps.rideatlanta.favoriteroutes;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +19,7 @@ import com.andrewvora.apps.rideatlanta.data.models.Train;
 import com.andrewvora.apps.rideatlanta.data.repos.BusesRepo;
 import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
 import com.andrewvora.apps.rideatlanta.data.repos.TrainsRepo;
+import com.andrewvora.apps.rideatlanta.utils.WordUtils;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -63,9 +65,11 @@ public class FavoriteRoutesAdapter extends
     public void onBindViewHolder(FavoriteRoutesViewHolder holder, int position) {
         FavoriteRouteDataObject favoriteRoute = mFavoriteRoutesList.get(position);
 
+        String destination = WordUtils.capitalizeWords(favoriteRoute.getDestination());
+        holder.destinationTextView.setText(destination);
+
         holder.nameTextView.setText(favoriteRoute.getName());
-        holder.destinationTextView.setText(favoriteRoute.getDestination());
-        holder.arrivalTimeTextView.setText(favoriteRoute.getTimeTilArrival());
+
         holder.favoriteButton.setSelected(true);
         holder.favoriteButton.setOnClickListener(getUnfavoriteClickListener(holder));
 
@@ -123,10 +127,25 @@ public class FavoriteRoutesAdapter extends
 
     private void onBindFavoriteBusRouteHolder(FavoriteRoutesViewHolder holder, int position) {
         FavoriteRouteDataObject favBusRoute = mFavoriteRoutesList.get(position);
+        Context context = holder.itemView.getContext();
+
+        int adherence = Bus.parseAdherence(favBusRoute.getTimeTilArrival());
+        String arrivalTime = Bus.getFormattedAdherence(context, adherence);
+
+        holder.arrivalTimeTextView.setText(arrivalTime);
+        holder.nameTextView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_bus_white_24dp, 0, 0, 0);
     }
 
     private void onBindFavoriteTrainRouteHolder(FavoriteRoutesViewHolder holder, int position) {
         FavoriteRouteDataObject favTrainRoute = mFavoriteRoutesList.get(position);
+        Context context = holder.itemView.getContext();
+
+        holder.arrivalTimeTextView.setText(favTrainRoute.getTimeTilArrival());
+
+        holder.nameTextView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_train_white_24dp, 0, 0, 0);
+
+        int color = ContextCompat.getColor(context, Train.getColorRes(favTrainRoute.getName()));
+        holder.nameTextView.setBackgroundColor(color);
     }
 
     @Override

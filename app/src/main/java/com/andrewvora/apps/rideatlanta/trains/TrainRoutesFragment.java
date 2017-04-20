@@ -23,6 +23,7 @@ import com.andrewvora.apps.rideatlanta.data.models.Train;
 import com.andrewvora.apps.rideatlanta.data.remote.trains.GetTrainsIntentService;
 import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
 import com.andrewvora.apps.rideatlanta.data.repos.TrainsRepo;
+import com.andrewvora.apps.rideatlanta.views.SimpleDividerItemDecoration;
 
 import java.util.List;
 
@@ -84,6 +85,7 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
 
         mTrainsRecyclerView.setAdapter(mTrainAdapter);
         mTrainsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mTrainsRecyclerView.addItemDecoration(new SimpleDividerItemDecoration(getViewContext()));
 
         if(mPresenter != null) {
             mPresenter.onRestoreState(savedInstanceState);

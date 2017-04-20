@@ -41,11 +41,11 @@
     </string>
 
     <string name="text_bus_adherence_suffix_early">
-        minutes early
+        min(s) early
     </string>
 
     <string name="text_bus_adherence_suffix_late">
-        minutes late
+        min(s) late
     </string>
 
     <string name="text_no_buses_running">

@@ -7,4 +7,11 @@
     <dimen name="toolbar_progress_offset_height">50dp</dimen>
     <dimen name="bottom_bar_height">60dp</dimen>
     <dimen name="bottom_bar_content_margin">56dp</dimen>
+
+    <dimen name="notification_text_size">16sp</dimen>
+    <dimen name="notification_subtitle_text_size">14sp</dimen>
+
+    <dimen name="train_title_text_size">16sp</dimen>
+    <dimen name="train_label_text_size">16sp</dimen>
+    <dimen name="train_subtitle_text_size">14sp</dimen>
 </resources>

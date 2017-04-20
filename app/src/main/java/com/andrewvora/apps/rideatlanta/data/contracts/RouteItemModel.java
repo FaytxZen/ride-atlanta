@@ -9,4 +9,5 @@ public interface RouteItemModel extends HomeItemModel {
     String getName();
     String getDestination();
     String getTimeUntilArrival();
+    boolean isBus();
 }

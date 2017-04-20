@@ -3,6 +3,7 @@ package com.andrewvora.apps.rideatlanta.home;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
@@ -198,5 +199,20 @@ public class HomePresenter implements HomeContract.Presenter {
         routeItemModels.add(favoriteRoute);
 
         mView.displayRouteItems(routeItemModels);
+        updateRouteOnDatabase(favoriteRoute);
+    }
+
+    private void updateRouteOnDatabase(@NonNull final FavoriteRoute favoriteRoute) {
+        // make sure this doesn't get marked as a new record
+        if(favoriteRoute.getId() == null) {
+            favoriteRoute.setId(1L);
+        }
+
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                mFavRoutesRepo.saveRoute(favoriteRoute);
+            }
+        });
     }
 }

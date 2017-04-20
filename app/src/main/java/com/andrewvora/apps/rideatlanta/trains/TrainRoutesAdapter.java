@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.models.Train;
+import com.andrewvora.apps.rideatlanta.utils.WordUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +53,7 @@ public class TrainRoutesAdapter extends
         configureTrainLineView(holder.lineTextView, train);
 
         // determine train destination
-        String destinationText = train.getStation();
+        String destinationText = WordUtils.capitalizeWords(train.getStation());
         holder.destinationTextView.setText(destinationText);
 
         // determine train status
@@ -84,25 +85,7 @@ public class TrainRoutesAdapter extends
     }
 
     private void configureTrainLineView(@NonNull TextView lineTextView, @NonNull Train train) {
-        int colorResId = R.color.md_grey_500;
-
-        switch(train.getLine()) {
-            case Train.BLUE_LINE:
-                colorResId = R.color.md_blue_500;
-                break;
-
-            case Train.GREEN_LINE:
-                colorResId = R.color.md_green_500;
-                break;
-
-            case Train.RED_LINE:
-                colorResId = R.color.md_red_500;
-                break;
-
-            case Train.GOLD_LINE:
-                colorResId = R.color.md_amber_500;
-                break;
-        }
+        int colorResId = Train.getColorRes(train.getLine());
 
         Context context = lineTextView.getContext();
         lineTextView.setBackgroundColor(ContextCompat.getColor(context, colorResId));

@@ -24,6 +24,7 @@ import com.andrewvora.apps.rideatlanta.data.remote.trains.GetTrainsIntentService
 import com.andrewvora.apps.rideatlanta.data.repos.BusesRepo;
 import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
 import com.andrewvora.apps.rideatlanta.data.repos.TrainsRepo;
+import com.andrewvora.apps.rideatlanta.views.SimpleDividerItemDecoration;
 
 import java.util.List;
 
@@ -73,6 +74,7 @@ public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesCo
 
         mFavoriteRoutesRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mFavoriteRoutesRecyclerView.setAdapter(mFavRoutesAdapter);
+        mFavoriteRoutesRecyclerView.addItemDecoration(new SimpleDividerItemDecoration(getViewContext()));
 
         return view;
     }

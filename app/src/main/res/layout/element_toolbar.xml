@@ -3,6 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    style="@style/LowElevationStyle"
     android:id="@+id/toolbar"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -16,7 +17,7 @@
         android:layout_width="@dimen/toolbar_height"
         android:layout_height="@dimen/toolbar_height"
         android:tint="@color/md_white_1000"
-        android:background="@color/colorAccent"
+        android:background="@color/primary_orange"
         android:contentDescription="@string/content_description_toolbar_icon"
         tools:src="@drawable/ic_home_24dp"/>
 

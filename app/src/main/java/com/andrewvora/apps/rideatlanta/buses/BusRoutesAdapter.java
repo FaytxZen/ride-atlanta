@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.models.Bus;
+import com.andrewvora.apps.rideatlanta.utils.WordUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,30 +53,13 @@ public class BusRoutesAdapter extends RecyclerView.Adapter<BusRoutesAdapter.BusR
 
         holder.directionTextView.setText(bus.getDirection());
 
-        String busDestination = bus.getTimePoint();
+        String busDestination = WordUtils.capitalizeWords(bus.getTimePoint());
         holder.destinationTextView.setText(busDestination);
 
         // determine bus schedule adherence
         // non-zero is minutes late, zero is on-time
         final Context context = holder.itemView.getContext();
-        final int busAdherence = bus.getAdherence();
-        final boolean isOnTime = busAdherence == 0;
-        final boolean isEarly = busAdherence < 0;
-        String status;
-
-        if(isOnTime) {
-            status = context.getString(R.string.text_bus_adherence_suffix_on_time);
-        }
-        else if(isEarly) {
-            status = String.format("%s %s",
-                    Math.abs(busAdherence),
-                    context.getString(R.string.text_bus_adherence_suffix_early));
-        }
-        else {
-            status = String.format("%s %s",
-                    busAdherence,
-                    context.getString(R.string.text_bus_adherence_suffix_late));
-        }
+        String status = Bus.getFormattedAdherence(context, bus.getAdherence());
 
         holder.statusTextView.setText(status);
 

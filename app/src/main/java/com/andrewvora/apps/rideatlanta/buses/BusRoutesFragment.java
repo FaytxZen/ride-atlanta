@@ -23,6 +23,7 @@ import com.andrewvora.apps.rideatlanta.data.models.Bus;
 import com.andrewvora.apps.rideatlanta.data.remote.buses.GetBusesIntentService;
 import com.andrewvora.apps.rideatlanta.data.repos.BusesRepo;
 import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
+import com.andrewvora.apps.rideatlanta.views.SimpleDividerItemDecoration;
 
 import java.util.List;
 
@@ -86,6 +87,7 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
 
         mBusesRecyclerView.setAdapter(mBusAdapter);
         mBusesRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mBusesRecyclerView.addItemDecoration(new SimpleDividerItemDecoration(getViewContext()));
 
         if(mPresenter != null) {
             mPresenter.onRestoreState(savedInstanceState);

@@ -1,5 +1,8 @@
 package com.andrewvora.apps.rideatlanta.data.models;
 
+import android.support.annotation.NonNull;
+
+import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 import com.google.gson.annotations.SerializedName;
 
@@ -143,5 +146,24 @@ public class Train extends BaseModel implements FavoriteRouteDataObject {
     @Override
     public String getTimeTilArrival() {
         return getWaitingTime();
+    }
+
+    public static int getColorRes(@NonNull String line) {
+        switch(line) {
+            case Train.BLUE_LINE:
+                return R.color.md_blue_500;
+
+            case Train.GREEN_LINE:
+                return R.color.md_green_500;
+
+            case Train.RED_LINE:
+                return R.color.md_red_500;
+
+            case Train.GOLD_LINE:
+                return R.color.md_amber_500;
+
+            default:
+                return R.color.md_grey_500;
+        }
     }
 }

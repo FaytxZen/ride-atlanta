@@ -6,21 +6,24 @@
     android:layout_height="wrap_content"
     android:paddingStart="16dp"
     android:paddingEnd="16dp"
-    android:layout_marginTop="4dp"
-    android:layout_marginBottom="4dp">
+    android:layout_marginTop="16dp"
+    android:layout_marginBottom="16dp">
 
     <TextView
+        style="@style/RouteLabelTextStyle"
         android:id="@+id/route_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
         android:padding="4dp"
-        android:background="@color/md_grey_500"
+        android:background="@drawable/shape_round_rect_accented"
         android:textColor="@color/md_white_1000"
         tools:text="Route 5"/>
 
     <TextView
+        style="@style/RouteSubtitleTextStyle"
         android:id="@+id/route_time_until_arrival"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -30,6 +33,7 @@
         tools:text="5 minutes"/>
 
     <TextView
+        style="@style/RouteTitleTextStyle"
         android:id="@+id/route_destination"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -42,6 +46,7 @@
         android:layout_toLeftOf="@id/favorite_button"/>
 
     <ImageView
+        style="@style/FavoriteButtonStyle"
         android:id="@+id/favorite_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -49,8 +54,7 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:padding="8dp"
-        android:ellipsize="end"
-        android:tint="@color/colorAccent"
-        android:src="@drawable/selector_favorite"
-        android:contentDescription="@string/content_description_favorite_route"/>
+        android:contentDescription=""
+        android:ellipsize="end"/>
+
 </RelativeLayout>
