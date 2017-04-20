@@ -111,7 +111,7 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
         }
     }
 
-    private void loadBusInformation(@NonNull FavoriteRoute favoriteRoute) {
+    private void loadBusInformation(@NonNull final FavoriteRoute favoriteRoute) {
         Bus bus = new Bus();
         bus.setRouteId(favoriteRoute.getRouteId());
 
@@ -119,7 +119,10 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
         busesRepo.getBus(bus, new BusesDataSource.GetBusCallback() {
             @Override
             public void onFinished(Bus bus) {
-                updateRouteOnDatabase(new FavoriteRoute(bus));
+                FavoriteRoute routeToSave = new FavoriteRoute(bus);
+                routeToSave.setId(favoriteRoute.getId());
+
+                updateRouteOnDatabase(routeToSave);
                 mView.onRouteInformationLoaded(bus);
             }
 
@@ -130,7 +133,7 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
         });
     }
 
-    private void loadTrainInformation(@NonNull FavoriteRoute favoriteRoute) {
+    private void loadTrainInformation(@NonNull final FavoriteRoute favoriteRoute) {
         Train train = new Train();
         train.setTrainId(Long.parseLong(favoriteRoute.getRouteId()));
         train.setLine(favoriteRoute.getName());
@@ -140,7 +143,10 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
         trainsRepo.getTrain(train, new TrainsDataSource.GetTrainRouteCallback() {
             @Override
             public void onFinished(Train train) {
-                updateRouteOnDatabase(new FavoriteRoute(train));
+                FavoriteRoute routeToSave = new FavoriteRoute(train);
+                routeToSave.setId(favoriteRoute.getId());
+
+                updateRouteOnDatabase(routeToSave);
                 mView.onRouteInformationLoaded(train);
             }
 

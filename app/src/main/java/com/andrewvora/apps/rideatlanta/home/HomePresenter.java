@@ -158,14 +158,17 @@ public class HomePresenter implements HomeContract.Presenter {
         });
     }
 
-    private void loadUpdatedBusInformation(@NonNull FavoriteRoute route) {
+    private void loadUpdatedBusInformation(@NonNull final FavoriteRoute route) {
         Bus bus = new Bus();
         bus.setRouteId(route.getRouteId());
 
         mBusRepo.getBus(bus, new BusesDataSource.GetBusCallback() {
             @Override
             public void onFinished(Bus bus) {
-                updateRouteOnView(new FavoriteRoute(bus));
+                FavoriteRoute routeToSave = new FavoriteRoute(bus);
+                routeToSave.setId(route.getId());
+
+                updateRouteOnView(routeToSave);
             }
 
             @Override
@@ -175,7 +178,7 @@ public class HomePresenter implements HomeContract.Presenter {
         });
     }
 
-    private void loadUpdatedTrainInformation(@NonNull FavoriteRoute route) {
+    private void loadUpdatedTrainInformation(@NonNull final FavoriteRoute route) {
         Train train = new Train();
         train.setTrainId(Long.parseLong(route.getRouteId()));
         train.setLine(route.getName());
@@ -184,7 +187,10 @@ public class HomePresenter implements HomeContract.Presenter {
         mTrainRepo.getTrain(train, new TrainsDataSource.GetTrainRouteCallback() {
             @Override
             public void onFinished(Train train) {
-                updateRouteOnView(new FavoriteRoute(train));
+                FavoriteRoute routeToSave = new FavoriteRoute(train);
+                routeToSave.setId(route.getId());
+
+                updateRouteOnView(routeToSave);
             }
 
             @Override
