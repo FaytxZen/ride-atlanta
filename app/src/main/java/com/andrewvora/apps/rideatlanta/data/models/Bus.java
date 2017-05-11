@@ -195,7 +195,10 @@ public class Bus extends BaseModel implements FavoriteRouteDataObject {
         final boolean isEarly = adherence < 0;
         String status;
 
-        if(isOnTime) {
+        if(adherence == Integer.MIN_VALUE) {
+            status = context.getString(R.string.text_adherence_unknown);
+        }
+        else if(isOnTime) {
             status = context.getString(R.string.text_bus_adherence_suffix_on_time);
         }
         else if(isEarly) {

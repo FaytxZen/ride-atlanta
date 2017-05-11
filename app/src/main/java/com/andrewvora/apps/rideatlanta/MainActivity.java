@@ -3,6 +3,7 @@ package com.andrewvora.apps.rideatlanta;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.DrawableRes;
@@ -111,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        mPollingHandler.postDelayed(mPollingTask, POLLING_INTERVAL_IN_MILLIS);
+        mPollingHandler.post(mPollingTask);
     }
 
     @Override
@@ -135,6 +136,10 @@ public class MainActivity extends AppCompatActivity {
 
             case R.id.menu_report:
                 goToSeeSayReportingPage();
+                break;
+
+            case R.id.menu_feedback:
+                sendFeedback();
                 break;
         }
 
@@ -224,6 +229,17 @@ public class MainActivity extends AppCompatActivity {
     private void goToSeeSayReportingPage() {
         Intent reportIncidentIntent = new Intent(this, SeeAndSayActivity.class);
         startActivity(reportIncidentIntent);
+    }
+
+    private void sendFeedback() {
+        Intent intent = new Intent(Intent.ACTION_SENDTO);
+        intent.setData(Uri.parse("mailto:")); // only email apps should handle this
+        intent.putExtra(Intent.EXTRA_EMAIL, new String[] {getString(R.string.app_email)});
+        intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.text_subject_feedback));
+
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
     }
 
     private void onNotificationsTabSelected() {

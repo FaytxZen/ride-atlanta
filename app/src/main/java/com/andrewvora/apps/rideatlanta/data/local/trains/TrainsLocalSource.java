@@ -102,6 +102,11 @@ public class TrainsLocalSource implements TrainsDataSource {
     }
 
     @Override
+    public void getTrains(@NonNull String station, @NonNull String line, @NonNull GetTrainRoutesCallback callback) {
+        // not used if no cache
+    }
+
+    @Override
     public void getTrain(@NonNull Train train, @NonNull GetTrainRouteCallback callback) {
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
 

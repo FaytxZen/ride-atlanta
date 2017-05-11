@@ -45,6 +45,12 @@ public class NotificationsPresenter implements NotificationsContract.Presenter {
     }
 
     @Override
+    public void refreshNotifications() {
+        CachedDataMap.getInstance().put(getCachedDataTag(), false);
+        loadNotifications();
+    }
+
+    @Override
     public void loadNotifications() {
         NotificationsRepo repo = NotificationsRepo.getInstance(mContext);
 

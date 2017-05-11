@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -32,6 +33,7 @@ public class NotificationsFragment extends Fragment implements NotificationsCont
 
     @BindView(R.id.notifications_list) RecyclerView mNotificationsRecyclerView;
     @BindView(R.id.loading_notifications_view) ProgressBar mLoadingView;
+    @BindView(R.id.notifications_refresh_layout) SwipeRefreshLayout mNotificationsRefreshLayout;
 
     private NotificationsContract.Presenter mPresenter;
     private NotificationsAdapter mNotificationsAdapter;
@@ -52,6 +54,15 @@ public class NotificationsFragment extends Fragment implements NotificationsCont
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_notifications, container, false);
         ButterKnife.bind(this, view);
+
+        mNotificationsRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                if(mPresenter != null) {
+                    mPresenter.loadNotifications();
+                }
+            }
+        });
 
         mNotificationsRecyclerView.setAdapter(mNotificationsAdapter);
         mNotificationsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -78,6 +89,7 @@ public class NotificationsFragment extends Fragment implements NotificationsCont
     @Override
     public void onNotificationsLoaded(List<Notification> notificationList) {
         mLoadingView.setVisibility(View.GONE);
+        mNotificationsRefreshLayout.setRefreshing(false);
 
         mNotificationsAdapter.setNotifications(notificationList);
         mNotificationsAdapter.notifyDataSetChanged();

@@ -38,6 +38,8 @@
         android:layout_alignBaseline="@+id/bus_route_text_view"
         android:layout_toRightOf="@+id/bus_route_text_view"
         android:layout_toEndOf="@+id/bus_route_text_view"
+        android:layout_toLeftOf="@+id/bus_favorite_button"
+        android:layout_toStartOf="@+id/bus_favorite_button"
         android:gravity="start"
         android:maxLines="1"
         android:ellipsize="end"

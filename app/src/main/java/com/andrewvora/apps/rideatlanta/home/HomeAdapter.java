@@ -103,7 +103,7 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public int addListItem(@NonNull HomeItemModel model) {
         if(mItemMap.containsKey(model.getIdentifier())) {
-            int position = -1;
+            int position = 0;
 
             for(int i = 0; i < getItemCount(); i++) {
                 if(mItemList.get(i).getIdentifier().equals(model.getIdentifier())) {
@@ -112,9 +112,13 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 }
             }
 
+            // update lists and maps
             mItemMap.put(model.getIdentifier(), model);
             mItemList.set(position, model);
 
+            // this is to differentiate between inserting and updating
+            // if negative, it means we're updating
+            // MIN_VALUE means the item was not found
             return (position + 1) * -1;
         }
         else {
@@ -200,7 +204,9 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             int color = ContextCompat.getColor(context, Train.getColorRes(routeItemModel.getName()));
             holder.nameTextView.setBackgroundColor(color);
 
-            holder.timeTilArrivalTextView.setText(routeItemModel.getTimeUntilArrival());
+            final String arrivalTime = Train.getFormattedTimeTilArrival(context, routeItemModel.getTimeUntilArrival());
+
+            holder.timeTilArrivalTextView.setText(arrivalTime);
         }
     }
     private View getLayoutFor(@NonNull ViewGroup parent, @LayoutRes int layoutResId) {

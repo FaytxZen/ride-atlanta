@@ -1,11 +1,14 @@
 <resources>
     <string name="app_name">Ride Atlanta</string>
+    <string name="app_email">andrewvora.apps@gmail.com</string>
 
     <string name="title_tab_buses">Buses</string>
     <string name="title_tab_trains">Trains</string>
     <string name="title_tab_home">Home</string>
     <string name="title_tab_fav_routes">Favorites</string>
     <string name="title_tab_notifications">Alerts</string>
+
+    <string name="text_subject_feedback">Ride Atlanta Feedback</string>
 
     <string name="menu_refresh">Refresh</string>
     <string name="menu_breeze_balance">Check Breeze Balance</string>
@@ -36,6 +39,10 @@
         Click to favorite route.
     </string>
 
+    <string name="text_adherence_unknown">
+        Unknown
+    </string>
+
     <string name="text_bus_adherence_suffix_on_time">
         On time
     </string>
@@ -59,4 +66,5 @@
     <string name="text_no_favorited_routes">
         You haven\'t favorited any routes, yet
     </string>
+    <string name="menu_feedback">Send App Feedback</string>
 </resources>

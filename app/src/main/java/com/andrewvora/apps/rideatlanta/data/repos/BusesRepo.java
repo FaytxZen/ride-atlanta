@@ -5,15 +5,14 @@ import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.andrewvora.apps.rideatlanta.data.models.Bus;
 import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
 import com.andrewvora.apps.rideatlanta.data.local.buses.BusesLocalSource;
+import com.andrewvora.apps.rideatlanta.data.models.Bus;
 import com.andrewvora.apps.rideatlanta.data.remote.buses.BusesRemoteSource;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Repo class that handles the syncing and fetching of data between the local and remote data
@@ -27,6 +26,7 @@ public class BusesRepo implements BusesDataSource {
 
     private static BusesRepo mInstance;
 
+    @NonNull
     private Map<String, Bus> mCachedBuses;
     private BusesDataSource mRemoteSource;
     private BusesDataSource mLocalSource;
@@ -38,6 +38,8 @@ public class BusesRepo implements BusesDataSource {
     {
         mRemoteSource = remoteSource;
         mLocalSource = localSource;
+
+        mCachedBuses = new ConcurrentHashMap<>();
     }
 
     public static BusesRepo getInstance(@NonNull Context context) {
@@ -49,10 +51,6 @@ public class BusesRepo implements BusesDataSource {
         }
 
         return mInstance;
-    }
-
-    public static void destroyInstance() {
-        mInstance = null;
     }
 
     @Override
@@ -83,8 +81,6 @@ public class BusesRepo implements BusesDataSource {
 
     @Override
     public void getBus(@NonNull final Bus bus, @NonNull final GetBusCallback callback) {
-        mCachedBuses = checkNotNull(mCachedBuses);
-
         final Bus cachedRoute = mCachedBuses.get(getKeyFor(bus));
 
         if(cachedRoute != null) {
@@ -122,7 +118,6 @@ public class BusesRepo implements BusesDataSource {
         mLocalSource.deleteAllBus(null);
         mRemoteSource.deleteAllBus(null);
 
-        mCachedBuses = checkNotNull(mCachedBuses);
         mCachedBuses.clear();
 
         if(callback != null) {
@@ -192,7 +187,6 @@ public class BusesRepo implements BusesDataSource {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                mCachedBuses = checkNotNull(mCachedBuses);
                 mCachedBuses.clear();
 
                 for(Bus route : routesList) {
@@ -218,12 +212,7 @@ public class BusesRepo implements BusesDataSource {
     }
 
     private void cacheBusRoute(@NonNull Bus bus) {
-        mCachedBuses = checkNotNull(mCachedBuses);
         mCachedBuses.put(getKeyFor(bus), bus);
-    }
-
-    private Map<String, Bus> checkNotNull(@Nullable Map<String, Bus> map) {
-        return map == null ? new LinkedHashMap<String, Bus>() : map;
     }
 
     private String getKeyFor(@NonNull Bus bus) {

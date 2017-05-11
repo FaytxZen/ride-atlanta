@@ -131,6 +131,15 @@ public class HomePresenter implements HomeContract.Presenter {
                 }
 
                 mView.displayRouteItems(routeItems);
+
+                for(FavoriteRoute route : favRoutes) {
+                    if(route.isBus()) {
+                        loadUpdatedBusInformation(route);
+                    }
+                    else {
+                        loadUpdatedTrainInformation(route);
+                    }
+                }
             }
 
             @Override
@@ -184,20 +193,36 @@ public class HomePresenter implements HomeContract.Presenter {
         train.setLine(route.getName());
         train.setStation(route.getDestination());
 
-        mTrainRepo.getTrain(train, new TrainsDataSource.GetTrainRouteCallback() {
-            @Override
-            public void onFinished(Train train) {
-                FavoriteRoute routeToSave = new FavoriteRoute(train);
-                routeToSave.setId(route.getId());
+        updateTrainArrivalTime(train);
+    }
 
-                updateRouteOnView(routeToSave);
-            }
+    private void updateTrainArrivalTime(final Train train) {
+        mTrainRepo.getTrains(train.getStation(), train.getLine(),
+                new TrainsDataSource.GetTrainRoutesCallback() {
+                    @Override
+                    public void onFinished(List<Train> trainList) {
+                        StringBuilder sb = new StringBuilder();
 
-            @Override
-            public void onError(Object error) {
+                        for(int i = 0; i < trainList.size(); i++) {
+                            if(i != 0) {
+                                sb.append(", ");
+                            }
 
-            }
-        });
+                            sb.append(trainList.get(i).getTimeTilArrival());
+                        }
+
+                        FavoriteRoute routeToSave = new FavoriteRoute(train);
+                        routeToSave.setTimeUntilArrival(sb.toString());
+                        routeToSave.setId(train.getId());
+
+                        updateRouteOnView(routeToSave);
+                    }
+
+                    @Override
+                    public void onError(Object error) {
+
+                    }
+                });
     }
 
     private void updateRouteOnView(@NonNull FavoriteRoute favoriteRoute) {
@@ -205,7 +230,11 @@ public class HomePresenter implements HomeContract.Presenter {
         routeItemModels.add(favoriteRoute);
 
         mView.displayRouteItems(routeItemModels);
-        updateRouteOnDatabase(favoriteRoute);
+
+        // only buses will change their names
+        if(favoriteRoute.isBus()) {
+            updateRouteOnDatabase(favoriteRoute);
+        }
     }
 
     private void updateRouteOnDatabase(@NonNull final FavoriteRoute favoriteRoute) {

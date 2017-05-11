@@ -9,6 +9,7 @@ import com.andrewvora.apps.rideatlanta.BuildConfig;
 import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
 import com.andrewvora.apps.rideatlanta.data.models.Train;
+import com.andrewvora.apps.rideatlanta.data.repos.TrainsRepo;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -22,6 +23,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -85,12 +87,17 @@ public class TrainsRemoteSource implements TrainsDataSource {
 
     @Override
     public void deleteAllTrains(@Nullable DeleteTrainRoutesCallback callback) {
-
+        // left-blank, remote is read-only
     }
 
     @Override
     public void saveTrain(@NonNull Train route) {
+        // left-blank, remote is read-only
+    }
 
+    @Override
+    public void getTrains(@NonNull String station, @NonNull String line, @NonNull GetTrainRoutesCallback callback) {
+        // not used if class does not use cache
     }
 
     @Override
@@ -99,7 +106,6 @@ public class TrainsRemoteSource implements TrainsDataSource {
     }
 
     private RequestQueue getRequestQueue() {
-
         if(mRequestQueue == null) {
             mRequestQueue = Volley.newRequestQueue(mContext.getApplicationContext());
         }
@@ -114,7 +120,6 @@ public class TrainsRemoteSource implements TrainsDataSource {
     }
 
     private static class ParseTrainsJsonTask extends AsyncTask<JSONArray, Void, List<Train>> {
-
         @NonNull
         private GetTrainRoutesCallback callbackRef;
 
@@ -124,14 +129,16 @@ public class TrainsRemoteSource implements TrainsDataSource {
 
         @Override
         protected List<Train> doInBackground(JSONArray... jsonArrays) {
-            final SortedMap<String, Train> trainMap = new TreeMap<>();
+            final SortedMap<String, Train> trainMap = new TreeMap<>(new TrainsComparator());
             final JSONArray response = jsonArrays[0];
 
             for(int i = 0; i < response.length(); i++) {
                 try {
                     String jsonStr = response.getJSONObject(i).toString();
                     Train train = new Gson().fromJson(jsonStr, Train.class);
-                    trainMap.put(train.getLine() + train.getStation(), train);
+
+                    String key = TrainsRepo.getKeyFor(train);
+                    trainMap.put(key, train);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -163,6 +170,24 @@ public class TrainsRemoteSource implements TrainsDataSource {
         @Override
         protected void onPostExecute(Train train) {
             callbackRef.onFinished(train);
+        }
+    }
+
+    public static class TrainsComparator implements Comparator<String> {
+        @Override
+        public int compare(String t1, String t2) {
+            String[] tokens1 = t1.split(TrainsRepo.KEY_DELIMITER);
+            String[] tokens2 = t2.split(TrainsRepo.KEY_DELIMITER);
+
+            if(tokens1[1].compareTo(tokens2[1]) != 0) {
+                return tokens1[1].compareTo(tokens2[1]);
+            }
+            else if(tokens1[2].compareTo(tokens2[2]) != 0) {
+                return tokens1[2].compareTo(tokens2[2]);
+            }
+            else {
+                return tokens1[0].compareTo(tokens2[0]);
+            }
         }
     }
 }

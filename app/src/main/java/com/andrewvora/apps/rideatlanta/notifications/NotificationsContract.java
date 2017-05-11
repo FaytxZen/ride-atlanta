@@ -15,6 +15,7 @@ public interface NotificationsContract {
 
     interface Presenter extends BasePresenter {
         void loadNotifications();
+        void refreshNotifications();
     }
 
     interface View extends BaseView<NotificationsContract.Presenter> {

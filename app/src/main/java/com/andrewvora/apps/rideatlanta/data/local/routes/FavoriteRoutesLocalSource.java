@@ -91,7 +91,7 @@ public class FavoriteRoutesLocalSource implements FavoriteRoutesDataSource {
         contentValues.put(FavoriteRoutesTable.COLUMN_TYPE, route.getType());
         contentValues.put(FavoriteRoutesTable.COLUMN_NAME, route.getName());
         contentValues.put(FavoriteRoutesTable.COLUMN_DESTINATION, route.getDestination());
-        contentValues.put(FavoriteRoutesTable.COLUMN_TIME_TIL_ARRIVAL, route.getTimeTilArrival());
+        contentValues.put(FavoriteRoutesTable.COLUMN_TIME_TIL_ARRIVAL, String.valueOf(Integer.MIN_VALUE));
 
         if(isNewRecord) {
             long id = db.insertWithOnConflict(FavoriteRoutesTable.TABLE_NAME,

@@ -75,6 +75,7 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter {
     public void favoriteRoute(@NonNull Bus bus) {
         bus.setFavorited(!bus.isFavorited());
         mBusesRepo.saveBus(bus);
+        mFavRoutesRepo.reloadRoutes();
 
         FavoriteRoute favoriteRoute = new FavoriteRoute(bus);
 

@@ -88,6 +88,7 @@ public class TrainRoutesPresenter implements TrainRoutesContract.Presenter {
         route.setFavorited(!route.isFavorited());
 
         mTrainRepo.saveTrain(route);
+        mFavoriteDataSource.reloadRoutes();
 
         FavoriteRoute favoriteRoute = new FavoriteRoute(route);
 

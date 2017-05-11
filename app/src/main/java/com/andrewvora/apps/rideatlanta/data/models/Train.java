@@ -1,6 +1,8 @@
 package com.andrewvora.apps.rideatlanta.data.models;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 
 import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
@@ -11,7 +13,7 @@ import com.google.gson.annotations.SerializedName;
  * @author Andrew Vorakrajangthiti
  */
 
-public class Train extends BaseModel implements FavoriteRouteDataObject {
+public class Train extends BaseModel implements FavoriteRouteDataObject, Cloneable {
 
     public static final String RED_LINE = "RED";
     public static final String BLUE_LINE = "BLUE";
@@ -49,7 +51,7 @@ public class Train extends BaseModel implements FavoriteRouteDataObject {
 
     @Override
     public String getDestination() {
-        return destination;
+        return getStation();
     }
 
     public void setDestination(String destination) {
@@ -148,6 +150,17 @@ public class Train extends BaseModel implements FavoriteRouteDataObject {
         return getWaitingTime();
     }
 
+    public static String getFormattedTimeTilArrival(@NonNull Context context, @NonNull String tta) {
+        final String unknownValue = String.valueOf(Integer.MIN_VALUE);
+
+        if(tta.contains(unknownValue) || tta.isEmpty()) {
+            return context.getString(R.string.text_adherence_unknown);
+        }
+        else {
+            return tta;
+        }
+    }
+
     public static int getColorRes(@NonNull String line) {
         switch(line) {
             case Train.BLUE_LINE:
@@ -165,5 +178,21 @@ public class Train extends BaseModel implements FavoriteRouteDataObject {
             default:
                 return R.color.md_grey_500;
         }
+    }
+
+    public Train getCopy() {
+        Train train = new Train();
+        train.setDestination(getDestination());
+        train.setDirection(getDirection());
+        train.setEventTime(getEventTime());
+        train.setLine(getLine());
+        train.setNextArrival(getNextArrival());
+        train.setStation(getStation());
+        train.setTrainId(getTrainId());
+        train.setWaitingSeconds(getWaitingSeconds());
+        train.setWaitingTime(getWaitingTime());
+        train.setFavorited(isFavorited());
+
+        return train;
     }
 }

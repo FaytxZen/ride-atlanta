@@ -140,7 +140,8 @@ public class FavoriteRoutesAdapter extends
         FavoriteRouteDataObject favTrainRoute = mFavoriteRoutesList.get(position);
         Context context = holder.itemView.getContext();
 
-        holder.arrivalTimeTextView.setText(favTrainRoute.getTimeTilArrival());
+        final String timeTilArrival = favTrainRoute.getTimeTilArrival();
+        holder.arrivalTimeTextView.setText(Train.getFormattedTimeTilArrival(context, timeTilArrival));
 
         holder.nameTextView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_train_white_24dp, 0, 0, 0);
 

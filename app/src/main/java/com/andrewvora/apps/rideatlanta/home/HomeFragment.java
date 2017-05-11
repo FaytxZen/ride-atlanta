@@ -136,9 +136,7 @@ public class HomeFragment extends Fragment implements HomeContract.View {
             mHomeRecyclerView.smoothScrollToPosition(0);
         }
         else {
-            // if updating, position is incremented + negative
-            position = Math.abs(position) - 1;
-            mHomeAdapter.notifyItemChanged(position);
+            mHomeAdapter.notifyDataSetChanged();
         }
     }
 }

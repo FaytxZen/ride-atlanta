@@ -64,18 +64,29 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
     @Override
     public void loadFavoriteRoutes() {
         mFavRouteRepo = mView.getFavoritesDataSource();
-        mFavRouteRepo.reloadRoutes();
 
         mFavRouteRepo.getFavoriteRoutes(new FavoriteRoutesDataSource.GetFavoriteRoutesCallback() {
             @Override
             public void onFinished(List<FavoriteRoute> favRoutes) {
                 List<FavoriteRouteDataObject> routes = new ArrayList<>();
 
+                // load saved routes
                 for(FavoriteRoute route : favRoutes) {
                     routes.add(route);
                 }
 
+                // display on UI
                 mView.onFavoriteRoutesLoaded(routes);
+
+                // attempt to load their most recent data
+                for(FavoriteRoute route : favRoutes) {
+                    if(route.isBus()) {
+                        loadBusInformation(route);
+                    }
+                    else {
+                        loadTrainInformation(route);
+                    }
+                }
             }
 
             @Override
@@ -134,7 +145,7 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
     }
 
     private void loadTrainInformation(@NonNull final FavoriteRoute favoriteRoute) {
-        Train train = new Train();
+        final Train train = new Train();
         train.setTrainId(Long.parseLong(favoriteRoute.getRouteId()));
         train.setLine(favoriteRoute.getName());
         train.setStation(favoriteRoute.getDestination());
@@ -146,8 +157,35 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
                 FavoriteRoute routeToSave = new FavoriteRoute(train);
                 routeToSave.setId(favoriteRoute.getId());
 
-                updateRouteOnDatabase(routeToSave);
-                mView.onRouteInformationLoaded(train);
+                updateTrainArrivalTime(train);
+            }
+
+            @Override
+            public void onError(Object error) {
+
+            }
+        });
+    }
+
+    private void updateTrainArrivalTime(final Train train) {
+        mView.getTrainDataSource().getTrains(train.getStation(), train.getLine(),
+        new TrainsDataSource.GetTrainRoutesCallback() {
+            @Override
+            public void onFinished(List<Train> trainList) {
+                StringBuilder sb = new StringBuilder();
+
+                for(int i = 0; i < trainList.size(); i++) {
+                    if(i != 0) {
+                        sb.append(", ");
+                    }
+
+                    sb.append(trainList.get(i).getTimeTilArrival());
+                }
+
+                Train trainToLoad = train.getCopy();
+                trainToLoad.setWaitingTime(sb.toString());
+
+                mView.onRouteInformationLoaded(trainToLoad);
             }
 
             @Override

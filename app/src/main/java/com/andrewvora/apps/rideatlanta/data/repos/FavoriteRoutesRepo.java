@@ -9,15 +9,14 @@ import com.andrewvora.apps.rideatlanta.data.local.routes.FavoriteRoutesLocalSour
 import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by faytx on 10/23/2016.
  * @author Andrew Vorakrajangthiti
  */
-
 public class FavoriteRoutesRepo implements FavoriteRoutesDataSource {
 
     private static FavoriteRoutesRepo mInstance;
@@ -25,6 +24,7 @@ public class FavoriteRoutesRepo implements FavoriteRoutesDataSource {
     private FavoriteRoutesDataSource mRemoteSource;
     private FavoriteRoutesDataSource mLocalSource;
 
+    @NonNull
     private Map<String, FavoriteRoute> mCachedRoutes;
 
     private boolean mCacheIsDirty;
@@ -34,6 +34,8 @@ public class FavoriteRoutesRepo implements FavoriteRoutesDataSource {
     {
         mRemoteSource = remoteSource;
         mLocalSource = localSource;
+
+        mCachedRoutes = new ConcurrentHashMap<>();
     }
 
     public static FavoriteRoutesRepo getInstance(@NonNull Context context) {
@@ -46,13 +48,9 @@ public class FavoriteRoutesRepo implements FavoriteRoutesDataSource {
         return mInstance;
     }
 
-    public static void destroyInstance() {
-        mInstance = null;
-    }
-
     @Override
     public void getFavoriteRoutes(@NonNull final GetFavoriteRoutesCallback callback) {
-        if(mCachedRoutes != null && !mCacheIsDirty) {
+        if(!mCachedRoutes.isEmpty() && !mCacheIsDirty) {
             callback.onFinished(new ArrayList<>(mCachedRoutes.values()));
         }
         else {
@@ -75,7 +73,7 @@ public class FavoriteRoutesRepo implements FavoriteRoutesDataSource {
     public void getFavoriteRoute(@NonNull String id,
                                  @NonNull final GetFavoriteRouteCallback callback)
     {
-        final FavoriteRoute cachedRoute = checkNotNull(mCachedRoutes).get(id);
+        final FavoriteRoute cachedRoute = mCachedRoutes.get(id);
 
         if(cachedRoute != null) {
             callback.onFinished(cachedRoute);
@@ -111,7 +109,6 @@ public class FavoriteRoutesRepo implements FavoriteRoutesDataSource {
         mLocalSource.deleteAllRoutes();
         mRemoteSource.deleteAllRoutes();
 
-        mCachedRoutes = checkNotNull(mCachedRoutes);
         mCachedRoutes.clear();
     }
 
@@ -119,7 +116,6 @@ public class FavoriteRoutesRepo implements FavoriteRoutesDataSource {
     public void deleteRoute(@NonNull FavoriteRouteDataObject route) {
         mLocalSource.deleteRoute(route);
 
-        mCachedRoutes = checkNotNull(mCachedRoutes);
         mCachedRoutes.remove(getMapKeyFor(route));
     }
 
@@ -129,7 +125,6 @@ public class FavoriteRoutesRepo implements FavoriteRoutesDataSource {
     }
 
     private void reloadCachedRoutes(@NonNull List<FavoriteRoute> favoriteRoutes) {
-        mCachedRoutes = checkNotNull(mCachedRoutes);
         mCachedRoutes.clear();
 
         for(FavoriteRoute route : favoriteRoutes) {
@@ -140,20 +135,10 @@ public class FavoriteRoutesRepo implements FavoriteRoutesDataSource {
     }
 
     private void cacheRoute(FavoriteRoute route) {
-        mCachedRoutes = checkNotNull(mCachedRoutes);
-
         mCachedRoutes.put(getMapKeyFor(route), route);
     }
 
     private String getMapKeyFor(@NonNull FavoriteRouteDataObject route) {
         return route.getRouteId();
-    }
-
-    private Map<String, FavoriteRoute> checkNotNull(Map<String, FavoriteRoute> favRoutesMap) {
-        if(favRoutesMap == null) {
-            favRoutesMap = new LinkedHashMap<>();
-        }
-
-        return favRoutesMap;
     }
 }
