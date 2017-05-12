@@ -25,6 +25,7 @@ import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
 import com.andrewvora.apps.rideatlanta.data.repos.TrainsRepo;
 import com.andrewvora.apps.rideatlanta.views.SimpleDividerItemDecoration;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -66,7 +67,8 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mTrainAdapter = new TrainRoutesAdapter(null, mTrainItemListener);
+        List<Train> placeholderList = new ArrayList<>();
+        mTrainAdapter = new TrainRoutesAdapter(placeholderList, mTrainItemListener);
     }
 
     @Nullable
@@ -160,16 +162,6 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
     @Override
     public Context getViewContext() {
         return getActivity().getApplication();
-    }
-
-    @Override
-    public TrainsDataSource getTrainDataSource() {
-        return TrainsRepo.getInstance(getViewContext());
-    }
-
-    @Override
-    public FavoriteRoutesDataSource getFavRouteDataSource() {
-        return FavoriteRoutesRepo.getInstance(getViewContext());
     }
 
     public interface TrainItemListener {

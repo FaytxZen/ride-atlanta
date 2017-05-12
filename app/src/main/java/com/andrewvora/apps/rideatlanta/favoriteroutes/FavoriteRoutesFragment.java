@@ -19,6 +19,8 @@ import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
 import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
+import com.andrewvora.apps.rideatlanta.data.models.Bus;
+import com.andrewvora.apps.rideatlanta.data.models.Train;
 import com.andrewvora.apps.rideatlanta.data.remote.buses.GetBusesIntentService;
 import com.andrewvora.apps.rideatlanta.data.remote.trains.GetTrainsIntentService;
 import com.andrewvora.apps.rideatlanta.data.repos.BusesRepo;
@@ -26,6 +28,7 @@ import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
 import com.andrewvora.apps.rideatlanta.data.repos.TrainsRepo;
 import com.andrewvora.apps.rideatlanta.views.SimpleDividerItemDecoration;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -39,21 +42,31 @@ public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesCo
 
     public static final String TAG = FavoriteRoutesFragment.class.getSimpleName();
 
+    interface AdapterCallback {
+        void onUnfavorited(int position, @NonNull FavoriteRouteDataObject obj);
+    }
+
     @BindView(R.id.favorite_routes_recycler_view) RecyclerView mFavoriteRoutesRecyclerView;
     @BindView(R.id.no_favorited_routes_view) View mEmptyStateView;
 
     private FavoriteRoutesContract.Presenter mPresenter;
     private FavoriteRoutesAdapter mFavRoutesAdapter;
+    private BusesDataSource mBusRepo;
+    private TrainsRepo mTrainRepo;
+    private FavoriteRoutesDataSource mFavRouteRepo;
+
     private AdapterCallback mCallback = new AdapterCallback() {
         @Override
-        public void onUnfavorited(int position) {
+        public void onUnfavorited(int position, @NonNull FavoriteRouteDataObject obj) {
+            // remove from database
+            updateRouteInDatabase(getViewContext(), obj);
+
+            // update the UI
+            mFavRoutesAdapter.notifyItemRemoved(position);
+
             updateRecyclerView();
         }
     };
-
-    public interface AdapterCallback {
-        void onUnfavorited(int position);
-    }
 
     public static FavoriteRoutesFragment newInstance() {
         return new FavoriteRoutesFragment();
@@ -63,7 +76,12 @@ public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesCo
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mFavRoutesAdapter = new FavoriteRoutesAdapter(null, mCallback);
+        List<FavoriteRouteDataObject> placeholderList = new ArrayList<>();
+        mFavRoutesAdapter = new FavoriteRoutesAdapter(placeholderList, mCallback);
+
+        mFavRouteRepo = FavoriteRoutesRepo.getInstance(getViewContext());
+        mTrainRepo = TrainsRepo.getInstance(getViewContext());
+        mBusRepo = BusesRepo.getInstance(getViewContext());
     }
 
     @Nullable
@@ -108,21 +126,6 @@ public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesCo
     }
 
     @Override
-    public TrainsDataSource getTrainDataSource() {
-        return TrainsRepo.getInstance(getViewContext());
-    }
-
-    @Override
-    public BusesDataSource getBusesDataSource() {
-        return BusesRepo.getInstance(getViewContext());
-    }
-
-    @Override
-    public FavoriteRoutesDataSource getFavoritesDataSource() {
-        return FavoriteRoutesRepo.getInstance(getViewContext());
-    }
-
-    @Override
     public void subscribeReceiver(@NonNull BroadcastReceiver receiver) {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(GetBusesIntentService.ACTION_BUSES_UPDATED);
@@ -148,19 +151,23 @@ public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesCo
 
     @Override
     public void onRouteInformationLoaded(FavoriteRouteDataObject favRoute) {
-        final boolean isExistingRoute = mFavRoutesAdapter.getPosition(favRoute) !=
+        final boolean isExistingRoute =
+                mFavRoutesAdapter.getPosition(favRoute) !=
                 FavoriteRoutesAdapter.NEW_INDEX;
 
         mFavRoutesAdapter.setFavoriteRoute(favRoute);
 
-        int position = mFavRoutesAdapter.getPosition(favRoute);
         if(isExistingRoute) {
+            int position = mFavRoutesAdapter.getPosition(favRoute);
+
             notifyItemChanged(position);
         }
     }
 
     private void updateRecyclerView() {
-        if(mFavRoutesAdapter.getItemCount() == 0) {
+        final boolean adapterIsEmpty = mFavRoutesAdapter.getItemCount() == 0;
+
+        if(adapterIsEmpty) {
             mEmptyStateView.setVisibility(View.VISIBLE);
         }
         else {
@@ -172,5 +179,62 @@ public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesCo
         if(isAdded() && isResumed()) {
             mFavRoutesAdapter.notifyItemChanged(position);
         }
+    }
+
+    private void updateRouteInDatabase(@NonNull Context context,
+                                       @NonNull FavoriteRouteDataObject route)
+    {
+        // update fav routes table
+        mFavRouteRepo.deleteRoute(route);
+
+        // update train and bus tables
+        if(route.getType().equals(FavoriteRouteDataObject.TYPE_BUS)) {
+            unfavoriteInBusTable(context, route);
+        }
+        else if(route.getType().equals(FavoriteRouteDataObject.TYPE_TRAIN)) {
+            unfavoriteInTrainTable(context, route);
+        }
+    }
+
+    private void unfavoriteInTrainTable(@NonNull final Context context,
+                                        @NonNull FavoriteRouteDataObject route)
+    {
+        // load object
+        Train trainArg = new Train();
+        trainArg.setTrainId(Long.parseLong(route.getRouteId()));
+
+        mTrainRepo.getTrain(trainArg, new TrainsDataSource.GetTrainRouteCallback() {
+                    @Override
+                    public void onFinished(Train train) {
+                        train.setFavorited(false);
+                        TrainsRepo.getInstance(context).saveTrain(train);
+                    }
+
+                    @Override
+                    public void onError(Object error) {
+
+                    }
+                });
+    }
+
+    private void unfavoriteInBusTable(@NonNull final Context context,
+                                      @NonNull FavoriteRouteDataObject route)
+    {
+        // load object
+        Bus busArg = new Bus();
+        busArg.setRouteId(route.getRouteId());
+
+        mBusRepo.getBus(busArg, new BusesDataSource.GetBusCallback() {
+            @Override
+            public void onFinished(Bus bus) {
+                bus.setFavorited(false);
+                BusesRepo.getInstance(context).saveBus(bus);
+            }
+
+            @Override
+            public void onError(Object error) {
+
+            }
+        });
     }
 }

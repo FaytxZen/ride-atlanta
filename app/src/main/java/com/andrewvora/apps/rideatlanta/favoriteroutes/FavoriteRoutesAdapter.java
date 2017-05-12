@@ -2,7 +2,6 @@ package com.andrewvora.apps.rideatlanta.favoriteroutes;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,17 +10,11 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.andrewvora.apps.rideatlanta.R;
-import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
-import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
 import com.andrewvora.apps.rideatlanta.data.models.Bus;
 import com.andrewvora.apps.rideatlanta.data.models.Train;
-import com.andrewvora.apps.rideatlanta.data.repos.BusesRepo;
-import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
-import com.andrewvora.apps.rideatlanta.data.repos.TrainsRepo;
 import com.andrewvora.apps.rideatlanta.utils.WordUtils;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +23,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
+ * Handles and displays {@link FavoriteRouteDataObject} for {@link FavoriteRoutesFragment}.
+ *
  * Created by faytx on 12/26/2016.
  * @author Andrew Vorakrajangthiti
  */
@@ -38,19 +33,18 @@ public class FavoriteRoutesAdapter extends
 {
     public static final int NEW_INDEX = -1;
 
-    private List<FavoriteRouteDataObject> mFavoriteRoutesList;
-    private Map<String, Integer> mFavoriteRoutesMap;
-    private FavoriteRoutesFragment.AdapterCallback mListener;
+    @NonNull private List<FavoriteRouteDataObject> mFavoriteRoutesList;
+    @NonNull private Map<String, Integer> mFavoriteRoutesMap;
+    @NonNull private FavoriteRoutesFragment.AdapterCallback mListener;
 
-    public FavoriteRoutesAdapter(@Nullable List<FavoriteRouteDataObject> favoriteRoutes,
-                                 @NonNull FavoriteRoutesFragment.AdapterCallback listener) {
-        mFavoriteRoutesList = checkNotNull(favoriteRoutes);
+    public FavoriteRoutesAdapter(@NonNull List<FavoriteRouteDataObject> favoriteRoutes,
+                                 @NonNull FavoriteRoutesFragment.AdapterCallback listener)
+    {
+        mFavoriteRoutesList = favoriteRoutes;
         mFavoriteRoutesMap = new LinkedHashMap<>();
         mListener = listener;
 
-        if(favoriteRoutes != null) {
-            addRoutesToMap(favoriteRoutes);
-        }
+        addRoutesToMap(favoriteRoutes);
     }
 
     @Override
@@ -63,7 +57,7 @@ public class FavoriteRoutesAdapter extends
 
     @Override
     public void onBindViewHolder(FavoriteRoutesViewHolder holder, int position) {
-        FavoriteRouteDataObject favoriteRoute = mFavoriteRoutesList.get(position);
+        final FavoriteRouteDataObject favoriteRoute = mFavoriteRoutesList.get(position);
 
         String destination = WordUtils.capitalizeWords(favoriteRoute.getDestination());
         holder.destinationTextView.setText(destination);
@@ -87,24 +81,30 @@ public class FavoriteRoutesAdapter extends
         }
     }
 
-    public void setFavoriteRoutes(List<FavoriteRouteDataObject> routes) {
+    public void setFavoriteRoutes(@NonNull List<FavoriteRouteDataObject> routes) {
         mFavoriteRoutesList = routes;
+
         addRoutesToMap(routes);
     }
 
-    public void setFavoriteRoute(FavoriteRouteDataObject route) {
-        String key = getMapKeyForRoute(route);
+    public List<FavoriteRouteDataObject> getFavoriteRoutes() {
+        return mFavoriteRoutesList;
+    }
+
+    public void setFavoriteRoute(@NonNull FavoriteRouteDataObject route) {
+        final String key = getMapKeyForRoute(route);
 
         if(mFavoriteRoutesMap.containsKey(key)) {
             int position = mFavoriteRoutesMap.get(key);
+
             mFavoriteRoutesList.set(position, route);
         }
     }
 
     public int getPosition(@NonNull FavoriteRouteDataObject route) {
-        String key = getMapKeyForRoute(route);
+        final String key = getMapKeyForRoute(route);
 
-        return mFavoriteRoutesMap.containsKey(key) ?
+        return  mFavoriteRoutesMap.containsKey(key) ?
                 mFavoriteRoutesMap.get(key) :
                 NEW_INDEX;
     }
@@ -126,40 +126,32 @@ public class FavoriteRoutesAdapter extends
     }
 
     private void onBindFavoriteBusRouteHolder(FavoriteRoutesViewHolder holder, int position) {
-        FavoriteRouteDataObject favBusRoute = mFavoriteRoutesList.get(position);
-        Context context = holder.itemView.getContext();
+        final FavoriteRouteDataObject favBusRoute = mFavoriteRoutesList.get(position);
+        final Context context = holder.itemView.getContext();
 
-        int adherence = Bus.parseAdherence(favBusRoute.getTimeTilArrival());
-        String arrivalTime = Bus.getFormattedAdherence(context, adherence);
-
+        final int adherence = Bus.parseAdherence(favBusRoute.getTimeTilArrival());
+        final String arrivalTime = Bus.getFormattedAdherence(context, adherence);
         holder.arrivalTimeTextView.setText(arrivalTime);
+
         holder.nameTextView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_bus_white_24dp, 0, 0, 0);
     }
 
     private void onBindFavoriteTrainRouteHolder(FavoriteRoutesViewHolder holder, int position) {
-        FavoriteRouteDataObject favTrainRoute = mFavoriteRoutesList.get(position);
-        Context context = holder.itemView.getContext();
+        final FavoriteRouteDataObject favTrainRoute = mFavoriteRoutesList.get(position);
+        final Context context = holder.itemView.getContext();
 
         final String timeTilArrival = favTrainRoute.getTimeTilArrival();
         holder.arrivalTimeTextView.setText(Train.getFormattedTimeTilArrival(context, timeTilArrival));
 
         holder.nameTextView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_train_white_24dp, 0, 0, 0);
 
-        int color = ContextCompat.getColor(context, Train.getColorRes(favTrainRoute.getName()));
+        final int color = ContextCompat.getColor(context, Train.getColorRes(favTrainRoute.getName()));
         holder.nameTextView.setBackgroundColor(color);
     }
 
     @Override
     public int getItemCount() {
         return mFavoriteRoutesList.size();
-    }
-
-    private List<FavoriteRouteDataObject> checkNotNull(List<FavoriteRouteDataObject> favoriteRouteList) {
-        if(favoriteRouteList == null) {
-            favoriteRouteList = new ArrayList<>();
-        }
-
-        return favoriteRouteList;
     }
 
     private View.OnClickListener getUnfavoriteClickListener(final FavoriteRoutesViewHolder holder) {
@@ -179,78 +171,20 @@ public class FavoriteRoutesAdapter extends
                 // update map
                 addRoutesToMap(mFavoriteRoutesList);
 
-                // remove from database
-                updateRouteInDatabase(view.getContext(), route);
-
-                // update the UI
-                notifyItemRemoved(position);
-                mListener.onUnfavorited(position);
+                // alert listener
+                mListener.onUnfavorited(position, route);
             }
         };
     }
 
-    private void updateRouteInDatabase(@NonNull Context context,
-                                       @NonNull FavoriteRouteDataObject route)
-    {
-        FavoriteRoutesRepo.getInstance(context).deleteRoute(route);
-
-        if(route.getType().equals(FavoriteRouteDataObject.TYPE_BUS)) {
-            unfavoriteInBusTable(context, route);
-        }
-        else if(route.getType().equals(FavoriteRouteDataObject.TYPE_TRAIN)) {
-            unfavoriteInTrainTable(context, route);
-        }
-    }
-
-    private void unfavoriteInTrainTable(@NonNull final Context context,
-                                        @NonNull FavoriteRouteDataObject route)
-    {
-        Train trainArg = new Train();
-        trainArg.setTrainId(Long.parseLong(route.getRouteId()));
-
-        TrainsRepo.getInstance(context)
-            .getTrain(trainArg, new TrainsDataSource.GetTrainRouteCallback() {
-            @Override
-            public void onFinished(Train train) {
-                train.setFavorited(false);
-                TrainsRepo.getInstance(context).saveTrain(train);
-            }
-
-            @Override
-            public void onError(Object error) {
-
-            }
-        });
-    }
-
-    private void unfavoriteInBusTable(@NonNull final Context context,
-                                      @NonNull FavoriteRouteDataObject route)
-    {
-        Bus busArg = new Bus();
-        busArg.setRouteId(route.getRouteId());
-
-        BusesRepo.getInstance(context).getBus(busArg, new BusesDataSource.GetBusCallback() {
-            @Override
-            public void onFinished(Bus bus) {
-                bus.setFavorited(false);
-                BusesRepo.getInstance(context).saveBus(bus);
-            }
-
-            @Override
-            public void onError(Object error) {
-
-            }
-        });
-    }
-
-    public static class FavoriteRoutesViewHolder extends RecyclerView.ViewHolder {
+    static class FavoriteRoutesViewHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.route_name) TextView nameTextView;
         @BindView(R.id.route_destination) TextView destinationTextView;
         @BindView(R.id.route_time_until_arrival) TextView arrivalTimeTextView;
         @BindView(R.id.favorite_button) View favoriteButton;
 
-        public FavoriteRoutesViewHolder(@NonNull View view) {
+        FavoriteRoutesViewHolder(@NonNull View view) {
             super(view);
             ButterKnife.bind(this, view);
         }

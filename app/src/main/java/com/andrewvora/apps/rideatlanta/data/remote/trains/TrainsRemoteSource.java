@@ -173,7 +173,7 @@ public class TrainsRemoteSource implements TrainsDataSource {
         }
     }
 
-    public static class TrainsComparator implements Comparator<String> {
+    private static class TrainsComparator implements Comparator<String> {
         @Override
         public int compare(String t1, String t2) {
             String[] tokens1 = t1.split(TrainsRepo.KEY_DELIMITER);

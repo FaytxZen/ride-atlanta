@@ -31,10 +31,10 @@ public class TrainRoutesAdapter extends
     @NonNull private List<Train> mTrainList;
     @Nullable private TrainRoutesFragment.TrainItemListener mItemListener;
 
-    public TrainRoutesAdapter(@Nullable List<Train> trainList,
+    public TrainRoutesAdapter(@NonNull List<Train> trainList,
                               @Nullable TrainRoutesFragment.TrainItemListener listener)
     {
-        mTrainList = trainList == null ? new ArrayList<Train>() : trainList;
+        mTrainList = trainList;
         mItemListener  = listener;
     }
 
@@ -80,12 +80,16 @@ public class TrainRoutesAdapter extends
         mTrainList = trains;
     }
 
+    public List<Train> getTrains() {
+        return mTrainList;
+    }
+
     public Train getTrain(int position) {
         return mTrainList.get(position);
     }
 
     private void configureTrainLineView(@NonNull TextView lineTextView, @NonNull Train train) {
-        int colorResId = Train.getColorRes(train.getLine());
+        final int colorResId = Train.getColorRes(train.getLine());
 
         Context context = lineTextView.getContext();
         lineTextView.setBackgroundColor(ContextCompat.getColor(context, colorResId));

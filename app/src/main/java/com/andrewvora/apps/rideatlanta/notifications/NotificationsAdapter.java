@@ -20,24 +20,24 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
+ * Handles and manages the display of {@link Notification} objects to
+ * {@link NotificationsFragment}.
+ *
  * Created by faytx on 11/11/2016.
  * @author Andrew Vorakrajangthiti
  */
-
 public class NotificationsAdapter extends
         RecyclerView.Adapter<NotificationsAdapter.NotificationsViewHolder>
 {
+    @NonNull
     private List<Notification> mNotificationList;
 
-    public NotificationsAdapter(@Nullable List<Notification> notificationList) {
-        mNotificationList = notificationList == null ?
-                new ArrayList<Notification>() :
-                notificationList;
+    public NotificationsAdapter(@NonNull List<Notification> notificationList) {
+        mNotificationList = notificationList;
     }
 
     @Override
     public NotificationsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.element_notification, parent, false);
 
@@ -46,15 +46,19 @@ public class NotificationsAdapter extends
 
     @Override
     public void onBindViewHolder(NotificationsViewHolder holder, int position) {
-        Notification notification = mNotificationList.get(position);
+        final Notification notification = mNotificationList.get(position);
 
+        // set message
         String decodedMsg = HtmlUtil.getDecodedHtml(notification.getMessage());
         holder.messageTextView.setText(decodedMsg);
 
+        // set timestamp
         final DateHelper dateHelper = DateHelper.getInstance();
         final long timeInMillis = dateHelper.getTimeAsMilliseconds(
-                notification.getPostedAt(), DateHelper.TWITTER_TIME_STAMP_FORMAT);
+                notification.getPostedAt(),
+                DateHelper.TWITTER_TIME_STAMP_FORMAT);
         final String timeToDisplay = dateHelper.getRelativeTimeStamp(timeInMillis);
+
         holder.timeStampTextView.setText(timeToDisplay);
     }
 
@@ -63,8 +67,13 @@ public class NotificationsAdapter extends
         return mNotificationList.size();
     }
 
-    public void setNotifications(List<Notification> notifications) {
+    public void setNotifications(@NonNull List<Notification> notifications) {
         mNotificationList = notifications;
+    }
+
+    @NonNull
+    public List<Notification> getNotifications() {
+        return mNotificationList;
     }
 
     static class NotificationsViewHolder extends RecyclerView.ViewHolder {

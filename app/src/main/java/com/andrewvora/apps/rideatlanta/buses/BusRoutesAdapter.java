@@ -21,10 +21,11 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
+ * Used with {@link BusRoutesFragment}.
+ *
  * Created by faytx on 11/10/2016.
  * @author Andrew Vorakrajangthiti
  */
-
 public class BusRoutesAdapter extends RecyclerView.Adapter<BusRoutesAdapter.BusRoutesViewHolder> {
 
     @NonNull private List<Bus> mBusList;

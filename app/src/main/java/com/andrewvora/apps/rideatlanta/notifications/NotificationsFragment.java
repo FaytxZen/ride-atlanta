@@ -3,9 +3,7 @@ package com.andrewvora.apps.rideatlanta.notifications;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -17,6 +15,7 @@ import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.models.Notification;
 import com.andrewvora.apps.rideatlanta.views.SimpleDividerItemDecoration;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -26,7 +25,6 @@ import butterknife.ButterKnife;
  * Created by faytx on 10/22/2016.
  * @author Andrew Vorakrajangthiti
  */
-
 public class NotificationsFragment extends Fragment implements NotificationsContract.View {
 
     public static final String TAG = NotificationsFragment.class.getSimpleName();
@@ -46,7 +44,8 @@ public class NotificationsFragment extends Fragment implements NotificationsCont
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mNotificationsAdapter = new NotificationsAdapter(null);
+        List<Notification> placeholderList = new ArrayList<>();
+        mNotificationsAdapter = new NotificationsAdapter(placeholderList);
     }
 
     @Nullable

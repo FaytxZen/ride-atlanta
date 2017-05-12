@@ -31,8 +31,5 @@ public interface FavoriteRoutesContract {
         void unsubscribeReceiver(@NonNull BroadcastReceiver receiver);
 
         Context getViewContext();
-        TrainsDataSource getTrainDataSource();
-        BusesDataSource getBusesDataSource();
-        FavoriteRoutesDataSource getFavoritesDataSource();
     }
 }

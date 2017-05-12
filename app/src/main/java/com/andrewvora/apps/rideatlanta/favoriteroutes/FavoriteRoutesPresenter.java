@@ -19,13 +19,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Contains business logic for {@link FavoriteRoutesContract.View}
+ *
  * Created by faytx on 10/22/2016.
  * @author Andrew Vorakrajangthiti
  */
 public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter {
 
-    private FavoriteRoutesContract.View mView;
-    private FavoriteRoutesDataSource mFavRouteRepo;
+    @NonNull private FavoriteRoutesContract.View mView;
+    @NonNull private FavoriteRoutesDataSource mFavRouteRepo;
+    @NonNull private BusesDataSource mBusRepo;
+    @NonNull private TrainsDataSource mTrainRepo;
+
     private BroadcastReceiver mRoutesReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -35,19 +40,22 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
         }
     };
 
-    public FavoriteRoutesPresenter(@NonNull FavoriteRoutesContract.View view) {
+    public FavoriteRoutesPresenter(@NonNull FavoriteRoutesContract.View view,
+                                   @NonNull FavoriteRoutesDataSource favRepo,
+                                   @NonNull BusesDataSource busRepo,
+                                   @NonNull TrainsDataSource trainRepo)
+    {
         mView = view;
+        mFavRouteRepo = favRepo;
+        mBusRepo = busRepo;
+        mTrainRepo = trainRepo;
     }
 
     @Override
-    public void onSaveState(Bundle outState) {
-
-    }
+    public void onSaveState(Bundle outState) { }
 
     @Override
-    public void onRestoreState(Bundle savedState) {
-
-    }
+    public void onRestoreState(Bundle savedState) { }
 
     @Override
     public void start() {
@@ -63,8 +71,6 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
 
     @Override
     public void loadFavoriteRoutes() {
-        mFavRouteRepo = mView.getFavoritesDataSource();
-
         mFavRouteRepo.getFavoriteRoutes(new FavoriteRoutesDataSource.GetFavoriteRoutesCallback() {
             @Override
             public void onFinished(List<FavoriteRoute> favRoutes) {
@@ -126,8 +132,7 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
         Bus bus = new Bus();
         bus.setRouteId(favoriteRoute.getRouteId());
 
-        BusesDataSource busesRepo = mView.getBusesDataSource();
-        busesRepo.getBus(bus, new BusesDataSource.GetBusCallback() {
+        mBusRepo.getBus(bus, new BusesDataSource.GetBusCallback() {
             @Override
             public void onFinished(Bus bus) {
                 FavoriteRoute routeToSave = new FavoriteRoute(bus);
@@ -150,8 +155,7 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
         train.setLine(favoriteRoute.getName());
         train.setStation(favoriteRoute.getDestination());
 
-        TrainsDataSource trainsRepo = mView.getTrainDataSource();
-        trainsRepo.getTrain(train, new TrainsDataSource.GetTrainRouteCallback() {
+        mTrainRepo.getTrain(train, new TrainsDataSource.GetTrainRouteCallback() {
             @Override
             public void onFinished(Train train) {
                 FavoriteRoute routeToSave = new FavoriteRoute(train);
@@ -168,8 +172,7 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
     }
 
     private void updateTrainArrivalTime(final Train train) {
-        mView.getTrainDataSource().getTrains(train.getStation(), train.getLine(),
-        new TrainsDataSource.GetTrainRoutesCallback() {
+        TrainsDataSource.GetTrainRoutesCallback callback = new TrainsDataSource.GetTrainRoutesCallback() {
             @Override
             public void onFinished(List<Train> trainList) {
                 StringBuilder sb = new StringBuilder();
@@ -192,7 +195,9 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
             public void onError(Object error) {
 
             }
-        });
+        };
+
+        mTrainRepo.getTrains(train.getStation(), train.getLine(), callback);
     }
 
     private void updateRouteOnDatabase(@NonNull final FavoriteRoute favoriteRoute) {

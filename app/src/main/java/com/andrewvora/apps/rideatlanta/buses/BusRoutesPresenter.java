@@ -22,9 +22,16 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter {
 
     static final String TAG = BusRoutesPresenter.class.getSimpleName();
 
+    @NonNull
     private BusRoutesContract.View mView;
+
+    @NonNull
     private BusesDataSource mBusesRepo;
+
+    @NonNull
     private FavoriteRoutesDataSource mFavRoutesRepo;
+
+    @NonNull
     private BroadcastReceiver mBusesReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -32,8 +39,13 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter {
         }
     };
 
-    public BusRoutesPresenter(@NonNull BusRoutesContract.View view) {
+    public BusRoutesPresenter(@NonNull BusRoutesContract.View view,
+                              @NonNull BusesDataSource busRepo,
+                              @NonNull FavoriteRoutesDataSource routesRepo)
+    {
         mView = view;
+        mBusesRepo = busRepo;
+        mFavRoutesRepo = routesRepo;
     }
 
     @Override
@@ -44,22 +56,18 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter {
 
     @Override
     public void start() {
-        mBusesRepo = mView.getBusesDataSource();
-        mFavRoutesRepo = mView.getFavRoutesDataSource();
-
         mView.subscribeReceiver(mBusesReceiver);
         loadBusRoutes();
     }
 
     @Override
     public void stop() {
-        mBusesRepo = null;
         mView.unsubscribeReceiver(mBusesReceiver);
     }
 
     @Override
     public void loadBusRoutes() {
-        useCachedDataIfAvailable(mBusesRepo);
+        useCachedDataIfAvailable();
 
         mBusesRepo.getBuses(createGetBusesCallbackInstance());
     }
@@ -73,8 +81,12 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter {
 
     @Override
     public void favoriteRoute(@NonNull Bus bus) {
+        // toggle favorited value
         bus.setFavorited(!bus.isFavorited());
+
         mBusesRepo.saveBus(bus);
+
+        // set repo to get fresh data
         mFavRoutesRepo.reloadRoutes();
 
         FavoriteRoute favoriteRoute = new FavoriteRoute(bus);
@@ -114,9 +126,9 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter {
         CachedDataMap.getInstance().put(TAG, true);
     }
 
-    private void useCachedDataIfAvailable(BusesDataSource repo) {
+    private void useCachedDataIfAvailable() {
         if(hasNoCachedData()) {
-            repo.reloadBuses();
+            mBusesRepo.reloadBuses();
         }
     }
 }

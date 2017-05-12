@@ -23,10 +23,13 @@ import com.andrewvora.apps.rideatlanta.breezebalance.BreezeBalanceActivity;
 import com.andrewvora.apps.rideatlanta.buses.BusRoutesContract;
 import com.andrewvora.apps.rideatlanta.buses.BusRoutesFragment;
 import com.andrewvora.apps.rideatlanta.buses.BusRoutesPresenter;
-import com.andrewvora.apps.rideatlanta.common.BasePresenter;
-import com.andrewvora.apps.rideatlanta.common.BaseView;
+import com.andrewvora.apps.rideatlanta.data.CachedDataMap;
 import com.andrewvora.apps.rideatlanta.data.remote.buses.GetBusesIntentService;
 import com.andrewvora.apps.rideatlanta.data.remote.trains.GetTrainsIntentService;
+import com.andrewvora.apps.rideatlanta.data.repos.BusesRepo;
+import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
+import com.andrewvora.apps.rideatlanta.data.repos.NotificationsRepo;
+import com.andrewvora.apps.rideatlanta.data.repos.TrainsRepo;
 import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesContract;
 import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesFragment;
 import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesPresenter;
@@ -55,8 +58,6 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.toolbar) Toolbar mToolbar;
     @BindView(R.id.bottom_bar) BottomBar mBottomBar;
 
-    private BaseView mActiveView;
-    private BasePresenter mActivePresenter;
     private Handler mPollingHandler;
     private Runnable mPollingTask = new Runnable() {
         @Override
@@ -161,9 +162,11 @@ public class MainActivity extends AppCompatActivity {
             fragment = BusRoutesFragment.newInstance();
         }
 
-        BusRoutesContract.Presenter presenter = new BusRoutesPresenter(fragment);
+        BusRoutesContract.Presenter presenter = new BusRoutesPresenter(
+                fragment,
+                BusesRepo.getInstance(this),
+                FavoriteRoutesRepo.getInstance(this));
         fragment.setPresenter(presenter);
-        setActiveViewAndPresenter(fragment, presenter);
 
         startFragment(R.id.fragment_container, fragment, BusRoutesFragment.TAG, false);
     }
@@ -178,9 +181,11 @@ public class MainActivity extends AppCompatActivity {
             fragment = TrainRoutesFragment.newInstance();
         }
 
-        TrainRoutesContract.Presenter presenter = new TrainRoutesPresenter(fragment);
+        TrainRoutesContract.Presenter presenter = new TrainRoutesPresenter(
+                fragment,
+                TrainsRepo.getInstance(this),
+                FavoriteRoutesRepo.getInstance(this));
         fragment.setPresenter(presenter);
-        setActiveViewAndPresenter(fragment, presenter);
 
         startFragment(R.id.fragment_container, fragment, TrainRoutesFragment.TAG, false);
 
@@ -199,7 +204,6 @@ public class MainActivity extends AppCompatActivity {
 
         HomeContract.Presenter presenter = new HomePresenter(fragment);
         fragment.setPresenter(presenter);
-        setActiveViewAndPresenter(fragment, presenter);
 
         startFragment(R.id.fragment_container, fragment, HomeFragment.TAG, false);
     }
@@ -214,9 +218,12 @@ public class MainActivity extends AppCompatActivity {
             fragment = FavoriteRoutesFragment.newInstance();
         }
 
-        FavoriteRoutesContract.Presenter presenter = new FavoriteRoutesPresenter(fragment);
+        FavoriteRoutesContract.Presenter presenter = new FavoriteRoutesPresenter(
+                fragment,
+                FavoriteRoutesRepo.getInstance(this),
+                BusesRepo.getInstance(this),
+                TrainsRepo.getInstance(this));
         fragment.setPresenter(presenter);
-        setActiveViewAndPresenter(fragment, presenter);
 
         startFragment(R.id.fragment_container, fragment, FavoriteRoutesFragment.TAG, false);
     }
@@ -252,20 +259,17 @@ public class MainActivity extends AppCompatActivity {
             fragment = NotificationsFragment.newInstance();
         }
 
-        NotificationsContract.Presenter presenter = new NotificationsPresenter(this, fragment);
+        NotificationsContract.Presenter presenter = new NotificationsPresenter(
+                fragment,
+                NotificationsRepo.getInstance(this),
+                CachedDataMap.getInstance());
         fragment.setPresenter(presenter);
-        setActiveViewAndPresenter(fragment, presenter);
 
         startFragment(R.id.fragment_container, fragment, NotificationsFragment.TAG, false);
     }
 
     private void setToolbarIcon(@DrawableRes int resId) {
         mToolbarIconView.setImageDrawable(ContextCompat.getDrawable(this, resId));
-    }
-
-    private void setActiveViewAndPresenter(BaseView view, BasePresenter presenter) {
-        mActivePresenter = presenter;
-        mActiveView = view;
     }
 
     private void startFragment(@IdRes int parentId, @NonNull Fragment fragment,

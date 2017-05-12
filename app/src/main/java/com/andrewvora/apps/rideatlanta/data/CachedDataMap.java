@@ -11,7 +11,7 @@ import java.util.Map;
  * @author Andrew Vorakrajangthiti
  */
 
-public final class CachedDataMap {
+public class CachedDataMap {
     @Nullable
     private static CachedDataMap mInstance;
 

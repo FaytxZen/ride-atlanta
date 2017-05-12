@@ -20,9 +20,10 @@ import java.util.List;
  */
 public class TrainRoutesPresenter implements TrainRoutesContract.Presenter {
 
-    private TrainRoutesContract.View mView;
-    private TrainsDataSource mTrainRepo;
-    private FavoriteRoutesDataSource mFavoriteDataSource;
+    @NonNull private TrainRoutesContract.View mView;
+    @NonNull private TrainsDataSource mTrainRepo;
+    @NonNull private FavoriteRoutesDataSource mFavoriteDataSource;
+
     private BroadcastReceiver mTrainReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -30,8 +31,13 @@ public class TrainRoutesPresenter implements TrainRoutesContract.Presenter {
         }
     };
 
-    public TrainRoutesPresenter(@NonNull TrainRoutesContract.View view) {
+    public TrainRoutesPresenter(@NonNull TrainRoutesContract.View view,
+                                @NonNull TrainsDataSource trainRepo,
+                                @NonNull FavoriteRoutesDataSource favRouteRepo)
+    {
         mView = view;
+        mTrainRepo = trainRepo;
+        mFavoriteDataSource = favRouteRepo;
     }
 
     @Override
@@ -42,9 +48,6 @@ public class TrainRoutesPresenter implements TrainRoutesContract.Presenter {
 
     @Override
     public void start() {
-        mTrainRepo = mView.getTrainDataSource();
-        mFavoriteDataSource = mView.getFavRouteDataSource();
-
         mView.subscribeReceiver(mTrainReceiver);
 
         loadTrainRoutes();
@@ -118,7 +121,7 @@ public class TrainRoutesPresenter implements TrainRoutesContract.Presenter {
         }
     }
 
-    private String getCachedDataTag() {
+    static String getCachedDataTag() {
         return TrainRoutesPresenter.class.getSimpleName();
     }
 }

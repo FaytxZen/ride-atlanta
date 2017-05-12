@@ -17,6 +17,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 /**
+ * Gives information about how to report to See & Say.
+ *
  * Created by faytx on 11/16/2016.
  * @author Andrew Vorakrajangthiti
  */

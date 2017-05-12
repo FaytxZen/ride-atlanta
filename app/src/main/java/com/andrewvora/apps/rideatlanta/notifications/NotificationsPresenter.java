@@ -1,13 +1,11 @@
 package com.andrewvora.apps.rideatlanta.notifications;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.data.CachedDataMap;
 import com.andrewvora.apps.rideatlanta.data.contracts.NotificationsDataSource;
 import com.andrewvora.apps.rideatlanta.data.models.Notification;
-import com.andrewvora.apps.rideatlanta.data.repos.NotificationsRepo;
 
 import java.util.List;
 
@@ -18,14 +16,17 @@ import java.util.List;
 
 public class NotificationsPresenter implements NotificationsContract.Presenter {
 
-    private Context mContext;
     private NotificationsContract.View mView;
+    private NotificationsDataSource mNotificationRepo;
+    private CachedDataMap mCachedDataMap;
 
-    public NotificationsPresenter(@NonNull Context context,
-                                  @NonNull NotificationsContract.View view)
+    public NotificationsPresenter(@NonNull NotificationsContract.View view,
+                                  @NonNull NotificationsDataSource notificationsRepo,
+                                  @NonNull CachedDataMap cachedDataMap)
     {
-        mContext = context;
         mView = view;
+        mNotificationRepo = notificationsRepo;
+        mCachedDataMap = cachedDataMap;
     }
 
     @Override
@@ -46,17 +47,16 @@ public class NotificationsPresenter implements NotificationsContract.Presenter {
 
     @Override
     public void refreshNotifications() {
-        CachedDataMap.getInstance().put(getCachedDataTag(), false);
+        mCachedDataMap.put(getCachedDataTag(), false);
+
         loadNotifications();
     }
 
     @Override
     public void loadNotifications() {
-        NotificationsRepo repo = NotificationsRepo.getInstance(mContext);
-
         useCachedDataIfAvailable();
 
-        repo.getNotifications(new NotificationsDataSource.GetNotificationsCallback() {
+        mNotificationRepo.getNotifications(new NotificationsDataSource.GetNotificationsCallback() {
             @Override
             public void onFinished(List<Notification> notifications) {
                 mView.onNotificationsLoaded(notifications);
@@ -72,19 +72,19 @@ public class NotificationsPresenter implements NotificationsContract.Presenter {
 
     private void useCachedDataIfAvailable() {
         if(!hasCachedData()) {
-            NotificationsRepo.getInstance(mContext).reloadNotifications();
+            mNotificationRepo.reloadNotifications();
         }
     }
 
     private boolean hasCachedData() {
-        return CachedDataMap.getInstance().hasCachedData(getCachedDataTag());
+        return mCachedDataMap.hasCachedData(getCachedDataTag());
     }
 
     private void makeCachedDataAvailable() {
-        CachedDataMap.getInstance().put(getCachedDataTag(), true);
+        mCachedDataMap.put(getCachedDataTag(), true);
     }
 
-    private String getCachedDataTag() {
+    static String getCachedDataTag() {
         return NotificationsPresenter.class.getSimpleName();
     }
 }

@@ -17,12 +17,8 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.andrewvora.apps.rideatlanta.R;
-import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
-import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
 import com.andrewvora.apps.rideatlanta.data.models.Bus;
 import com.andrewvora.apps.rideatlanta.data.remote.buses.GetBusesIntentService;
-import com.andrewvora.apps.rideatlanta.data.repos.BusesRepo;
-import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
 import com.andrewvora.apps.rideatlanta.views.SimpleDividerItemDecoration;
 
 import java.util.List;
@@ -34,13 +30,18 @@ import butterknife.ButterKnife;
  * Created by faytx on 10/22/2016.
  * @author Andrew Vorakrajangthiti
  */
-
 public class BusRoutesFragment extends Fragment implements BusRoutesContract.View {
 
     public static final String TAG = BusRoutesFragment.class.getSimpleName();
 
+    interface BusItemListener {
+        void onItemClicked(Bus bus);
+        void onFavoriteBus(int position);
+    }
+
     @BindView(R.id.buses_list) RecyclerView mBusesRecyclerView;
     @BindView(R.id.swipe_to_refresh_layout) SwipeRefreshLayout mSwipeRefreshLayout;
+
     @BindView(R.id.loading_bus_routes_view) ProgressBar mProgressBar;
     @BindView(R.id.no_bus_routes_view) View mEmptyStateView;
 
@@ -151,20 +152,5 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
     @Override
     public Context getViewContext() {
         return getActivity().getApplication();
-    }
-
-    @Override
-    public BusesDataSource getBusesDataSource() {
-        return BusesRepo.getInstance(getViewContext());
-    }
-
-    @Override
-    public FavoriteRoutesDataSource getFavRoutesDataSource() {
-        return FavoriteRoutesRepo.getInstance(getViewContext());
-    }
-
-    public interface BusItemListener {
-        void onItemClicked(Bus bus);
-        void onFavoriteBus(int position);
     }
 }

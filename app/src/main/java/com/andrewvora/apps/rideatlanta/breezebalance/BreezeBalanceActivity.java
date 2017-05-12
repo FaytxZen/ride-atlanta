@@ -20,6 +20,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
+ * Displays the Breeze Balance site in a {@link WebView}.
+ *
  * Created by faytx on 11/16/2016.
  * @author Andrew Vorakrajangthiti
  */
@@ -68,19 +70,24 @@ public class BreezeBalanceActivity extends AppCompatActivity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
+
+                // fix to prevent page from starting in the center
+                // or some other location
                 view.scrollTo(0, 0);
             }
 
             @Override
             public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+                // ignore incorrectly signed SSL certificates
+                // currently, this is an issue with the official site
                 if(error.getUrl().equals(getString(R.string.breeze_balance_url))) {
                     handler.proceed();
                 }
                 else super.onReceivedSslError(view, handler, error);
             }
         });
-        mWebView.getSettings().setSupportZoom(true);
 
+        mWebView.getSettings().setSupportZoom(true);
         mWebView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onProgressChanged(WebView view, int newProgress) {

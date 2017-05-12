@@ -2,7 +2,6 @@ package com.andrewvora.apps.rideatlanta.data.models;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
 
 import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
@@ -12,13 +11,12 @@ import com.google.gson.annotations.SerializedName;
  * Created by faytx on 10/23/2016.
  * @author Andrew Vorakrajangthiti
  */
-
 public class Train extends BaseModel implements FavoriteRouteDataObject, Cloneable {
 
-    public static final String RED_LINE = "RED";
-    public static final String BLUE_LINE = "BLUE";
-    public static final String GOLD_LINE = "GOLD";
-    public static final String GREEN_LINE = "GREEN";
+    private static final String RED_LINE = "RED";
+    private static final String BLUE_LINE = "BLUE";
+    private static final String GOLD_LINE = "GOLD";
+    private static final String GREEN_LINE = "GREEN";
 
     @SerializedName("DESTINATION")
     private String destination;
@@ -52,6 +50,10 @@ public class Train extends BaseModel implements FavoriteRouteDataObject, Cloneab
     @Override
     public String getDestination() {
         return getStation();
+    }
+
+    public String getEndDestination() {
+        return destination;
     }
 
     public void setDestination(String destination) {
