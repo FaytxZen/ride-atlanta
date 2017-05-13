@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
-import com.andrewvora.apps.rideatlanta.data.CachedDataMap;
 import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
 import com.andrewvora.apps.rideatlanta.data.models.Bus;
@@ -104,7 +103,6 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter {
             @Override
             public void onFinished(List<Bus> buses) {
                 updateView(buses);
-                makeCachedDataAvailable();
             }
 
             @Override
@@ -119,11 +117,7 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter {
     }
 
     private boolean hasNoCachedData() {
-        return !CachedDataMap.getInstance().hasCachedData(TAG);
-    }
-
-    private void makeCachedDataAvailable() {
-        CachedDataMap.getInstance().put(TAG, true);
+        return !mBusesRepo.hasCachedData();
     }
 
     private void useCachedDataIfAvailable() {

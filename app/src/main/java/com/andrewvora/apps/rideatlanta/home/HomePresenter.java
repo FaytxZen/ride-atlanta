@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.R;
-import com.andrewvora.apps.rideatlanta.data.CachedDataMap;
 import com.andrewvora.apps.rideatlanta.data.contracts.AlertItemModel;
 import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
@@ -21,11 +20,6 @@ import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
 import com.andrewvora.apps.rideatlanta.data.models.InfoAlert;
 import com.andrewvora.apps.rideatlanta.data.models.Notification;
 import com.andrewvora.apps.rideatlanta.data.models.Train;
-import com.andrewvora.apps.rideatlanta.data.repos.BusesRepo;
-import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
-import com.andrewvora.apps.rideatlanta.data.repos.NotificationsRepo;
-import com.andrewvora.apps.rideatlanta.data.repos.TrainsRepo;
-import com.andrewvora.apps.rideatlanta.notifications.NotificationsPresenter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,20 +33,29 @@ public class HomePresenter implements HomeContract.Presenter {
     private static final int MAX_NOTIFICATIONS = 2;
 
     @NonNull private HomeContract.View mView;
-    private FavoriteRoutesDataSource mFavRoutesRepo;
-    private NotificationsDataSource mNotificationRepo;
-    private BusesDataSource mBusRepo;
-    private TrainsDataSource mTrainRepo;
+    @NonNull private FavoriteRoutesDataSource mFavRoutesRepo;
+    @NonNull private NotificationsDataSource mNotificationRepo;
+    @NonNull private BusesDataSource mBusRepo;
+    @NonNull private TrainsDataSource mTrainRepo;
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-           loadUpdatedRouteInformation();
+           refreshRouteInformation();
         }
     };
 
-    public HomePresenter(@NonNull HomeContract.View view) {
+    public HomePresenter(@NonNull HomeContract.View view,
+                         @NonNull FavoriteRoutesDataSource favRoutesRepo,
+                         @NonNull NotificationsDataSource notificationRepo,
+                         @NonNull BusesDataSource busRepo,
+                         @NonNull TrainsDataSource trainRepo)
+    {
         mView = view;
+        mFavRoutesRepo = favRoutesRepo;
+        mNotificationRepo = notificationRepo;
+        mBusRepo = busRepo;
+        mTrainRepo = trainRepo;
     }
 
     @Override
@@ -63,11 +66,6 @@ public class HomePresenter implements HomeContract.Presenter {
 
     @Override
     public void start() {
-        mBusRepo = BusesRepo.getInstance(mView.getViewContext());
-        mTrainRepo = TrainsRepo.getInstance(mView.getViewContext());
-        mFavRoutesRepo = FavoriteRoutesRepo.getInstance(mView.getViewContext());
-        mNotificationRepo = NotificationsRepo.getInstance(mView.getViewContext());
-
         loadInfoItems();
         loadAlerts();
         loadFavoriteRoutes();
@@ -82,9 +80,8 @@ public class HomePresenter implements HomeContract.Presenter {
 
     @Override
     public void loadAlerts() {
+        final boolean hasNoCachedData = !mNotificationRepo.hasCachedData();
 
-        final String cachedDataTag = NotificationsPresenter.class.getSimpleName();
-        final boolean hasNoCachedData = !CachedDataMap.getInstance().hasCachedData(cachedDataTag);
         if(hasNoCachedData) {
             mNotificationRepo.reloadNotifications();
         }
@@ -128,18 +125,11 @@ public class HomePresenter implements HomeContract.Presenter {
                 List<RouteItemModel> routeItems = new ArrayList<>();
                 for(FavoriteRoute route : favRoutes) {
                     routeItems.add(route);
+
+                    updateRouteInfoIfCached(route);
                 }
 
                 mView.displayRouteItems(routeItems);
-
-                for(FavoriteRoute route : favRoutes) {
-                    if(route.isBus()) {
-                        loadUpdatedBusInformation(route);
-                    }
-                    else {
-                        loadUpdatedTrainInformation(route);
-                    }
-                }
             }
 
             @Override
@@ -147,17 +137,26 @@ public class HomePresenter implements HomeContract.Presenter {
         });
     }
 
+    private void updateRouteInfoIfCached(@NonNull FavoriteRoute route) {
+        if(route.isBus() && mBusRepo.hasCachedData()) {
+            refreshBusInfo(route, false);
+        }
+        else if(mTrainRepo.hasCachedData()) {
+            refreshTrainInfo(route, false);
+        }
+    }
+
     @Override
-    public void loadUpdatedRouteInformation() {
+    public void refreshRouteInformation() {
         mFavRoutesRepo.getFavoriteRoutes(new FavoriteRoutesDataSource.GetFavoriteRoutesCallback() {
             @Override
             public void onFinished(List<FavoriteRoute> favRoutes) {
                 for(FavoriteRoute route : favRoutes) {
                     if(route.getType().equals(FavoriteRoute.TYPE_TRAIN)) {
-                        loadUpdatedTrainInformation(route);
+                        refreshTrainInfo(route, true);
                     }
                     else if(route.getType().equals(FavoriteRoute.TYPE_BUS)) {
-                        loadUpdatedBusInformation(route);
+                        refreshBusInfo(route, true);
                     }
                 }
             }
@@ -167,7 +166,7 @@ public class HomePresenter implements HomeContract.Presenter {
         });
     }
 
-    private void loadUpdatedBusInformation(@NonNull final FavoriteRoute route) {
+    private void refreshBusInfo(@NonNull final FavoriteRoute route, final boolean refreshUi) {
         Bus bus = new Bus();
         bus.setRouteId(route.getRouteId());
 
@@ -177,7 +176,13 @@ public class HomePresenter implements HomeContract.Presenter {
                 FavoriteRoute routeToSave = new FavoriteRoute(bus);
                 routeToSave.setId(route.getId());
 
-                updateRouteOnView(routeToSave);
+                route.setName(routeToSave.getName());
+                route.setDestination(routeToSave.getDestination());
+                route.setTimeUntilArrival(routeToSave.getTimeUntilArrival());
+
+                if(refreshUi) {
+                    updateRouteOnView(routeToSave);
+                }
             }
 
             @Override
@@ -187,16 +192,16 @@ public class HomePresenter implements HomeContract.Presenter {
         });
     }
 
-    private void loadUpdatedTrainInformation(@NonNull final FavoriteRoute route) {
+    private void refreshTrainInfo(@NonNull final FavoriteRoute route, final boolean refreshUi) {
         Train train = new Train();
         train.setTrainId(Long.parseLong(route.getRouteId()));
         train.setLine(route.getName());
         train.setStation(route.getDestination());
 
-        updateTrainArrivalTime(train);
+        updateTrainArrivalTime(route, train, refreshUi);
     }
 
-    private void updateTrainArrivalTime(final Train train) {
+    private void updateTrainArrivalTime(final FavoriteRoute route, final Train train, final boolean refreshUi) {
         mTrainRepo.getTrains(train.getStation(), train.getLine(),
                 new TrainsDataSource.GetTrainRoutesCallback() {
                     @Override
@@ -215,7 +220,13 @@ public class HomePresenter implements HomeContract.Presenter {
                         routeToSave.setTimeUntilArrival(sb.toString());
                         routeToSave.setId(train.getId());
 
-                        updateRouteOnView(routeToSave);
+                        route.setTimeUntilArrival(routeToSave.getTimeUntilArrival());
+                        route.setDestination(routeToSave.getDestination());
+                        route.setName(routeToSave.getName());
+
+                        if(refreshUi) {
+                            updateRouteOnView(routeToSave);
+                        }
                     }
 
                     @Override

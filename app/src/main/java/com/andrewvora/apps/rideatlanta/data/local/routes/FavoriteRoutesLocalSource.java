@@ -124,6 +124,11 @@ public class FavoriteRoutesLocalSource implements FavoriteRoutesDataSource {
     }
 
     @Override
+    public boolean hasCachedData() {
+        return false;
+    }
+
+    @Override
     public void reloadRoutes() {
         // reloading is handled in the FavoriteRoutesRepo.
     }

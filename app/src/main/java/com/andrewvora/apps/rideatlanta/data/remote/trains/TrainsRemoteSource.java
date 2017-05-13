@@ -119,6 +119,11 @@ public class TrainsRemoteSource implements TrainsDataSource {
         requestQueue.add(request);
     }
 
+    @Override
+    public boolean hasCachedData() {
+        return false;
+    }
+
     private static class ParseTrainsJsonTask extends AsyncTask<JSONArray, Void, List<Train>> {
         @NonNull
         private GetTrainRoutesCallback callbackRef;

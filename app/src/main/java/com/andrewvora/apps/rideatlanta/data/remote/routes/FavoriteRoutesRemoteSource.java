@@ -38,6 +38,11 @@ public class FavoriteRoutesRemoteSource implements FavoriteRoutesDataSource {
     }
 
     @Override
+    public boolean hasCachedData() {
+        return false;
+    }
+
+    @Override
     public void getFavoriteRoutes(@NonNull GetFavoriteRoutesCallback callback) {
 
     }

@@ -190,6 +190,11 @@ public class TrainsLocalSource implements TrainsDataSource {
     }
 
     @Override
+    public boolean hasCachedData() {
+        return false;
+    }
+
+    @Override
     public void reloadTrains() {
         // refreshing handled in the TrainRepo
     }

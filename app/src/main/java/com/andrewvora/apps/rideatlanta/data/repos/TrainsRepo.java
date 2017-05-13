@@ -64,6 +64,11 @@ public class TrainsRepo implements TrainsDataSource {
     }
 
     @Override
+    public boolean hasCachedData() {
+        return !mCachedTrains.isEmpty();
+    }
+
+    @Override
     public void getTrains(@NonNull final GetTrainRoutesCallback callback) {
         if(!mCachedTrains.isEmpty() && !mCacheIsDirty) {
             List<Train> cachedTrainList = new ArrayList<>(mCachedTrains.values());

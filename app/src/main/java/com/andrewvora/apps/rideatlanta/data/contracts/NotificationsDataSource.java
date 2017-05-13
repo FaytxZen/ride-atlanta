@@ -10,7 +10,6 @@ import java.util.List;
  * Created by faytx on 10/22/2016.
  * @author Andrew Vorakrajangthiti
  */
-
 public interface NotificationsDataSource {
 
     interface GetNotificationsCallback {
@@ -22,4 +21,6 @@ public interface NotificationsDataSource {
     void deleteAllNotifications();
     void saveNotification(@NonNull Notification notification);
     void reloadNotifications();
+
+    boolean hasCachedData();
 }

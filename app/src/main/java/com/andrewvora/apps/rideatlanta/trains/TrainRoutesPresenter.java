@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
-import com.andrewvora.apps.rideatlanta.data.CachedDataMap;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
 import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
 import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
@@ -76,7 +75,6 @@ public class TrainRoutesPresenter implements TrainRoutesContract.Presenter {
             @Override
             public void onFinished(List<Train> trainList) {
                 updateViews(trainList);
-                makeCachedDataAvailable();
             }
 
             @Override
@@ -108,20 +106,12 @@ public class TrainRoutesPresenter implements TrainRoutesContract.Presenter {
     }
 
     private boolean hasNoCachedData() {
-        return !CachedDataMap.getInstance().hasCachedData(getCachedDataTag());
-    }
-
-    private void makeCachedDataAvailable() {
-        CachedDataMap.getInstance().put(getCachedDataTag(), true);
+        return !mTrainRepo.hasCachedData();
     }
 
     private void useCachedDataIfAvailable(TrainsDataSource repo) {
         if(hasNoCachedData()) {
             repo.reloadTrains();
         }
-    }
-
-    static String getCachedDataTag() {
-        return TrainRoutesPresenter.class.getSimpleName();
     }
 }

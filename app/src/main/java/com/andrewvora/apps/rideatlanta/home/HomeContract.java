@@ -23,7 +23,7 @@ public interface HomeContract {
         void loadAlerts();
         void loadInfoItems();
         void loadFavoriteRoutes();
-        void loadUpdatedRouteInformation();
+        void refreshRouteInformation();
     }
 
     interface View extends BaseView<HomeContract.Presenter> {

@@ -77,6 +77,11 @@ public class NotificationsRemoteSource implements NotificationsDataSource {
     }
 
     @Override
+    public boolean hasCachedData() {
+        return false;
+    }
+
+    @Override
     public void deleteAllNotifications() {
         // remote notifications are read-only
     }

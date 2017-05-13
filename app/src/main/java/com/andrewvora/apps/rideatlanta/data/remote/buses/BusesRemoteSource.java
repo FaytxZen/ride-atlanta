@@ -94,6 +94,11 @@ public class BusesRemoteSource implements BusesDataSource {
 
     }
 
+    @Override
+    public boolean hasCachedData() {
+        return false;
+    }
+
     private RequestQueue getRequestQueue() {
         if(mRequestQueue == null) {
             mRequestQueue = Volley.newRequestQueue(mContext);

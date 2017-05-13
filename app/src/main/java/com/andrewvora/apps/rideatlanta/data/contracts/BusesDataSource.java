@@ -35,4 +35,6 @@ public interface BusesDataSource {
     void deleteAllBus(@Nullable DeleteBusesCallback callback);
     void saveBus(@NonNull Bus route);
     void reloadBuses();
+
+    boolean hasCachedData();
 }

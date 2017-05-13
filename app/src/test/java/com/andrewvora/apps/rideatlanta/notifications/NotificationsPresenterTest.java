@@ -3,13 +3,11 @@ package com.andrewvora.apps.rideatlanta.notifications;
 import android.os.Bundle;
 
 import com.andrewvora.apps.rideatlanta.BaseUnitTest;
-import com.andrewvora.apps.rideatlanta.data.CachedDataMap;
 import com.andrewvora.apps.rideatlanta.data.contracts.NotificationsDataSource;
 
 import org.junit.Test;
 import org.mockito.Mock;
 
-import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -25,7 +23,6 @@ import static org.mockito.Mockito.when;
 public class NotificationsPresenterTest extends BaseUnitTest {
 
     @Mock private NotificationsDataSource mNotificationRepo;
-    @Mock private CachedDataMap mCachedDataMap;
     @Mock private NotificationsContract.View mView;
     private NotificationsContract.Presenter mPresenter;
 
@@ -33,7 +30,7 @@ public class NotificationsPresenterTest extends BaseUnitTest {
     public void setUp() throws Exception {
         super.setUp();
 
-        mPresenter = new NotificationsPresenter(mView, mNotificationRepo, mCachedDataMap);
+        mPresenter = new NotificationsPresenter(mView, mNotificationRepo);
     }
 
     @Test
@@ -61,8 +58,7 @@ public class NotificationsPresenterTest extends BaseUnitTest {
 
     @Test
     public void loadNotifications_hasCachedData() throws Exception {
-        when(mCachedDataMap.hasCachedData(NotificationsPresenter.getCachedDataTag()))
-                .thenReturn(true);
+        when(mNotificationRepo.hasCachedData()).thenReturn(true);
 
         mPresenter.loadNotifications();
 

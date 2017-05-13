@@ -165,6 +165,11 @@ public class BusesLocalSource implements BusesDataSource {
     }
 
     @Override
+    public boolean hasCachedData() {
+        return false;
+    }
+
+    @Override
     public void reloadBuses() {
         // reload handled in the BusesRepo
     }

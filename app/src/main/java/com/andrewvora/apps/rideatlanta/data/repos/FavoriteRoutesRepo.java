@@ -21,11 +21,10 @@ public class FavoriteRoutesRepo implements FavoriteRoutesDataSource {
 
     private static FavoriteRoutesRepo mInstance;
 
-    private FavoriteRoutesDataSource mRemoteSource;
-    private FavoriteRoutesDataSource mLocalSource;
+    @NonNull private FavoriteRoutesDataSource mRemoteSource;
+    @NonNull private FavoriteRoutesDataSource mLocalSource;
 
-    @NonNull
-    private Map<String, FavoriteRoute> mCachedRoutes;
+    @NonNull private Map<String, FavoriteRoute> mCachedRoutes;
 
     private boolean mCacheIsDirty;
 
@@ -117,6 +116,11 @@ public class FavoriteRoutesRepo implements FavoriteRoutesDataSource {
         mLocalSource.deleteRoute(route);
 
         mCachedRoutes.remove(getMapKeyFor(route));
+    }
+
+    @Override
+    public boolean hasCachedData() {
+        return !mCachedRoutes.isEmpty();
     }
 
     @Override

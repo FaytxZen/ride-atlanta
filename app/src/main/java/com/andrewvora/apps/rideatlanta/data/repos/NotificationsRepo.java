@@ -2,17 +2,16 @@ package com.andrewvora.apps.rideatlanta.data.repos;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
-import com.andrewvora.apps.rideatlanta.data.models.Notification;
 import com.andrewvora.apps.rideatlanta.data.contracts.NotificationsDataSource;
 import com.andrewvora.apps.rideatlanta.data.local.notifications.NotificationsLocalSource;
+import com.andrewvora.apps.rideatlanta.data.models.Notification;
 import com.andrewvora.apps.rideatlanta.data.remote.notifications.NotificationsRemoteSource;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by faytx on 10/22/2016.
@@ -23,9 +22,10 @@ public class NotificationsRepo implements NotificationsDataSource {
 
     private static NotificationsRepo mInstance;
 
-    private Map<String, Notification> mCachedNotifications;
-    private NotificationsDataSource mLocalSource;
-    private NotificationsDataSource mRemoteSource;
+    @NonNull private Map<String, Notification> mCachedNotifications;
+    @NonNull private NotificationsDataSource mLocalSource;
+    @NonNull private NotificationsDataSource mRemoteSource;
+
     private boolean mCacheIsDirty;
 
     private NotificationsRepo(@NonNull NotificationsDataSource localSource,
@@ -33,6 +33,8 @@ public class NotificationsRepo implements NotificationsDataSource {
     {
         mLocalSource = localSource;
         mRemoteSource = remoteSource;
+
+        mCachedNotifications = new ConcurrentHashMap<>();
     }
 
     public static NotificationsRepo getInstance(@NonNull Context context) {
@@ -46,13 +48,14 @@ public class NotificationsRepo implements NotificationsDataSource {
         return mInstance;
     }
 
-    public static void destroyInstance() {
-        mInstance = null;
+    @Override
+    public boolean hasCachedData() {
+        return !mCachedNotifications.isEmpty();
     }
 
     @Override
     public void getNotifications(@NonNull final GetNotificationsCallback callback) {
-        if(mCachedNotifications != null && !mCacheIsDirty) {
+        if(!mCachedNotifications.isEmpty() && !mCacheIsDirty) {
             callback.onFinished(new ArrayList<>(mCachedNotifications.values()));
         }
         else if(mCacheIsDirty) {
@@ -79,7 +82,6 @@ public class NotificationsRepo implements NotificationsDataSource {
         mLocalSource.deleteAllNotifications();
         mRemoteSource.deleteAllNotifications();
 
-        mCachedNotifications = checkNotNull(mCachedNotifications);
         mCachedNotifications.clear();
     }
 
@@ -116,7 +118,6 @@ public class NotificationsRepo implements NotificationsDataSource {
 
     private void reloadCachedNotifications(@NonNull List<Notification> notifications) {
 
-        mCachedNotifications = checkNotNull(mCachedNotifications);
         mCachedNotifications.clear();
 
         for(Notification notification : notifications) {
@@ -136,16 +137,6 @@ public class NotificationsRepo implements NotificationsDataSource {
     }
 
     private void cacheNotification(Notification notification) {
-        mCachedNotifications = checkNotNull(mCachedNotifications);
         mCachedNotifications.put(notification.getNotificationId(), notification);
-    }
-
-    private Map<String, Notification> checkNotNull(@Nullable Map<String, Notification> map)
-    {
-        if(map == null) {
-            map = new LinkedHashMap<>();
-        }
-
-        return map;
     }
 }

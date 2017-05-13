@@ -36,4 +36,6 @@ public interface TrainsDataSource {
     void deleteAllTrains(@Nullable DeleteTrainRoutesCallback callback);
     void saveTrain(@NonNull Train route);
     void reloadTrains();
+
+    boolean hasCachedData();
 }

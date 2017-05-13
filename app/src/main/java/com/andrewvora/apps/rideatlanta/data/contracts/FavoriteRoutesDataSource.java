@@ -29,4 +29,6 @@ public interface FavoriteRoutesDataSource {
     void deleteRoute(@NonNull FavoriteRouteDataObject route);
     void deleteAllRoutes();
     void reloadRoutes();
+
+    boolean hasCachedData();
 }

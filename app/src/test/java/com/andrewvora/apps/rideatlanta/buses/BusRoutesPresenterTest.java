@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.os.Bundle;
 
 import com.andrewvora.apps.rideatlanta.BaseUnitTest;
-import com.andrewvora.apps.rideatlanta.data.CachedDataMap;
 import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
@@ -20,6 +19,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link BusRoutesPresenter}.
@@ -30,7 +30,6 @@ import static org.mockito.Mockito.verify;
 public class BusRoutesPresenterTest extends BaseUnitTest {
 
     private BusRoutesContract.Presenter mBusRoutesPresenter;
-    private CachedDataMap mCachedDataMap;
 
     @Mock private BusRoutesContract.View mBusRoutesView;
     @Mock private Bundle mStateBundle;
@@ -43,8 +42,7 @@ public class BusRoutesPresenterTest extends BaseUnitTest {
 
         mBusRoutesPresenter = new BusRoutesPresenter(mBusRoutesView, mBusSource, mFavsSource);
 
-        mCachedDataMap = CachedDataMap.getInstance();
-        mCachedDataMap.put(BusRoutesPresenter.TAG, false);
+        when(mBusSource.hasCachedData()).thenReturn(false);
 
         doNothing().when(mBusSource).reloadBuses();
         doNothing().when(mBusSource).saveBus(any(Bus.class));
@@ -52,13 +50,6 @@ public class BusRoutesPresenterTest extends BaseUnitTest {
         doNothing().when(mFavsSource).deleteRoute(any(FavoriteRouteDataObject.class));
         doNothing().when(mFavsSource).saveRoute(any(FavoriteRoute.class));
         doNothing().when(mBusRoutesView).subscribeReceiver(any(BroadcastReceiver.class));
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-
-        mCachedDataMap.clear();
     }
 
     @Test
@@ -96,7 +87,7 @@ public class BusRoutesPresenterTest extends BaseUnitTest {
 
     @Test
     public void loadBusRoutes_hasCachedData() throws Exception {
-        mCachedDataMap.put(BusRoutesPresenter.TAG, true);
+        when(mBusSource.hasCachedData()).thenReturn(true);
 
         mBusRoutesPresenter.loadBusRoutes();
 

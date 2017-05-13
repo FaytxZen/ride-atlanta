@@ -71,7 +71,7 @@ public class FavoriteRoutesPresenterTest extends BaseUnitTest {
 
     @Test
     public void loadRouteInformation() throws Exception {
-        mPresenter.loadRouteInformation();
+        mPresenter.refreshRouteInformation();
 
         Class<FavoriteRoutesDataSource.GetFavoriteRoutesCallback> callbackClass =
                 FavoriteRoutesDataSource.GetFavoriteRoutesCallback.class;

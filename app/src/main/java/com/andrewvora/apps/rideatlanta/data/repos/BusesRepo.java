@@ -26,10 +26,9 @@ public class BusesRepo implements BusesDataSource {
 
     private static BusesRepo mInstance;
 
-    @NonNull
-    private Map<String, Bus> mCachedBuses;
-    private BusesDataSource mRemoteSource;
-    private BusesDataSource mLocalSource;
+    @NonNull private Map<String, Bus> mCachedBuses;
+    @NonNull private BusesDataSource mRemoteSource;
+    @NonNull private BusesDataSource mLocalSource;
 
     private boolean mCacheIsDirty;
 
@@ -134,6 +133,11 @@ public class BusesRepo implements BusesDataSource {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public boolean hasCachedData() {
+        return !mCachedBuses.isEmpty();
     }
 
     @Override

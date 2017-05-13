@@ -23,7 +23,6 @@ import com.andrewvora.apps.rideatlanta.breezebalance.BreezeBalanceActivity;
 import com.andrewvora.apps.rideatlanta.buses.BusRoutesContract;
 import com.andrewvora.apps.rideatlanta.buses.BusRoutesFragment;
 import com.andrewvora.apps.rideatlanta.buses.BusRoutesPresenter;
-import com.andrewvora.apps.rideatlanta.data.CachedDataMap;
 import com.andrewvora.apps.rideatlanta.data.remote.buses.GetBusesIntentService;
 import com.andrewvora.apps.rideatlanta.data.remote.trains.GetTrainsIntentService;
 import com.andrewvora.apps.rideatlanta.data.repos.BusesRepo;
@@ -202,7 +201,12 @@ public class MainActivity extends AppCompatActivity {
             fragment = HomeFragment.newInstance();
         }
 
-        HomeContract.Presenter presenter = new HomePresenter(fragment);
+        HomeContract.Presenter presenter = new HomePresenter(
+                fragment,
+                FavoriteRoutesRepo.getInstance(this),
+                NotificationsRepo.getInstance(this),
+                BusesRepo.getInstance(this),
+                TrainsRepo.getInstance(this));
         fragment.setPresenter(presenter);
 
         startFragment(R.id.fragment_container, fragment, HomeFragment.TAG, false);
@@ -261,8 +265,7 @@ public class MainActivity extends AppCompatActivity {
 
         NotificationsContract.Presenter presenter = new NotificationsPresenter(
                 fragment,
-                NotificationsRepo.getInstance(this),
-                CachedDataMap.getInstance());
+                NotificationsRepo.getInstance(this));
         fragment.setPresenter(presenter);
 
         startFragment(R.id.fragment_container, fragment, NotificationsFragment.TAG, false);

@@ -21,7 +21,7 @@ public interface FavoriteRoutesContract {
 
     interface Presenter extends BasePresenter {
         void loadFavoriteRoutes();
-        void loadRouteInformation();
+        void refreshRouteInformation();
     }
 
     interface View extends BaseView<FavoriteRoutesContract.Presenter> {

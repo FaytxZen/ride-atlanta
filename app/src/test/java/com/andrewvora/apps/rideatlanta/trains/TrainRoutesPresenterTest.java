@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.os.Bundle;
 
 import com.andrewvora.apps.rideatlanta.BaseUnitTest;
-import com.andrewvora.apps.rideatlanta.data.CachedDataMap;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
 import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
 import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
@@ -32,15 +31,11 @@ public class TrainRoutesPresenterTest extends BaseUnitTest {
     @Mock TrainsDataSource mTrainsRepo;
     @Mock TrainRoutesContract.View mView;
 
-    private CachedDataMap mCachedDataMap;
     private TrainRoutesContract.Presenter mPresenter;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-
-        mCachedDataMap = CachedDataMap.getInstance();
-        mCachedDataMap.clear();
 
         mPresenter = new TrainRoutesPresenter(mView, mTrainsRepo, mFavRoutesRepo);
     }
@@ -78,7 +73,7 @@ public class TrainRoutesPresenterTest extends BaseUnitTest {
 
     @Test
     public void loadTrainRoutes_hasCachedData() throws Exception {
-        mCachedDataMap.put(TrainRoutesPresenter.getCachedDataTag(), true);
+        when(mTrainsRepo.hasCachedData()).thenReturn(true);
 
         mPresenter.loadTrainRoutes();
 

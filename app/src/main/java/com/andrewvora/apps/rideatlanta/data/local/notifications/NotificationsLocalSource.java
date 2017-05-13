@@ -38,6 +38,11 @@ public class NotificationsLocalSource implements NotificationsDataSource {
     }
 
     @Override
+    public boolean hasCachedData() {
+        return false;
+    }
+
+    @Override
     public void getNotifications(@NonNull GetNotificationsCallback callback) {
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
