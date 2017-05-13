@@ -30,6 +30,7 @@ import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
 import com.andrewvora.apps.rideatlanta.data.repos.NotificationsRepo;
 import com.andrewvora.apps.rideatlanta.data.repos.TrainsRepo;
 import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesContract;
+import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesDataManager;
 import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesFragment;
 import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesPresenter;
 import com.andrewvora.apps.rideatlanta.home.HomeContract;
@@ -57,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.toolbar) Toolbar mToolbar;
     @BindView(R.id.bottom_bar) BottomBar mBottomBar;
 
+    private FavoriteRoutesDataManager mFavRouteDataManager;
     private Handler mPollingHandler;
     private Runnable mPollingTask = new Runnable() {
         @Override
@@ -79,6 +81,13 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         setSupportActionBar(mToolbar);
+
+        mFavRouteDataManager = (FavoriteRoutesDataManager)
+                getFragmentManager().findFragmentByTag(FavoriteRoutesDataManager.TAG);
+
+        if(mFavRouteDataManager == null) {
+            mFavRouteDataManager = FavoriteRoutesDataManager.createInstance();
+        }
 
         mPollingHandler = new Handler();
         mBottomBar.setOnTabSelectListener(new OnTabSelectListener() {
@@ -164,7 +173,8 @@ public class MainActivity extends AppCompatActivity {
         BusRoutesContract.Presenter presenter = new BusRoutesPresenter(
                 fragment,
                 BusesRepo.getInstance(this),
-                FavoriteRoutesRepo.getInstance(this));
+                FavoriteRoutesRepo.getInstance(this),
+                mFavRouteDataManager);
         fragment.setPresenter(presenter);
 
         startFragment(R.id.fragment_container, fragment, BusRoutesFragment.TAG, false);
@@ -176,6 +186,7 @@ public class MainActivity extends AppCompatActivity {
 
         TrainRoutesFragment fragment = (TrainRoutesFragment) getFragmentManager()
                 .findFragmentByTag(TrainRoutesFragment.TAG);
+
         if(fragment == null) {
             fragment = TrainRoutesFragment.newInstance();
         }
@@ -183,7 +194,9 @@ public class MainActivity extends AppCompatActivity {
         TrainRoutesContract.Presenter presenter = new TrainRoutesPresenter(
                 fragment,
                 TrainsRepo.getInstance(this),
-                FavoriteRoutesRepo.getInstance(this));
+                FavoriteRoutesRepo.getInstance(this),
+                mFavRouteDataManager);
+
         fragment.setPresenter(presenter);
 
         startFragment(R.id.fragment_container, fragment, TrainRoutesFragment.TAG, false);
@@ -283,6 +296,11 @@ public class MainActivity extends AppCompatActivity {
             ft.addToBackStack(tag);
         }
         ft.replace(parentId, fragment, tag);
+
+        if(getFragmentManager().findFragmentByTag(FavoriteRoutesDataManager.TAG) == null) {
+            ft.add(mFavRouteDataManager, FavoriteRoutesDataManager.TAG);
+        }
+
         ft.commit();
     }
 }

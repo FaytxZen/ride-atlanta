@@ -6,8 +6,7 @@ import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.common.BasePresenter;
 import com.andrewvora.apps.rideatlanta.common.BaseView;
-import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
-import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
+import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 import com.andrewvora.apps.rideatlanta.data.models.Train;
 
 import java.util.List;
@@ -29,6 +28,7 @@ public interface TrainRoutesContract {
         void onTrainRoutesLoaded(List<Train> trainList);
         void subscribeReceiver(@NonNull BroadcastReceiver receiver);
         void unsubscribeReceiver(@NonNull BroadcastReceiver receiver);
+        void applyFavorites(List<FavoriteRouteDataObject> favRoutes);
 
         Context getViewContext();
     }

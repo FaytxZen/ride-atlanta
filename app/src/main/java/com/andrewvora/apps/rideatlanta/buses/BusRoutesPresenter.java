@@ -7,9 +7,12 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
+import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
 import com.andrewvora.apps.rideatlanta.data.models.Bus;
 import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
+import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesContract;
+import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesDataManager;
 
 import java.util.List;
 
@@ -17,18 +20,14 @@ import java.util.List;
  * Created by faytx on 10/22/2016.
  * @author Andrew Vorakrajangthiti
  */
-public class BusRoutesPresenter implements BusRoutesContract.Presenter {
-
-    static final String TAG = BusRoutesPresenter.class.getSimpleName();
-
-    @NonNull
-    private BusRoutesContract.View mView;
-
-    @NonNull
-    private BusesDataSource mBusesRepo;
-
-    @NonNull
-    private FavoriteRoutesDataSource mFavRoutesRepo;
+public class BusRoutesPresenter implements
+        BusRoutesContract.Presenter,
+        FavoriteRoutesContract.DataLoadedListener
+{
+    @NonNull private BusRoutesContract.View mView;
+    @NonNull private BusesDataSource mBusesRepo;
+    @NonNull private FavoriteRoutesDataSource mFavRoutesRepo;
+    @NonNull private FavoriteRoutesDataManager mFavRoutesDataManager;
 
     @NonNull
     private BroadcastReceiver mBusesReceiver = new BroadcastReceiver() {
@@ -40,11 +39,13 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter {
 
     public BusRoutesPresenter(@NonNull BusRoutesContract.View view,
                               @NonNull BusesDataSource busRepo,
-                              @NonNull FavoriteRoutesDataSource routesRepo)
+                              @NonNull FavoriteRoutesDataSource routesRepo,
+                              @NonNull FavoriteRoutesDataManager routesDataManager)
     {
         mView = view;
         mBusesRepo = busRepo;
         mFavRoutesRepo = routesRepo;
+        mFavRoutesDataManager = routesDataManager;
     }
 
     @Override
@@ -55,13 +56,23 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter {
 
     @Override
     public void start() {
+        mFavRoutesDataManager.setListener(this);
+        mFavRoutesDataManager.loadFavoriteRoutes();
+
         mView.subscribeReceiver(mBusesReceiver);
+
         loadBusRoutes();
     }
 
     @Override
     public void stop() {
+        mFavRoutesDataManager.setListener(null);
         mView.unsubscribeReceiver(mBusesReceiver);
+    }
+
+    @Override
+    public void onLoaded(@NonNull List<FavoriteRouteDataObject> favRoutes) {
+        mView.applyFavorites(favRoutes);
     }
 
     @Override
@@ -74,7 +85,6 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter {
     @Override
     public void refreshBusRoutes() {
         mBusesRepo.reloadBuses();
-
         mBusesRepo.getBuses(createGetBusesCallbackInstance());
     }
 

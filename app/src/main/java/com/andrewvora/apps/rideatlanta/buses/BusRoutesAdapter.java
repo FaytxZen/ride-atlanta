@@ -15,7 +15,9 @@ import com.andrewvora.apps.rideatlanta.data.models.Bus;
 import com.andrewvora.apps.rideatlanta.utils.WordUtils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -29,6 +31,7 @@ import butterknife.ButterKnife;
 public class BusRoutesAdapter extends RecyclerView.Adapter<BusRoutesAdapter.BusRoutesViewHolder> {
 
     @NonNull private List<Bus> mBusList;
+    @NonNull private Set<String> mFavoriteRouteIds;
     @Nullable private BusRoutesFragment.BusItemListener mListener;
 
     public BusRoutesAdapter(@Nullable List<Bus> buses,
@@ -36,6 +39,7 @@ public class BusRoutesAdapter extends RecyclerView.Adapter<BusRoutesAdapter.BusR
     {
         mBusList = buses == null ? new ArrayList<Bus>() : buses;
         mListener = listener;
+        mFavoriteRouteIds = new HashSet<>();
     }
 
     @Override
@@ -64,7 +68,13 @@ public class BusRoutesAdapter extends RecyclerView.Adapter<BusRoutesAdapter.BusR
 
         holder.statusTextView.setText(status);
 
-        holder.favoriteButton.setSelected(bus.isFavorited());
+        if(mFavoriteRouteIds.contains(bus.getName())) {
+            holder.favoriteButton.setSelected(true);
+        }
+        else {
+            holder.favoriteButton.setSelected(bus.isFavorited());
+        }
+
         holder.favoriteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -82,6 +92,10 @@ public class BusRoutesAdapter extends RecyclerView.Adapter<BusRoutesAdapter.BusR
 
     Bus getItemAtPosition(int position) {
         return mBusList.get(position);
+    }
+
+    public void setFavoriteRoutes(@NonNull Set<String> favRouteIds) {
+        mFavoriteRouteIds = favRouteIds;
     }
 
     public void setBuses(@Nullable List<Bus> buses) {

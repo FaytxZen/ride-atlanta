@@ -17,16 +17,15 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.andrewvora.apps.rideatlanta.R;
-import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
-import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
+import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 import com.andrewvora.apps.rideatlanta.data.models.Train;
 import com.andrewvora.apps.rideatlanta.data.remote.trains.GetTrainsIntentService;
-import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
-import com.andrewvora.apps.rideatlanta.data.repos.TrainsRepo;
 import com.andrewvora.apps.rideatlanta.views.SimpleDividerItemDecoration;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -126,6 +125,18 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
     @Override
     public void setPresenter(TrainRoutesContract.Presenter presenter) {
         mPresenter = presenter;
+    }
+
+    @Override
+    public void applyFavorites(List<FavoriteRouteDataObject> favRoutes) {
+        Set<String> favRouteIds = new HashSet<>();
+
+        for(FavoriteRouteDataObject route : favRoutes) {
+            favRouteIds.add(route.getName() + route.getDestination());
+        }
+
+        mTrainAdapter.setFavoritedRoutes(favRouteIds);
+        mTrainAdapter.notifyDataSetChanged();
     }
 
     @Override

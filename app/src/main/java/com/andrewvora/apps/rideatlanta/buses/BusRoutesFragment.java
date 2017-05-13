@@ -17,11 +17,14 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.andrewvora.apps.rideatlanta.R;
+import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 import com.andrewvora.apps.rideatlanta.data.models.Bus;
 import com.andrewvora.apps.rideatlanta.data.remote.buses.GetBusesIntentService;
 import com.andrewvora.apps.rideatlanta.views.SimpleDividerItemDecoration;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -127,6 +130,18 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
         } else {
             mEmptyStateView.setVisibility(View.GONE);
         }
+    }
+
+    @Override
+    public void applyFavorites(@NonNull List<FavoriteRouteDataObject> favRoutes) {
+        Set<String> favRouteIds = new HashSet<>();
+
+        for(FavoriteRouteDataObject route : favRoutes) {
+            favRouteIds.add(route.getName());
+        }
+
+        mBusAdapter.setFavoriteRoutes(favRouteIds);
+        mBusAdapter.notifyDataSetChanged();
     }
 
     @Override

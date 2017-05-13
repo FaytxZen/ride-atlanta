@@ -6,10 +6,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
+import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
 import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
 import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
 import com.andrewvora.apps.rideatlanta.data.models.Train;
+import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesContract;
+import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesDataManager;
 
 import java.util.List;
 
@@ -17,11 +20,15 @@ import java.util.List;
  * Created by faytx on 10/22/2016.
  * @author Andrew Vorakrajangthiti
  */
-public class TrainRoutesPresenter implements TrainRoutesContract.Presenter {
+public class TrainRoutesPresenter implements
+        TrainRoutesContract.Presenter,
+        FavoriteRoutesContract.DataLoadedListener
+{
 
     @NonNull private TrainRoutesContract.View mView;
     @NonNull private TrainsDataSource mTrainRepo;
     @NonNull private FavoriteRoutesDataSource mFavoriteDataSource;
+    @NonNull private FavoriteRoutesDataManager mFavRouteDataManager;
 
     private BroadcastReceiver mTrainReceiver = new BroadcastReceiver() {
         @Override
@@ -32,11 +39,13 @@ public class TrainRoutesPresenter implements TrainRoutesContract.Presenter {
 
     public TrainRoutesPresenter(@NonNull TrainRoutesContract.View view,
                                 @NonNull TrainsDataSource trainRepo,
-                                @NonNull FavoriteRoutesDataSource favRouteRepo)
+                                @NonNull FavoriteRoutesDataSource favRouteRepo,
+                                @NonNull FavoriteRoutesDataManager favRouteDataManager)
     {
         mView = view;
         mTrainRepo = trainRepo;
         mFavoriteDataSource = favRouteRepo;
+        mFavRouteDataManager = favRouteDataManager;
     }
 
     @Override
@@ -49,12 +58,23 @@ public class TrainRoutesPresenter implements TrainRoutesContract.Presenter {
     public void start() {
         mView.subscribeReceiver(mTrainReceiver);
 
+        mFavRouteDataManager.setListener(this);
+        mFavRouteDataManager.loadFavoriteRoutes();
+
         loadTrainRoutes();
     }
 
     @Override
     public void stop() {
+        mFavRouteDataManager.setListener(null);
+        mFavRouteDataManager.loadFavoriteRoutes();
+
         mView.unsubscribeReceiver(mTrainReceiver);
+    }
+
+    @Override
+    public void onLoaded(@NonNull List<FavoriteRouteDataObject> favRoutes) {
+        mView.applyFavorites(favRoutes);
     }
 
     @Override
@@ -94,9 +114,11 @@ public class TrainRoutesPresenter implements TrainRoutesContract.Presenter {
         FavoriteRoute favoriteRoute = new FavoriteRoute(route);
 
         if(route.isFavorited()) {
+            mFavRouteDataManager.addFavoritedRoute(favoriteRoute);
             mFavoriteDataSource.saveRoute(favoriteRoute);
         }
         else {
+            mFavRouteDataManager.removeFavoriteRoute(favoriteRoute);
             mFavoriteDataSource.deleteRoute(favoriteRoute);
         }
     }
