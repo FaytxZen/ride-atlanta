@@ -29,6 +29,7 @@ public interface TrainRoutesContract {
         void subscribeReceiver(@NonNull BroadcastReceiver receiver);
         void unsubscribeReceiver(@NonNull BroadcastReceiver receiver);
         void applyFavorites(List<FavoriteRouteDataObject> favRoutes);
+        void updateFavoriteStatusOf(@NonNull Train train);
 
         Context getViewContext();
     }

@@ -100,6 +100,11 @@ public class FavoriteRoute extends BaseModel implements FavoriteRouteDataObject,
     }
 
     @Override
+    public String getFavoriteRouteKey() {
+        return isBus() ? getName() : getName() + " " + getDestination();
+    }
+
+    @Override
     public String getIdentifier() {
         return getType().equals(TYPE_TRAIN) ?
                 getName() + getDestination() :

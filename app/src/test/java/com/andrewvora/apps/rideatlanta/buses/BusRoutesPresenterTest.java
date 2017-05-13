@@ -9,13 +9,17 @@ import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
 import com.andrewvora.apps.rideatlanta.data.models.Bus;
 import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
+import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesContract;
 
 import org.junit.Test;
 import org.mockito.Mock;
 
+import java.util.ArrayList;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -29,18 +33,23 @@ import static org.mockito.Mockito.when;
  */
 public class BusRoutesPresenterTest extends BaseUnitTest {
 
-    private BusRoutesContract.Presenter mBusRoutesPresenter;
+    private BusRoutesPresenter mBusRoutesPresenter;
 
     @Mock private BusRoutesContract.View mBusRoutesView;
     @Mock private Bundle mStateBundle;
     @Mock private BusesDataSource mBusSource;
     @Mock private FavoriteRoutesDataSource mFavsSource;
+    @Mock private FavoriteRoutesContract.LoadingCache mFavsCache;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
 
-        mBusRoutesPresenter = new BusRoutesPresenter(mBusRoutesView, mBusSource, mFavsSource);
+        mBusRoutesPresenter = new BusRoutesPresenter(
+                mBusRoutesView,
+                mBusSource,
+                mFavsSource,
+                mFavsCache);
 
         when(mBusSource.hasCachedData()).thenReturn(false);
 
@@ -66,6 +75,9 @@ public class BusRoutesPresenterTest extends BaseUnitTest {
     public void start() throws Exception {
         mBusRoutesPresenter.start();
 
+        verify(mFavsCache).setListener(any(FavoriteRoutesContract.DataLoadedListener.class));
+        verify(mFavsCache).loadFavoriteRoutes();
+
         verify(mBusRoutesView).subscribeReceiver(any(BroadcastReceiver.class));
         verify(mBusSource).getBuses(any(BusesDataSource.GetBusesCallback.class));
     }
@@ -74,7 +86,15 @@ public class BusRoutesPresenterTest extends BaseUnitTest {
     public void stop() throws Exception {
         mBusRoutesPresenter.stop();
 
+        verify(mFavsCache).setListener(null);
         verify(mBusRoutesView).unsubscribeReceiver(any(BroadcastReceiver.class));
+    }
+
+    @Test
+    public void onLoaded() throws Exception {
+        mBusRoutesPresenter.onFavoriteRoutesLoaded(new ArrayList<FavoriteRouteDataObject>());
+
+        verify(mBusRoutesView).applyFavorites(anyListOf(FavoriteRouteDataObject.class));
     }
 
     @Test
@@ -114,7 +134,9 @@ public class BusRoutesPresenterTest extends BaseUnitTest {
 
         verify(mBusSource).saveBus(bus);
         verify(mFavsSource).reloadRoutes();
+        verify(mFavsSource, never()).deleteRoute(any(FavoriteRoute.class));
         verify(mFavsSource).saveRoute(any(FavoriteRoute.class));
+        verify(mFavsCache).addFavoritedRoute(any(FavoriteRoute.class));
     }
 
     @Test
@@ -128,6 +150,8 @@ public class BusRoutesPresenterTest extends BaseUnitTest {
 
         verify(mBusSource).saveBus(bus);
         verify(mFavsSource).reloadRoutes();
+        verify(mFavsSource, never()).saveRoute(any(FavoriteRoute.class));
         verify(mFavsSource).deleteRoute(any(FavoriteRoute.class));
+        verify(mFavsCache).removeFavoriteRoute(any(FavoriteRoute.class));
     }
 }

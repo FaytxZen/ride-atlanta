@@ -12,8 +12,8 @@ import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
 import com.andrewvora.apps.rideatlanta.data.models.Bus;
 import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
 import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesContract;
-import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesDataManager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -27,7 +27,7 @@ public class BusRoutesPresenter implements
     @NonNull private BusRoutesContract.View mView;
     @NonNull private BusesDataSource mBusesRepo;
     @NonNull private FavoriteRoutesDataSource mFavRoutesRepo;
-    @NonNull private FavoriteRoutesDataManager mFavRoutesDataManager;
+    @NonNull private FavoriteRoutesContract.LoadingCache mFavRoutesCache;
 
     @NonNull
     private BroadcastReceiver mBusesReceiver = new BroadcastReceiver() {
@@ -40,12 +40,12 @@ public class BusRoutesPresenter implements
     public BusRoutesPresenter(@NonNull BusRoutesContract.View view,
                               @NonNull BusesDataSource busRepo,
                               @NonNull FavoriteRoutesDataSource routesRepo,
-                              @NonNull FavoriteRoutesDataManager routesDataManager)
+                              @NonNull FavoriteRoutesContract.LoadingCache routesDataManager)
     {
         mView = view;
         mBusesRepo = busRepo;
         mFavRoutesRepo = routesRepo;
-        mFavRoutesDataManager = routesDataManager;
+        mFavRoutesCache = routesDataManager;
     }
 
     @Override
@@ -56,8 +56,8 @@ public class BusRoutesPresenter implements
 
     @Override
     public void start() {
-        mFavRoutesDataManager.setListener(this);
-        mFavRoutesDataManager.loadFavoriteRoutes();
+        mFavRoutesCache.setListener(this);
+        mFavRoutesCache.loadFavoriteRoutes();
 
         mView.subscribeReceiver(mBusesReceiver);
 
@@ -66,12 +66,12 @@ public class BusRoutesPresenter implements
 
     @Override
     public void stop() {
-        mFavRoutesDataManager.setListener(null);
+        mFavRoutesCache.setListener(null);
         mView.unsubscribeReceiver(mBusesReceiver);
     }
 
     @Override
-    public void onLoaded(@NonNull List<FavoriteRouteDataObject> favRoutes) {
+    public void onFavoriteRoutesLoaded(@NonNull List<FavoriteRouteDataObject> favRoutes) {
         mView.applyFavorites(favRoutes);
     }
 
@@ -97,6 +97,7 @@ public class BusRoutesPresenter implements
 
         // set repo to get fresh data
         mFavRoutesRepo.reloadRoutes();
+        mFavRoutesCache.setFavoritedRoutes(new ArrayList<FavoriteRouteDataObject>());
 
         FavoriteRoute favoriteRoute = new FavoriteRoute(bus);
 

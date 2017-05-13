@@ -165,7 +165,7 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
                 FavoriteRoute routeToSave = new FavoriteRoute(train);
                 routeToSave.setId(favoriteRoute.getId());
 
-                updateTrainArrivalTime(train, updateUi);
+                updateTrainArrivalTime(favoriteRoute, train, updateUi);
             }
 
             @Override
@@ -175,7 +175,7 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
         });
     }
 
-    private void updateTrainArrivalTime(final Train train, final boolean updateUi) {
+    private void updateTrainArrivalTime(final FavoriteRoute route, final Train train, final boolean updateUi) {
         TrainsDataSource.GetTrainRoutesCallback callback = new TrainsDataSource.GetTrainRoutesCallback() {
             @Override
             public void onFinished(List<Train> trainList) {

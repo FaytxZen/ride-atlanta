@@ -30,7 +30,7 @@ import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
 import com.andrewvora.apps.rideatlanta.data.repos.NotificationsRepo;
 import com.andrewvora.apps.rideatlanta.data.repos.TrainsRepo;
 import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesContract;
-import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesDataManager;
+import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesLoadingCache;
 import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesFragment;
 import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesPresenter;
 import com.andrewvora.apps.rideatlanta.home.HomeContract;
@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.toolbar) Toolbar mToolbar;
     @BindView(R.id.bottom_bar) BottomBar mBottomBar;
 
-    private FavoriteRoutesDataManager mFavRouteDataManager;
+    private FavoriteRoutesLoadingCache mFavRouteDataManager;
     private Handler mPollingHandler;
     private Runnable mPollingTask = new Runnable() {
         @Override
@@ -82,11 +82,11 @@ public class MainActivity extends AppCompatActivity {
 
         setSupportActionBar(mToolbar);
 
-        mFavRouteDataManager = (FavoriteRoutesDataManager)
-                getFragmentManager().findFragmentByTag(FavoriteRoutesDataManager.TAG);
+        mFavRouteDataManager = (FavoriteRoutesLoadingCache)
+                getFragmentManager().findFragmentByTag(FavoriteRoutesLoadingCache.TAG);
 
         if(mFavRouteDataManager == null) {
-            mFavRouteDataManager = FavoriteRoutesDataManager.createInstance();
+            mFavRouteDataManager = FavoriteRoutesLoadingCache.createInstance();
         }
 
         mPollingHandler = new Handler();
@@ -297,8 +297,8 @@ public class MainActivity extends AppCompatActivity {
         }
         ft.replace(parentId, fragment, tag);
 
-        if(getFragmentManager().findFragmentByTag(FavoriteRoutesDataManager.TAG) == null) {
-            ft.add(mFavRouteDataManager, FavoriteRoutesDataManager.TAG);
+        if(getFragmentManager().findFragmentByTag(FavoriteRoutesLoadingCache.TAG) == null) {
+            ft.add(mFavRouteDataManager, FavoriteRoutesLoadingCache.TAG);
         }
 
         ft.commit();

@@ -8,6 +8,7 @@ import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
 import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
 import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
 import com.andrewvora.apps.rideatlanta.data.models.Train;
+import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesContract;
 
 import org.junit.Test;
 import org.mockito.Mock;
@@ -28,6 +29,7 @@ import static org.mockito.Mockito.when;
 public class TrainRoutesPresenterTest extends BaseUnitTest {
 
     @Mock FavoriteRoutesDataSource mFavRoutesRepo;
+    @Mock FavoriteRoutesContract.LoadingCache mFavRoutesCache;
     @Mock TrainsDataSource mTrainsRepo;
     @Mock TrainRoutesContract.View mView;
 
@@ -37,7 +39,7 @@ public class TrainRoutesPresenterTest extends BaseUnitTest {
     public void setUp() throws Exception {
         super.setUp();
 
-        mPresenter = new TrainRoutesPresenter(mView, mTrainsRepo, mFavRoutesRepo);
+        mPresenter = new TrainRoutesPresenter(mView, mTrainsRepo, mFavRoutesRepo, mFavRoutesCache);
     }
 
     @Test
@@ -56,11 +58,17 @@ public class TrainRoutesPresenterTest extends BaseUnitTest {
 
         verify(mView).subscribeReceiver(any(BroadcastReceiver.class));
         verify(mTrainsRepo).getTrains(any(TrainsDataSource.GetTrainRoutesCallback.class));
+
+        verify(mFavRoutesCache).setListener(any(FavoriteRoutesContract.DataLoadedListener.class));
+        verify(mFavRoutesCache).loadFavoriteRoutes();
     }
 
     @Test
     public void stop() throws Exception {
         mPresenter.stop();
+
+        verify(mView).unsubscribeReceiver(any(BroadcastReceiver.class));
+        verify(mFavRoutesCache).setListener(null);
     }
 
     @Test
@@ -91,24 +99,31 @@ public class TrainRoutesPresenterTest extends BaseUnitTest {
 
     @Test
     public void favoriteRoute_favoriting() throws Exception {
-        Train train = mock(Train.class);
+        Train train = new Train();
+        train.setTrainId(1L);
+
+        mPresenter.favoriteRoute(train);
+
+        verify(mTrainsRepo).saveTrain(train);
+        verify(mFavRoutesRepo).reloadRoutes();
+
+        verify(mFavRoutesRepo, never()).deleteRoute(any(FavoriteRoute.class));
+        verify(mFavRoutesRepo).saveRoute(any(FavoriteRoute.class));
+        verify(mFavRoutesCache).addFavoritedRoute(any(FavoriteRoute.class));
+    }
+
+    @Test
+    public void favoriteRoute_alreadyFavorited() throws Exception {
+        Train train = new Train();
+        train.setTrainId(1L);
+        train.setFavorited(true);
 
         mPresenter.favoriteRoute(train);
 
         verify(mTrainsRepo).saveTrain(train);
         verify(mFavRoutesRepo).reloadRoutes();
         verify(mFavRoutesRepo).deleteRoute(any(FavoriteRoute.class));
-    }
-
-    @Test
-    public void favoriteRoute_alreadyFavorited() throws Exception {
-        Train train = mock(Train.class);
-        when(train.isFavorited()).thenReturn(true);
-
-        mPresenter.favoriteRoute(train);
-
-        verify(mTrainsRepo).saveTrain(train);
-        verify(mFavRoutesRepo).reloadRoutes();
-        verify(mFavRoutesRepo).saveRoute(any(FavoriteRoute.class));
+        verify(mFavRoutesRepo, never()).saveRoute(any(FavoriteRoute.class));
+        verify(mFavRoutesCache).removeFavoriteRoute(any(FavoriteRoute.class));
     }
 }

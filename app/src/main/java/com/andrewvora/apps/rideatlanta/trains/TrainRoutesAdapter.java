@@ -63,13 +63,9 @@ public class TrainRoutesAdapter extends
         holder.statusTextView.setText(train.getWaitingTime());
 
         // attach click listeners
-        String key = train.getName() + train.getDestination();
-        if(mFavoritedRouteIds.contains(key)) {
-            holder.favoriteButton.setSelected(true);
-        }
-        else {
-            holder.favoriteButton.setSelected(train.isFavorited());
-        }
+        String key = train.getFavoriteRouteKey();
+        holder.favoriteButton.setSelected(mFavoritedRouteIds.contains(key));
+        train.setFavorited(mFavoritedRouteIds.contains(key));
 
         holder.favoriteButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -86,8 +82,12 @@ public class TrainRoutesAdapter extends
         return mTrainList.size();
     }
 
-    public void setFavoritedRoutes(@NonNull Set<String> favRouteIds) {
+    public void setFavoritedRouteIds(@NonNull Set<String> favRouteIds) {
         mFavoritedRouteIds = favRouteIds;
+    }
+
+    public Set<String> getFavoriteRouteIds() {
+        return mFavoritedRouteIds;
     }
 
     public void setTrains(@NonNull List<Train> trains) {

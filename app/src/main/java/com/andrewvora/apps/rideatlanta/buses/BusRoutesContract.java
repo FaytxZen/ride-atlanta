@@ -28,6 +28,7 @@ public interface BusRoutesContract {
         void subscribeReceiver(@NonNull BroadcastReceiver receiver);
         void unsubscribeReceiver(@NonNull BroadcastReceiver receiver);
         void applyFavorites(@NonNull List<FavoriteRouteDataObject> favRoutes);
+        void updateFavoriteStatusOf(@NonNull Bus bus);
 
         Context getViewContext();
     }

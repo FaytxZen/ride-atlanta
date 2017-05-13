@@ -59,6 +59,10 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
         @Override
         public void onFavoriteBus(int position) {
             mPresenter.favoriteRoute(mBusAdapter.getItemAtPosition(position));
+
+            // must be called after presenter method
+            updateFavoriteStatusOf(mBusAdapter.getItemAtPosition(position));
+
             mBusAdapter.notifyItemChanged(position);
         }
     };
@@ -133,6 +137,18 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
     }
 
     @Override
+    public void updateFavoriteStatusOf(@NonNull Bus bus) {
+        String key = bus.getFavoriteRouteKey();
+
+        if(bus.isFavorited()) {
+            mBusAdapter.getFavoriteRouteIds().add(key);
+        }
+        else {
+            mBusAdapter.getFavoriteRouteIds().remove(key);
+        }
+    }
+
+    @Override
     public void applyFavorites(@NonNull List<FavoriteRouteDataObject> favRoutes) {
         Set<String> favRouteIds = new HashSet<>();
 
@@ -140,7 +156,7 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
             favRouteIds.add(route.getName());
         }
 
-        mBusAdapter.setFavoriteRoutes(favRouteIds);
+        mBusAdapter.setFavoriteRouteIds(favRouteIds);
         mBusAdapter.notifyDataSetChanged();
     }
 

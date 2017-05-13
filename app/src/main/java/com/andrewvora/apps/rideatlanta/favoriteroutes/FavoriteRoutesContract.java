@@ -30,7 +30,7 @@ public interface FavoriteRoutesContract {
         Context getViewContext();
     }
 
-    interface DataHolder {
+    interface LoadingCache {
         void setListener(DataLoadedListener listener);
         DataLoadedListener getListener();
 
@@ -42,6 +42,6 @@ public interface FavoriteRoutesContract {
     }
 
     interface DataLoadedListener {
-        void onLoaded(@NonNull List<FavoriteRouteDataObject> favRoutes);
+        void onFavoriteRoutesLoaded(@NonNull List<FavoriteRouteDataObject> favRoutes);
     }
 }

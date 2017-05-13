@@ -68,12 +68,9 @@ public class BusRoutesAdapter extends RecyclerView.Adapter<BusRoutesAdapter.BusR
 
         holder.statusTextView.setText(status);
 
-        if(mFavoriteRouteIds.contains(bus.getName())) {
-            holder.favoriteButton.setSelected(true);
-        }
-        else {
-            holder.favoriteButton.setSelected(bus.isFavorited());
-        }
+        final boolean isFavorited = mFavoriteRouteIds.contains(bus.getFavoriteRouteKey());
+        holder.favoriteButton.setSelected(isFavorited);
+        bus.setFavorited(isFavorited);
 
         holder.favoriteButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -94,8 +91,12 @@ public class BusRoutesAdapter extends RecyclerView.Adapter<BusRoutesAdapter.BusR
         return mBusList.get(position);
     }
 
-    public void setFavoriteRoutes(@NonNull Set<String> favRouteIds) {
+    public void setFavoriteRouteIds(@NonNull Set<String> favRouteIds) {
         mFavoriteRouteIds = favRouteIds;
+    }
+
+    public Set<String> getFavoriteRouteIds() {
+        return mFavoriteRouteIds;
     }
 
     public void setBuses(@Nullable List<Bus> buses) {

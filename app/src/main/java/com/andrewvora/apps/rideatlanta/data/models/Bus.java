@@ -153,6 +153,11 @@ public class Bus extends BaseModel implements FavoriteRouteDataObject {
     }
 
     @Override
+    public String getFavoriteRouteKey() {
+        return getName();
+    }
+
+    @Override
     public String getRouteId() {
         return routeId;
     }

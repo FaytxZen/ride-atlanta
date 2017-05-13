@@ -3,6 +3,8 @@ package com.andrewvora.apps.rideatlanta.favoriteroutes;
 import android.app.Fragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -12,6 +14,7 @@ import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
 import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -19,19 +22,19 @@ import java.util.List;
  *
  * @author Andrew Vorakrajangthiti
  */
-public class FavoriteRoutesDataManager extends Fragment implements FavoriteRoutesContract.DataHolder {
+public class FavoriteRoutesLoadingCache extends Fragment implements FavoriteRoutesContract.LoadingCache {
 
-    public static final String TAG = FavoriteRoutesDataManager.class.getSimpleName();
+    public static final String TAG = FavoriteRoutesLoadingCache.class.getSimpleName();
 
     @NonNull private List<FavoriteRouteDataObject> mFavoriteRoutes;
     @Nullable private FavoriteRoutesContract.DataLoadedListener mListener;
 
-    public FavoriteRoutesDataManager() {
+    public FavoriteRoutesLoadingCache() {
         this.mFavoriteRoutes = new ArrayList<>();
     }
 
-    public static FavoriteRoutesDataManager createInstance() {
-        return new FavoriteRoutesDataManager();
+    public static FavoriteRoutesLoadingCache createInstance() {
+        return new FavoriteRoutesLoadingCache();
     }
 
     @Override
@@ -61,13 +64,17 @@ public class FavoriteRoutesDataManager extends Fragment implements FavoriteRoute
         }
         // use cached results
         else if(mListener != null) {
-            mListener.onLoaded(mFavoriteRoutes);
+            mListener.onFavoriteRoutesLoaded(mFavoriteRoutes);
         }
     }
 
     @Override
     public void setFavoritedRoutes(@NonNull List<FavoriteRouteDataObject> favoritedTrains) {
         mFavoriteRoutes = favoritedTrains;
+    }
+
+    List<FavoriteRouteDataObject> getFavoriteRoutes() {
+        return mFavoriteRoutes;
     }
 
     @Override
@@ -77,9 +84,13 @@ public class FavoriteRoutesDataManager extends Fragment implements FavoriteRoute
 
     @Override
     public void removeFavoriteRoute(@NonNull FavoriteRouteDataObject route) {
-        for(FavoriteRouteDataObject curRoute : mFavoriteRoutes) {
-            if(route.getRouteId().equals(curRoute.getRouteId())) {
-                mFavoriteRoutes.remove(curRoute);
+        Iterator<FavoriteRouteDataObject> it = mFavoriteRoutes.iterator();
+
+        while(it.hasNext()) {
+            FavoriteRouteDataObject curRoute = it.next();
+
+            if(route.getFavoriteRouteKey().equals(curRoute.getFavoriteRouteKey())) {
+                it.remove();
                 break;
             }
         }
@@ -88,10 +99,10 @@ public class FavoriteRoutesDataManager extends Fragment implements FavoriteRoute
     private static class GetFavRoutesTask extends
             AsyncTask<Void, Void, List<FavoriteRouteDataObject>>
     {
-        private FavoriteRoutesContract.DataHolder mHolder;
+        private FavoriteRoutesLoadingCache mHolder;
         private FavoriteRoutesDataSource mFavRoutesRepo;
 
-        GetFavRoutesTask(@Nullable FavoriteRoutesContract.DataHolder holder,
+        GetFavRoutesTask(@Nullable FavoriteRoutesLoadingCache holder,
                          @NonNull FavoriteRoutesDataSource favRoutesRepo)
         {
             mHolder = holder;
@@ -111,7 +122,8 @@ public class FavoriteRoutesDataManager extends Fragment implements FavoriteRoute
                         }
 
                         mHolder.setFavoritedRoutes(result);
-                        mHolder.getListener().onLoaded(result);
+
+                        passDataToListener();
                     }
                 }
 
@@ -122,6 +134,18 @@ public class FavoriteRoutesDataManager extends Fragment implements FavoriteRoute
             });
 
             return null;
+        }
+
+        private void passDataToListener() {
+            Handler uiHandler = new Handler(Looper.getMainLooper());
+            uiHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if(mHolder != null && mHolder.getListener() != null) {
+                        mHolder.getListener().onFavoriteRoutesLoaded(mHolder.getFavoriteRoutes());
+                    }
+                }
+            });
         }
     }
 }

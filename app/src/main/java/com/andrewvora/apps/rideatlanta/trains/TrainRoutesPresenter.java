@@ -12,8 +12,8 @@ import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
 import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
 import com.andrewvora.apps.rideatlanta.data.models.Train;
 import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesContract;
-import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesDataManager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,7 +28,7 @@ public class TrainRoutesPresenter implements
     @NonNull private TrainRoutesContract.View mView;
     @NonNull private TrainsDataSource mTrainRepo;
     @NonNull private FavoriteRoutesDataSource mFavoriteDataSource;
-    @NonNull private FavoriteRoutesDataManager mFavRouteDataManager;
+    @NonNull private FavoriteRoutesContract.LoadingCache mFavRouteCache;
 
     private BroadcastReceiver mTrainReceiver = new BroadcastReceiver() {
         @Override
@@ -40,12 +40,12 @@ public class TrainRoutesPresenter implements
     public TrainRoutesPresenter(@NonNull TrainRoutesContract.View view,
                                 @NonNull TrainsDataSource trainRepo,
                                 @NonNull FavoriteRoutesDataSource favRouteRepo,
-                                @NonNull FavoriteRoutesDataManager favRouteDataManager)
+                                @NonNull FavoriteRoutesContract.LoadingCache favRouteDataManager)
     {
         mView = view;
         mTrainRepo = trainRepo;
         mFavoriteDataSource = favRouteRepo;
-        mFavRouteDataManager = favRouteDataManager;
+        mFavRouteCache = favRouteDataManager;
     }
 
     @Override
@@ -58,22 +58,22 @@ public class TrainRoutesPresenter implements
     public void start() {
         mView.subscribeReceiver(mTrainReceiver);
 
-        mFavRouteDataManager.setListener(this);
-        mFavRouteDataManager.loadFavoriteRoutes();
+        mFavRouteCache.setListener(this);
+        mFavRouteCache.loadFavoriteRoutes();
 
         loadTrainRoutes();
     }
 
     @Override
     public void stop() {
-        mFavRouteDataManager.setListener(null);
-        mFavRouteDataManager.loadFavoriteRoutes();
+        mFavRouteCache.setListener(null);
+        mFavRouteCache.loadFavoriteRoutes();
 
         mView.unsubscribeReceiver(mTrainReceiver);
     }
 
     @Override
-    public void onLoaded(@NonNull List<FavoriteRouteDataObject> favRoutes) {
+    public void onFavoriteRoutesLoaded(@NonNull List<FavoriteRouteDataObject> favRoutes) {
         mView.applyFavorites(favRoutes);
     }
 
@@ -109,16 +109,16 @@ public class TrainRoutesPresenter implements
         route.setFavorited(!route.isFavorited());
 
         mTrainRepo.saveTrain(route);
+
         mFavoriteDataSource.reloadRoutes();
+        mFavRouteCache.setFavoritedRoutes(new ArrayList<FavoriteRouteDataObject>());
 
         FavoriteRoute favoriteRoute = new FavoriteRoute(route);
 
         if(route.isFavorited()) {
-            mFavRouteDataManager.addFavoritedRoute(favoriteRoute);
             mFavoriteDataSource.saveRoute(favoriteRoute);
         }
         else {
-            mFavRouteDataManager.removeFavoriteRoute(favoriteRoute);
             mFavoriteDataSource.deleteRoute(favoriteRoute);
         }
     }

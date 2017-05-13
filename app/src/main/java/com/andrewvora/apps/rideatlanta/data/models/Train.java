@@ -133,6 +133,11 @@ public class Train extends BaseModel implements FavoriteRouteDataObject, Cloneab
     }
 
     @Override
+    public String getFavoriteRouteKey() {
+        return getName() + " " + getDestination();
+    }
+
+    @Override
     public String getType() {
         return FavoriteRouteDataObject.TYPE_TRAIN;
     }

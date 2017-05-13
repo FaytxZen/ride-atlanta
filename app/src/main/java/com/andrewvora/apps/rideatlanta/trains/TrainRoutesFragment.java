@@ -54,6 +54,10 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
         @Override
         public void onFavoriteItem(int position) {
             mPresenter.favoriteRoute(mTrainAdapter.getTrain(position));
+
+            // must be called after presenter method
+            updateFavoriteStatusOf(mTrainAdapter.getTrain(position));
+
             mTrainAdapter.notifyItemChanged(position);
         }
     };
@@ -128,14 +132,26 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
     }
 
     @Override
+    public void updateFavoriteStatusOf(@NonNull Train train) {
+        String key = train.getFavoriteRouteKey();
+
+        if(train.isFavorited()) {
+            mTrainAdapter.getFavoriteRouteIds().add(key);
+        }
+        else {
+            mTrainAdapter.getFavoriteRouteIds().remove(key);
+        }
+    }
+
+    @Override
     public void applyFavorites(List<FavoriteRouteDataObject> favRoutes) {
         Set<String> favRouteIds = new HashSet<>();
 
         for(FavoriteRouteDataObject route : favRoutes) {
-            favRouteIds.add(route.getName() + route.getDestination());
+            favRouteIds.add(route.getFavoriteRouteKey());
         }
 
-        mTrainAdapter.setFavoritedRoutes(favRouteIds);
+        mTrainAdapter.setFavoritedRouteIds(favRouteIds);
         mTrainAdapter.notifyDataSetChanged();
     }
 

@@ -14,4 +14,5 @@ public interface FavoriteRouteDataObject {
     String getName();
     String getDestination();
     String getTimeTilArrival();
+    String getFavoriteRouteKey();
 }
