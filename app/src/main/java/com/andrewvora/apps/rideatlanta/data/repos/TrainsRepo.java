@@ -24,13 +24,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by faytx on 10/22/2016.
  * @author Andrew Vorakrajangthiti
  */
-
 public class TrainsRepo implements TrainsDataSource {
 
     public static final String KEY_DELIMITER = "\\$";
 
     private static TrainsRepo mInstance;
 
+    // Note: currently not leveraging the local source
     private TrainsDataSource mLocalSource;
     private TrainsDataSource mRemoteSource;
 
@@ -73,24 +73,11 @@ public class TrainsRepo implements TrainsDataSource {
         if(!mCachedTrains.isEmpty() && !mCacheIsDirty) {
             List<Train> cachedTrainList = new ArrayList<>(mCachedTrains.values());
             Collections.sort(cachedTrainList, new TrainsComparator());
+
             callback.onFinished(cachedTrainList);
         }
         else if(mCacheIsDirty) {
             getTrainsFromRemote(callback);
-        }
-        else {
-            mLocalSource.getTrains(new GetTrainRoutesCallback() {
-                @Override
-                public void onFinished(List<Train> trainList) {
-                    reloadCachedTrains(trainList);
-                    callback.onFinished(trainList);
-                }
-
-                @Override
-                public void onError(Object error) {
-                    callback.onError(error);
-                }
-            });
         }
     }
 
@@ -119,7 +106,7 @@ public class TrainsRepo implements TrainsDataSource {
 
     @Override
     public void getTrains(@NonNull GetTrainRoutesCallback callback, @NonNull Long... trainIds) {
-        mLocalSource.getTrains(callback, trainIds);
+        mRemoteSource.getTrains(callback, trainIds);
     }
 
     @Override
@@ -131,7 +118,7 @@ public class TrainsRepo implements TrainsDataSource {
             callback.onFinished(cachedTrain);
         }
         else {
-            mLocalSource.getTrain(train, new GetTrainRouteCallback() {
+            mRemoteSource.getTrain(train, new GetTrainRouteCallback() {
                 @Override
                 public void onFinished(Train train) {
                     callback.onFinished(train);
@@ -140,18 +127,7 @@ public class TrainsRepo implements TrainsDataSource {
 
                 @Override
                 public void onError(Object error) {
-                    mRemoteSource.getTrain(train, new GetTrainRouteCallback() {
-                        @Override
-                        public void onFinished(Train train) {
-                            callback.onFinished(train);
-                            cacheTrain(train);
-                        }
-
-                        @Override
-                        public void onError(Object error) {
-                            callback.onError(error);
-                        }
-                    });
+                    callback.onError(error);
                 }
             });
         }
@@ -159,7 +135,6 @@ public class TrainsRepo implements TrainsDataSource {
 
     @Override
     public void deleteAllTrains(@Nullable DeleteTrainRoutesCallback callback) {
-        mLocalSource.deleteAllTrains(null);
         mRemoteSource.deleteAllTrains(null);
 
         mCachedTrains.clear();
@@ -171,8 +146,6 @@ public class TrainsRepo implements TrainsDataSource {
 
     @Override
     public void saveTrain(@NonNull Train route) {
-        // only save trains locally
-        mLocalSource.saveTrain(route);
         cacheTrain(route);
     }
 
@@ -185,9 +158,7 @@ public class TrainsRepo implements TrainsDataSource {
         mRemoteSource.getTrains(new GetTrainRoutesCallback() {
             @Override
             public void onFinished(List<Train> trainList) {
-                restoreFavoritedTrains(trainList);
                 reloadCachedTrains(trainList);
-                reloadLocalTrains(trainList);
 
                 callback.onFinished(trainList);
             }
@@ -195,32 +166,6 @@ public class TrainsRepo implements TrainsDataSource {
             @Override
             public void onError(Object error) {
                 callback.onError(error);
-            }
-        });
-    }
-
-    private void restoreFavoritedTrains(@NonNull final List<Train> favoritedTrains) {
-        mLocalSource.getTrains(new GetTrainRoutesCallback() {
-            @Override
-            public void onFinished(List<Train> trainList) {
-                if(trainList != null) {
-                    for(Train train : favoritedTrains) {
-                        for(Train localTrain : trainList) {
-                            boolean matched = train.getStation().equals(localTrain.getStation()) &&
-                                    train.getLine().equals(localTrain.getLine());
-
-                            if(matched) {
-                                train.setFavorited(localTrain.isFavorited());
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onError(Object error) {
-
             }
         });
     }
@@ -236,19 +181,6 @@ public class TrainsRepo implements TrainsDataSource {
                 }
 
                 mCacheIsDirty = false;
-            }
-        });
-    }
-
-    private void reloadLocalTrains(final List<Train> trainList) {
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                mLocalSource.deleteAllTrains(null);
-
-                for(Train train : trainList) {
-                    mLocalSource.saveTrain(train);
-                }
             }
         });
     }

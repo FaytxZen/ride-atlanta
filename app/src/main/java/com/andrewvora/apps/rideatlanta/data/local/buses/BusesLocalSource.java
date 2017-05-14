@@ -94,7 +94,7 @@ public class BusesLocalSource implements BusesDataSource {
             Cursor busCursor = db.query(BusesTable.TABLE_NAME,
                     columns, selection, selectionArgs, null, null, null, numResultsNeeded);
 
-            if(busCursor.getColumnCount() > 0) {
+            if(busCursor.getCount() > 0) {
                 busCursor.moveToFirst();
 
                 Bus savedBus = getBusFrom(busCursor);

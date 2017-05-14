@@ -151,16 +151,18 @@ public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesCo
 
     @Override
     public void onRouteInformationLoaded(FavoriteRouteDataObject favRoute) {
-        final boolean isExistingRoute =
-                mFavRoutesAdapter.getPosition(favRoute) !=
-                FavoriteRoutesAdapter.NEW_INDEX;
+        final int adapterPosition = mFavRoutesAdapter.getPosition(favRoute);
 
-        mFavRoutesAdapter.setFavoriteRoute(favRoute);
+        if(adapterPosition != FavoriteRoutesAdapter.NEW_INDEX) {
+            mFavRoutesAdapter.setFavoriteRoute(adapterPosition, favRoute);
 
-        if(isExistingRoute) {
-            int position = mFavRoutesAdapter.getPosition(favRoute);
+            notifyItemChanged(adapterPosition);
+        }
+        else {
+            int insertedIndex = mFavRoutesAdapter.getItemCount();
 
-            notifyItemChanged(position);
+            mFavRoutesAdapter.getFavoriteRoutes().add(favRoute);
+            mFavRoutesAdapter.notifyItemInserted(insertedIndex);
         }
     }
 
@@ -207,7 +209,8 @@ public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesCo
                     @Override
                     public void onFinished(Train train) {
                         train.setFavorited(false);
-                        TrainsRepo.getInstance(context).saveTrain(train);
+
+                        mTrainRepo.saveTrain(train);
                     }
 
                     @Override
@@ -228,7 +231,8 @@ public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesCo
             @Override
             public void onFinished(Bus bus) {
                 bus.setFavorited(false);
-                BusesRepo.getInstance(context).saveBus(bus);
+
+                mBusRepo.saveBus(bus);
             }
 
             @Override

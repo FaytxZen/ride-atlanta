@@ -131,10 +131,14 @@ public class BusesRemoteSource implements BusesDataSource {
 
         @Override
         protected List<Bus> doInBackground(JSONArray... jsonArrays) {
+            if(jsonArrays.length == 0) {
+                return new ArrayList<>();
+            }
+
             final SortedMap<String, Bus> busMap = new TreeMap<>(new BusComparator());
             final JSONArray response = jsonArrays[0];
 
-            for(int i = 0; i < response.length(); i++) {
+            for(int i = 0; response != null && i < response.length(); i++) {
                 try {
                     String jsonStr = response.getJSONObject(i).toString();
                     Bus bus = new Gson().fromJson(jsonStr, Bus.class);

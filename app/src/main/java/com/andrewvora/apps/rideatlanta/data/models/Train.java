@@ -7,6 +7,8 @@ import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
+
 /**
  * Created by faytx on 10/23/2016.
  * @author Andrew Vorakrajangthiti
@@ -185,6 +187,20 @@ public class Train extends BaseModel implements FavoriteRouteDataObject, Cloneab
             default:
                 return R.color.md_grey_500;
         }
+    }
+
+    public static String combineArrivalTimes(@NonNull List<Train> trainList) {
+        StringBuilder sb = new StringBuilder();
+
+        for(int i = 0; i < trainList.size(); i++) {
+            if(i != 0) {
+                sb.append(", ");
+            }
+
+            sb.append(trainList.get(i).getTimeTilArrival());
+        }
+
+        return sb.toString();
     }
 
     public Train getCopy() {

@@ -90,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         mPollingHandler = new Handler();
+        mBottomBar.setDefaultTabPosition(1);
         mBottomBar.setOnTabSelectListener(new OnTabSelectListener() {
             @Override
             public void onTabSelected(@IdRes int tabId) {

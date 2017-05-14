@@ -10,6 +10,9 @@ import com.andrewvora.apps.rideatlanta.data.local.buses.BusesLocalSource;
 import com.andrewvora.apps.rideatlanta.data.models.Bus;
 import com.andrewvora.apps.rideatlanta.data.remote.buses.BusesRemoteSource;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,6 +31,8 @@ public class BusesRepo implements BusesDataSource {
 
     @NonNull private Map<String, Bus> mCachedBuses;
     @NonNull private BusesDataSource mRemoteSource;
+
+    // NOTE: currently not leveraging local source
     @NonNull private BusesDataSource mLocalSource;
 
     private boolean mCacheIsDirty;
@@ -58,11 +63,31 @@ public class BusesRepo implements BusesDataSource {
             getBusRoutesFromRemote(callback);
         }
         else {
-            mLocalSource.getBuses(new GetBusesCallback() {
+            List<Bus> buses = new ArrayList<>(mCachedBuses.values());
+            Collections.sort(buses, new BusComparator());
+
+            callback.onFinished(buses);
+        }
+    }
+
+    @Override
+    public void getBuses(@NonNull GetBusesCallback callback, @NonNull String... routeIds) {
+
+    }
+
+    @Override
+    public void getBus(@NonNull final Bus bus, @NonNull final GetBusCallback callback) {
+        final Bus cachedRoute = mCachedBuses.get(getKeyFor(bus));
+
+        if(cachedRoute != null) {
+            callback.onFinished(cachedRoute);
+        }
+        else {
+            mRemoteSource.getBus(bus, new GetBusCallback() {
                 @Override
-                public void onFinished(List<Bus> buses) {
-                    reloadCachedBusRoutes(buses);
-                    callback.onFinished(buses);
+                public void onFinished(Bus bus) {
+                    callback.onFinished(bus);
+                    cacheBusRoute(bus);
                 }
 
                 @Override
@@ -74,47 +99,7 @@ public class BusesRepo implements BusesDataSource {
     }
 
     @Override
-    public void getBuses(@NonNull GetBusesCallback callback, @NonNull String... routeIds) {
-        mLocalSource.getBuses(callback, routeIds);
-    }
-
-    @Override
-    public void getBus(@NonNull final Bus bus, @NonNull final GetBusCallback callback) {
-        final Bus cachedRoute = mCachedBuses.get(getKeyFor(bus));
-
-        if(cachedRoute != null) {
-            callback.onFinished(cachedRoute);
-        }
-        else {
-            mLocalSource.getBus(bus, new GetBusCallback() {
-                @Override
-                public void onFinished(Bus bus) {
-                    callback.onFinished(bus);
-                    cacheBusRoute(bus);
-                }
-
-                @Override
-                public void onError(Object error) {
-                    mRemoteSource.getBus(bus, new GetBusCallback() {
-                        @Override
-                        public void onFinished(Bus bus) {
-                            callback.onFinished(bus);
-                            cacheBusRoute(bus);
-                        }
-
-                        @Override
-                        public void onError(Object error) {
-                            callback.onError(error);
-                        }
-                    });
-                }
-            });
-        }
-    }
-
-    @Override
     public void deleteAllBus(@Nullable DeleteBusesCallback callback) {
-        mLocalSource.deleteAllBus(null);
         mRemoteSource.deleteAllBus(null);
 
         mCachedBuses.clear();
@@ -128,9 +113,9 @@ public class BusesRepo implements BusesDataSource {
     public void saveBus(@NonNull Bus route) {
         // only saves the routes locally since we're pulling from a read-only API
         try {
-            mLocalSource.saveBus(route);
             cacheBusRoute(route);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -149,10 +134,7 @@ public class BusesRepo implements BusesDataSource {
         mRemoteSource.getBuses(new GetBusesCallback() {
             @Override
             public void onFinished(List<Bus> buses) {
-
-                restoreFavoritedBuses(buses);
                 reloadCachedBusRoutes(buses);
-                reloadLocalBusRoutes(buses);
 
                 callback.onFinished(buses);
             }
@@ -160,29 +142,6 @@ public class BusesRepo implements BusesDataSource {
             @Override
             public void onError(Object error) {
                 callback.onError(error);
-            }
-        });
-    }
-
-    private void restoreFavoritedBuses(@NonNull final List<Bus> buses) {
-        mLocalSource.getBuses(new GetBusesCallback() {
-            @Override
-            public void onFinished(List<Bus> savedBuses) {
-                if(savedBuses != null) {
-                    for(Bus bus : buses) {
-                        for(Bus savedBus : savedBuses) {
-                            if(bus.getRouteId().equals(savedBus.getRouteId())) {
-                                bus.setFavorited(savedBus.isFavorited());
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onError(Object error) {
-
             }
         });
     }
@@ -202,24 +161,18 @@ public class BusesRepo implements BusesDataSource {
         });
     }
 
-    private void reloadLocalBusRoutes(@NonNull final List<Bus> routesList) {
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                mLocalSource.deleteAllBus(null);
-
-                for(Bus route : routesList) {
-                    mLocalSource.saveBus(route);
-                }
-            }
-        });
-    }
-
     private void cacheBusRoute(@NonNull Bus bus) {
         mCachedBuses.put(getKeyFor(bus), bus);
     }
 
     private String getKeyFor(@NonNull Bus bus) {
         return bus.getRouteId();
+    }
+
+    private static class BusComparator implements Comparator<Bus> {
+        @Override
+        public int compare(Bus o1, Bus o2) {
+            return o1.getRouteId().compareTo(o2.getRouteId());
+        }
     }
 }

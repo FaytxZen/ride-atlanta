@@ -52,6 +52,10 @@ public class Bus extends BaseModel implements FavoriteRouteDataObject {
 
     private boolean favorited;
 
+    public Bus() {
+        this.adherence = Integer.MIN_VALUE;
+    }
+
     public Integer getAdherence() {
         return adherence;
     }

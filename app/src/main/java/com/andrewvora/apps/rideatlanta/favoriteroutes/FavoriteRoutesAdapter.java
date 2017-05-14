@@ -15,6 +15,7 @@ import com.andrewvora.apps.rideatlanta.data.models.Bus;
 import com.andrewvora.apps.rideatlanta.data.models.Train;
 import com.andrewvora.apps.rideatlanta.utils.WordUtils;
 
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,17 +35,13 @@ public class FavoriteRoutesAdapter extends
     public static final int NEW_INDEX = -1;
 
     @NonNull private List<FavoriteRouteDataObject> mFavoriteRoutesList;
-    @NonNull private Map<String, Integer> mFavoriteRoutesMap;
     @NonNull private FavoriteRoutesFragment.AdapterCallback mListener;
 
     public FavoriteRoutesAdapter(@NonNull List<FavoriteRouteDataObject> favoriteRoutes,
                                  @NonNull FavoriteRoutesFragment.AdapterCallback listener)
     {
         mFavoriteRoutesList = favoriteRoutes;
-        mFavoriteRoutesMap = new LinkedHashMap<>();
         mListener = listener;
-
-        addRoutesToMap(favoriteRoutes);
     }
 
     @Override
@@ -83,46 +80,32 @@ public class FavoriteRoutesAdapter extends
 
     public void setFavoriteRoutes(@NonNull List<FavoriteRouteDataObject> routes) {
         mFavoriteRoutesList = routes;
-
-        addRoutesToMap(routes);
     }
 
     public List<FavoriteRouteDataObject> getFavoriteRoutes() {
         return mFavoriteRoutesList;
     }
 
-    public void setFavoriteRoute(@NonNull FavoriteRouteDataObject route) {
-        final String key = getMapKeyForRoute(route);
-
-        if(mFavoriteRoutesMap.containsKey(key)) {
-            int position = mFavoriteRoutesMap.get(key);
-
-            mFavoriteRoutesList.set(position, route);
-        }
+    public void setFavoriteRoute(int position, @NonNull FavoriteRouteDataObject route) {
+        mFavoriteRoutesList.set(position, route);
     }
 
     public int getPosition(@NonNull FavoriteRouteDataObject route) {
-        final String key = getMapKeyForRoute(route);
+        Iterator<FavoriteRouteDataObject> it = mFavoriteRoutesList.iterator();
+        int index = 0, result = NEW_INDEX;
 
-        return  mFavoriteRoutesMap.containsKey(key) ?
-                mFavoriteRoutesMap.get(key) :
-                NEW_INDEX;
-    }
+        while(it.hasNext()) {
+            FavoriteRouteDataObject curRoute = it.next();
 
-    private String getMapKeyForRoute(@NonNull FavoriteRouteDataObject route) {
-        return route.getType() + route.getRouteId();
-    }
+            if(curRoute.getFavoriteRouteKey().equals(route.getFavoriteRouteKey())) {
+                result = index;
+                break;
+            }
 
-    private void addRoutesToMap(@NonNull List<FavoriteRouteDataObject> routes) {
-        for(int i = 0; i < routes.size(); i++) {
-            FavoriteRouteDataObject route = routes.get(i);
-            addRouteToMap(route, i);
+            index++;
         }
-    }
 
-    private void addRouteToMap(@NonNull FavoriteRouteDataObject route, int pos) {
-        String key = getMapKeyForRoute(route);
-        mFavoriteRoutesMap.put(key, pos);
+        return result;
     }
 
     private void onBindFavoriteBusRouteHolder(FavoriteRoutesViewHolder holder, int position) {
@@ -164,12 +147,6 @@ public class FavoriteRoutesAdapter extends
 
                 // remove from list
                 mFavoriteRoutesList.remove(position);
-
-                // remove from map
-                mFavoriteRoutesMap.remove(getMapKeyForRoute(route));
-
-                // update map
-                addRoutesToMap(mFavoriteRoutesList);
 
                 // alert listener
                 mListener.onUnfavorited(position, route);

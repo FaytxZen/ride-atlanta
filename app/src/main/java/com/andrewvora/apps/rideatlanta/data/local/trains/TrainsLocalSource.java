@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.models.Train;
 import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
 import com.andrewvora.apps.rideatlanta.data.local.RideAtlantaDbHelper;
@@ -24,9 +25,11 @@ public class TrainsLocalSource implements TrainsDataSource {
 
     private static TrainsLocalSource mInstance;
     private RideAtlantaDbHelper mDbHelper;
+    private Context mContext;
 
     private TrainsLocalSource(@NonNull Context context) {
         mDbHelper = new RideAtlantaDbHelper(context);
+        mContext = context;
     }
 
     public static TrainsLocalSource getInstance(@NonNull Context context) {
@@ -124,6 +127,10 @@ public class TrainsLocalSource implements TrainsDataSource {
 
                 Train savedTrain = getTrainFrom(trainCursor);
                 callback.onFinished(savedTrain);
+            }
+            else {
+                train.setWaitingTime(mContext.getString(R.string.text_adherence_unknown));
+                callback.onFinished(train);
             }
         }
         catch (Exception e) {

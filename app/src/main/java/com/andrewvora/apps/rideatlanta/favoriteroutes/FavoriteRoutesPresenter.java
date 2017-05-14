@@ -16,7 +16,9 @@ import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
 import com.andrewvora.apps.rideatlanta.data.models.Train;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Contains business logic for {@link FavoriteRoutesContract.View}
@@ -79,12 +81,14 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
                 // load saved routes
                 for(FavoriteRoute route : favRoutes) {
                     routes.add(route);
-
-                    updateInfoIfCached(route);
                 }
 
                 // display on UI
                 mView.onFavoriteRoutesLoaded(routes);
+
+                if(mTrainRepo.hasCachedData() || mBusRepo.hasCachedData()) {
+                    refreshRouteInformation();
+                }
             }
 
             @Override
@@ -92,15 +96,6 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
 
             }
         });
-    }
-
-    private void updateInfoIfCached(@NonNull FavoriteRoute route) {
-        if(route.isBus() && mBusRepo.hasCachedData()) {
-            loadBusInformation(route, false);
-        }
-        else if(mTrainRepo.hasCachedData()) {
-            loadTrainInformation(route, false);
-        }
     }
 
     @Override
@@ -108,8 +103,37 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
         mFavRouteRepo.getFavoriteRoutes(new FavoriteRoutesDataSource.GetFavoriteRoutesCallback() {
             @Override
             public void onFinished(List<FavoriteRoute> favRoutes) {
-                for(FavoriteRoute route : favRoutes) {
-                    determineRouteInfoToLoad(route, true);
+                updateRouteInformation(favRoutes);
+            }
+
+            @Override
+            public void onError(Object error) {
+
+            }
+        });
+    }
+
+    private void updateRouteInformation(@NonNull final List<FavoriteRoute> routes) {
+        mBusRepo.getBuses(new BusesDataSource.GetBusesCallback() {
+            @Override
+            public void onFinished(List<Bus> buses) {
+                Map<String, Bus> busMap = new HashMap<>();
+
+                for (Bus bus : buses) {
+                    busMap.put(bus.getFavoriteRouteKey(), bus);
+                }
+
+                for(FavoriteRoute route : routes) {
+                    if(route.isBus() && busMap.containsKey(route.getFavoriteRouteKey())) {
+                        Bus bus = busMap.get(route.getFavoriteRouteKey());
+
+                        route.setName(bus.getName());
+                        route.setDestination(bus.getDestination());
+                        route.setTimeUntilArrival(bus.getTimeTilArrival());
+
+                        updateRouteOnDatabase(route);
+                        mView.onRouteInformationLoaded(route);
+                    }
                 }
             }
 
@@ -118,82 +142,36 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
 
             }
         });
-    }
 
-    private void determineRouteInfoToLoad(@NonNull FavoriteRoute route, boolean updateUi) {
-        if(FavoriteRoute.TYPE_BUS.equals(route.getType())) {
-            loadBusInformation(route, updateUi);
-        }
-        else if(FavoriteRoute.TYPE_TRAIN.equals(route.getType())) {
-            loadTrainInformation(route, updateUi);
-        }
-    }
-
-    private void loadBusInformation(@NonNull final FavoriteRoute favoriteRoute, final boolean updateUi) {
-        Bus bus = new Bus();
-        bus.setRouteId(favoriteRoute.getRouteId());
-
-        mBusRepo.getBus(bus, new BusesDataSource.GetBusCallback() {
-            @Override
-            public void onFinished(Bus bus) {
-                FavoriteRoute routeToSave = new FavoriteRoute(bus);
-                routeToSave.setId(favoriteRoute.getId());
-
-                updateRouteOnDatabase(routeToSave);
-
-                if(updateUi) {
-                    mView.onRouteInformationLoaded(bus);
-                }
-            }
-
-            @Override
-            public void onError(Object error) {
-
-            }
-        });
-    }
-
-    private void loadTrainInformation(@NonNull final FavoriteRoute favoriteRoute, final boolean updateUi) {
-        final Train train = new Train();
-        train.setTrainId(Long.parseLong(favoriteRoute.getRouteId()));
-        train.setLine(favoriteRoute.getName());
-        train.setStation(favoriteRoute.getDestination());
-
-        mTrainRepo.getTrain(train, new TrainsDataSource.GetTrainRouteCallback() {
-            @Override
-            public void onFinished(Train train) {
-                FavoriteRoute routeToSave = new FavoriteRoute(train);
-                routeToSave.setId(favoriteRoute.getId());
-
-                updateTrainArrivalTime(favoriteRoute, train, updateUi);
-            }
-
-            @Override
-            public void onError(Object error) {
-
-            }
-        });
-    }
-
-    private void updateTrainArrivalTime(final FavoriteRoute route, final Train train, final boolean updateUi) {
-        TrainsDataSource.GetTrainRoutesCallback callback = new TrainsDataSource.GetTrainRoutesCallback() {
+        mTrainRepo.getTrains(new TrainsDataSource.GetTrainRoutesCallback() {
             @Override
             public void onFinished(List<Train> trainList) {
-                StringBuilder sb = new StringBuilder();
+                Map<String, List<Train>> trainMap = new HashMap<>();
 
-                for(int i = 0; i < trainList.size(); i++) {
-                    if(i != 0) {
-                        sb.append(", ");
+                for(Train train : trainList) {
+                    String key = train.getFavoriteRouteKey();
+
+                    if(trainMap.containsKey(key)) {
+                        trainMap.get(key).add(train);
                     }
+                    else {
+                        List<Train> matching = new ArrayList<>();
+                        matching.add(train);
 
-                    sb.append(trainList.get(i).getTimeTilArrival());
+                        trainMap.put(key, matching);
+                    }
                 }
 
-                Train trainToLoad = train.getCopy();
-                trainToLoad.setWaitingTime(sb.toString());
+                for(FavoriteRoute route : routes) {
+                    if(!route.isBus() && trainMap.containsKey(route.getFavoriteRouteKey())) {
+                        List<Train> list = trainMap.get(route.getFavoriteRouteKey());
+                        String arrivalTime = Train.combineArrivalTimes(list);
 
-                if(updateUi) {
-                    mView.onRouteInformationLoaded(trainToLoad);
+                        route.setTimeUntilArrival(arrivalTime);
+
+                        updateRouteOnDatabase(route);
+                        mView.onRouteInformationLoaded(route);
+                    }
                 }
             }
 
@@ -201,9 +179,7 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
             public void onError(Object error) {
 
             }
-        };
-
-        mTrainRepo.getTrains(train.getStation(), train.getLine(), callback);
+        });
     }
 
     private void updateRouteOnDatabase(@NonNull final FavoriteRoute favoriteRoute) {
