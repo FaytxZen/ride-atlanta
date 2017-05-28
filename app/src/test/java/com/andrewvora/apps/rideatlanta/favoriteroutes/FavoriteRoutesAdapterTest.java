@@ -43,7 +43,7 @@ public class FavoriteRoutesAdapterTest extends BaseUnitTest {
         favoriteRoute.setType(FavoriteRouteDataObject.TYPE_BUS);
         favoriteRoute.setRouteId("1234");
 
-        mAdapter.setFavoriteRoute(favoriteRoute);
+        mAdapter.setFavoriteRoute(0, favoriteRoute);
     }
 
     @Test
@@ -51,6 +51,8 @@ public class FavoriteRoutesAdapterTest extends BaseUnitTest {
         FavoriteRoute favoriteRoute = new FavoriteRoute();
         favoriteRoute.setType(FavoriteRouteDataObject.TYPE_BUS);
         favoriteRoute.setRouteId("1234");
+        favoriteRoute.setName("Bus12");
+        favoriteRoute.setDestination("Ohio City St & Lol Rd");
 
         List<FavoriteRouteDataObject> routes = new ArrayList<>();
         routes.add(favoriteRoute);
@@ -66,7 +68,10 @@ public class FavoriteRoutesAdapterTest extends BaseUnitTest {
         FavoriteRoute favoriteRoute = new FavoriteRoute();
         favoriteRoute.setType(FavoriteRouteDataObject.TYPE_BUS);
         favoriteRoute.setRouteId("1234");
+        favoriteRoute.setName("Bus12");
+        favoriteRoute.setDestination("Ohio City St & Lol Rd");
 
+        mAdapter.setFavoriteRoutes(new ArrayList<FavoriteRouteDataObject>());
         int routeAdapterPosition = mAdapter.getPosition(favoriteRoute);
         assertEquals(FavoriteRoutesAdapter.NEW_INDEX, routeAdapterPosition);
     }

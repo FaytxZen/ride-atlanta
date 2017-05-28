@@ -14,7 +14,6 @@ import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
 import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -75,25 +74,6 @@ public class FavoriteRoutesLoadingCache extends Fragment implements FavoriteRout
 
     List<FavoriteRouteDataObject> getFavoriteRoutes() {
         return mFavoriteRoutes;
-    }
-
-    @Override
-    public void addFavoritedRoute(@NonNull FavoriteRouteDataObject route) {
-        mFavoriteRoutes.add(route);
-    }
-
-    @Override
-    public void removeFavoriteRoute(@NonNull FavoriteRouteDataObject route) {
-        Iterator<FavoriteRouteDataObject> it = mFavoriteRoutes.iterator();
-
-        while(it.hasNext()) {
-            FavoriteRouteDataObject curRoute = it.next();
-
-            if(route.getFavoriteRouteKey().equals(curRoute.getFavoriteRouteKey())) {
-                it.remove();
-                break;
-            }
-        }
     }
 
     private static class GetFavRoutesTask extends

@@ -24,6 +24,7 @@ import com.andrewvora.apps.rideatlanta.breezebalance.BreezeBalanceActivity;
 import com.andrewvora.apps.rideatlanta.buses.BusRoutesContract;
 import com.andrewvora.apps.rideatlanta.buses.BusRoutesFragment;
 import com.andrewvora.apps.rideatlanta.buses.BusRoutesPresenter;
+import com.andrewvora.apps.rideatlanta.data.SharedPrefsManager;
 import com.andrewvora.apps.rideatlanta.data.remote.buses.GetBusesIntentService;
 import com.andrewvora.apps.rideatlanta.data.remote.trains.GetTrainsIntentService;
 import com.andrewvora.apps.rideatlanta.data.repos.BusesRepo;
@@ -58,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.bottom_bar) BottomNavigationView mBottomBar;
 
     private FavoriteRoutesLoadingCache mFavRouteDataManager;
+    private SharedPrefsManager mPrefManager;
     private Handler mPollingHandler;
     private Runnable mPollingTask = new Runnable() {
         @Override
@@ -89,41 +91,50 @@ public class MainActivity extends AppCompatActivity {
         }
 
         mPollingHandler = new Handler();
-        mBottomBar.setSelectedItemId(R.id.tab_home);
+
+        mPrefManager = new SharedPrefsManager(getApplication());
+        applySelectedTab(mPrefManager.getSelectedTab());
+
+        mBottomBar.setSelectedItemId(mPrefManager.getSelectedTab());
         mBottomBar.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                switch(item.getItemId()) {
-                    case R.id.tab_home:
-                        onHomeTabSelected();
-                        break;
-
-                    case R.id.tab_buses:
-                        onBusesTabSelected();
-                        break;
-
-                    case R.id.tab_trains:
-                        onTrainsTabSelected();
-                        break;
-
-                    case R.id.tab_fav_routes:
-                        onFavRoutesTabSelected();
-                        break;
-
-                    case R.id.tab_notifications:
-                        onNotificationsTabSelected();
-                        break;
-                }
+                applySelectedTab(item.getItemId());
                 return true;
             }
         });
+    }
+
+    private void applySelectedTab(@IdRes int tabId) {
+        switch(tabId) {
+            case R.id.tab_home:
+                onHomeTabSelected();
+                break;
+
+            case R.id.tab_buses:
+                onBusesTabSelected();
+                break;
+
+            case R.id.tab_trains:
+                onTrainsTabSelected();
+                break;
+
+            case R.id.tab_fav_routes:
+                onFavRoutesTabSelected();
+                break;
+
+            case R.id.tab_notifications:
+                onNotificationsTabSelected();
+                break;
+        }
+
+        mPrefManager.setSelectedTab(tabId);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        onHomeTabSelected();
         mPollingHandler.post(mPollingTask);
     }
 

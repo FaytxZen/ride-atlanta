@@ -136,7 +136,7 @@ public class BusRoutesPresenterTest extends BaseUnitTest {
         verify(mFavsSource).reloadRoutes();
         verify(mFavsSource, never()).deleteRoute(any(FavoriteRoute.class));
         verify(mFavsSource).saveRoute(any(FavoriteRoute.class));
-        verify(mFavsCache).addFavoritedRoute(any(FavoriteRoute.class));
+        verify(mFavsCache).setFavoritedRoutes(anyListOf(FavoriteRouteDataObject.class));
     }
 
     @Test
@@ -152,6 +152,6 @@ public class BusRoutesPresenterTest extends BaseUnitTest {
         verify(mFavsSource).reloadRoutes();
         verify(mFavsSource, never()).saveRoute(any(FavoriteRoute.class));
         verify(mFavsSource).deleteRoute(any(FavoriteRoute.class));
-        verify(mFavsCache).removeFavoriteRoute(any(FavoriteRoute.class));
+        verify(mFavsCache).setFavoritedRoutes(anyListOf(FavoriteRouteDataObject.class));
     }
 }

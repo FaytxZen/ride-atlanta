@@ -35,10 +35,7 @@ public interface FavoriteRoutesContract {
         DataLoadedListener getListener();
 
         void loadFavoriteRoutes();
-
         void setFavoritedRoutes(@NonNull List<FavoriteRouteDataObject> favRoutes);
-        void addFavoritedRoute(@NonNull FavoriteRouteDataObject route);
-        void removeFavoriteRoute(@NonNull FavoriteRouteDataObject route);
     }
 
     interface DataLoadedListener {

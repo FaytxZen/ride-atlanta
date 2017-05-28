@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.os.Bundle;
 
 import com.andrewvora.apps.rideatlanta.BaseUnitTest;
+import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
 import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
 import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
@@ -14,6 +15,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -109,7 +111,7 @@ public class TrainRoutesPresenterTest extends BaseUnitTest {
 
         verify(mFavRoutesRepo, never()).deleteRoute(any(FavoriteRoute.class));
         verify(mFavRoutesRepo).saveRoute(any(FavoriteRoute.class));
-        verify(mFavRoutesCache).addFavoritedRoute(any(FavoriteRoute.class));
+        verify(mFavRoutesCache).setFavoritedRoutes(anyListOf(FavoriteRouteDataObject.class));
     }
 
     @Test
@@ -124,6 +126,6 @@ public class TrainRoutesPresenterTest extends BaseUnitTest {
         verify(mFavRoutesRepo).reloadRoutes();
         verify(mFavRoutesRepo).deleteRoute(any(FavoriteRoute.class));
         verify(mFavRoutesRepo, never()).saveRoute(any(FavoriteRoute.class));
-        verify(mFavRoutesCache).removeFavoriteRoute(any(FavoriteRoute.class));
+        verify(mFavRoutesCache).setFavoritedRoutes(anyListOf(FavoriteRouteDataObject.class));
     }
 }

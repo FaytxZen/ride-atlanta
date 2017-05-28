@@ -13,8 +13,8 @@ android {
         applicationId "com.andrewvora.apps.rideatlanta"
         minSdkVersion 16
         targetSdkVersion 25
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.0.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
@@ -22,7 +22,7 @@ android {
         debug {
             minifyEnabled false
             shrinkResources false
-            testCoverageEnabled false
+            testCoverageEnabled true
 
             buildConfigField "String", "MARTA_API_KEY", "\"$System.env.RIDEATLANTA_MARTA_API_KEY\""
             buildConfigField "String", "FABRIC_API_KEY", "\"$System.env.RIDEATLANTA_FABRIC_API_KEY\""
