@@ -25,14 +25,15 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <com.roughike.bottombar.BottomBar
+    <android.support.design.widget.BottomNavigationView
+        style="@style/LowElevationStyle"
         android:id="@+id/bottom_bar"
         android:layout_width="match_parent"
         android:layout_height="@dimen/bottom_bar_height"
         android:layout_gravity="bottom"
-        app:bb_activeTabColor="@color/primary_orange"
-        app:bb_inActiveTabAlpha="1"
-        app:bb_activeTabAlpha="1"
-        app:bb_tabXmlResource="@xml/bottom_nav_tabs"/>
+        android:background="@color/colorAccent"
+        app:itemTextColor="@color/md_white_1000"
+        app:itemIconTint="@color/md_white_1000"
+        app:menu="@menu/menu_bottom_nav"/>
 
 </android.support.design.widget.CoordinatorLayout>

@@ -11,6 +11,7 @@ import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -30,8 +31,8 @@ import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
 import com.andrewvora.apps.rideatlanta.data.repos.NotificationsRepo;
 import com.andrewvora.apps.rideatlanta.data.repos.TrainsRepo;
 import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesContract;
-import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesLoadingCache;
 import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesFragment;
+import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesLoadingCache;
 import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesPresenter;
 import com.andrewvora.apps.rideatlanta.home.HomeContract;
 import com.andrewvora.apps.rideatlanta.home.HomeFragment;
@@ -43,8 +44,6 @@ import com.andrewvora.apps.rideatlanta.seeandsay.SeeAndSayActivity;
 import com.andrewvora.apps.rideatlanta.trains.TrainRoutesContract;
 import com.andrewvora.apps.rideatlanta.trains.TrainRoutesFragment;
 import com.andrewvora.apps.rideatlanta.trains.TrainRoutesPresenter;
-import com.roughike.bottombar.BottomBar;
-import com.roughike.bottombar.OnTabSelectListener;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -56,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.toolbar_icon) ImageButton mToolbarIconView;
     @BindView(R.id.toolbar_title) TextView mToolbarTitleView;
     @BindView(R.id.toolbar) Toolbar mToolbar;
-    @BindView(R.id.bottom_bar) BottomBar mBottomBar;
+    @BindView(R.id.bottom_bar) BottomNavigationView mBottomBar;
 
     private FavoriteRoutesLoadingCache mFavRouteDataManager;
     private Handler mPollingHandler;
@@ -90,21 +89,21 @@ public class MainActivity extends AppCompatActivity {
         }
 
         mPollingHandler = new Handler();
-        mBottomBar.setDefaultTabPosition(1);
-        mBottomBar.setOnTabSelectListener(new OnTabSelectListener() {
+        mBottomBar.setSelectedItemId(R.id.tab_home);
+        mBottomBar.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
-            public void onTabSelected(@IdRes int tabId) {
-                switch(tabId) {
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch(item.getItemId()) {
+                    case R.id.tab_home:
+                        onHomeTabSelected();
+                        break;
+
                     case R.id.tab_buses:
                         onBusesTabSelected();
                         break;
 
                     case R.id.tab_trains:
                         onTrainsTabSelected();
-                        break;
-
-                    case R.id.tab_home:
-                        onHomeTabSelected();
                         break;
 
                     case R.id.tab_fav_routes:
@@ -115,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
                         onNotificationsTabSelected();
                         break;
                 }
+                return true;
             }
         });
     }
@@ -122,6 +122,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        onHomeTabSelected();
         mPollingHandler.post(mPollingTask);
     }
 

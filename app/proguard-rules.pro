@@ -15,6 +15,7 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
 ## ButterKnife Rules
 # Retain generated class which implement ViewBinder.
 -keep public class * implements butterknife.internal.ViewBinder { public <init>(); }
@@ -24,6 +25,12 @@
 -keep class butterknife.*
 -keepclasseswithmembernames class * { @butterknife.* <methods>; }
 -keepclasseswithmembernames class * { @butterknife.* <fields>; }
+
+## Firebase Rules
+-keepattributes Signature
+-keepclassmembers class com.andrewvora.apps.rideatlanta.data.models.** {
+  *;
+}
 
 ## Design Support Library
 -keep class android.support.design.widget.** { *; }

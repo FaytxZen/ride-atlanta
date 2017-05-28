@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/tab_home"
+        android:enabled="true"
+        android:icon="@drawable/ic_home_24dp"
+        android:title="@string/title_tab_home"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/tab_fav_routes"
+        android:enabled="true"
+        android:icon="@drawable/ic_favorite_filled_24dp"
+        android:title="@string/title_tab_fav_routes"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/tab_buses"
+        android:enabled="true"
+        android:icon="@drawable/ic_bus_24dp"
+        android:title="@string/title_tab_buses"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/tab_trains"
+        android:enabled="true"
+        android:icon="@drawable/ic_train_24dp"
+        android:title="@string/title_tab_trains"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/tab_notifications"
+        android:enabled="true"
+        android:icon="@drawable/ic_notifications_24dp"
+        android:title="@string/title_tab_notifications"
+        app:showAsAction="ifRoom"/>
+</menu>
