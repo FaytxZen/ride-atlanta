@@ -21,25 +21,15 @@ import java.util.List;
  */
 
 public class FavoriteRoutesLocalSource implements FavoriteRoutesDataSource {
+    private RideAtlantaDbHelper dbHelper;
 
-    private static FavoriteRoutesLocalSource mInstance;
-    private RideAtlantaDbHelper mDbHelper;
-
-    private FavoriteRoutesLocalSource(@NonNull Context context) {
-        mDbHelper = new RideAtlantaDbHelper(context);
-    }
-
-    public static FavoriteRoutesLocalSource getInstance(@NonNull Context context) {
-        if(mInstance == null) {
-            mInstance = new FavoriteRoutesLocalSource(context);
-        }
-
-        return mInstance;
+    public FavoriteRoutesLocalSource(@NonNull Context context) {
+        dbHelper = new RideAtlantaDbHelper(context);
     }
 
     @Override
     public void getFavoriteRoutes(@NonNull GetFavoriteRoutesCallback callback) {
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
 
         try {
             String[] columns = FavoriteRoutesTable.getColumns();
@@ -60,7 +50,7 @@ public class FavoriteRoutesLocalSource implements FavoriteRoutesDataSource {
 
     @Override
     public void getFavoriteRoute(@NonNull String recordId, @NonNull GetFavoriteRouteCallback callback) {
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
 
         try {
             String[] columns = FavoriteRoutesTable.getColumns();
@@ -83,7 +73,7 @@ public class FavoriteRoutesLocalSource implements FavoriteRoutesDataSource {
 
     @Override
     public void saveRoute(@NonNull FavoriteRoute route) {
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
         final boolean isNewRecord = route.getId() == null;
 
         ContentValues contentValues = new ContentValues();
@@ -110,13 +100,13 @@ public class FavoriteRoutesLocalSource implements FavoriteRoutesDataSource {
 
     @Override
     public void deleteAllRoutes() {
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
         db.delete(FavoriteRoutesTable.TABLE_NAME, "1=1", null);
     }
 
     @Override
     public void deleteRoute(@NonNull FavoriteRouteDataObject route) {
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         String whereClause = FavoriteRoutesTable.COLUMN_ROUTE_ID + "=?";
         String[] whereArgs = { route.getRouteId() };

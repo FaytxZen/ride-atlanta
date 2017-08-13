@@ -1,13 +1,10 @@
 package com.andrewvora.apps.rideatlanta.trains;
 
 import android.app.Fragment;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -19,7 +16,6 @@ import android.widget.ProgressBar;
 import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 import com.andrewvora.apps.rideatlanta.data.models.Train;
-import com.andrewvora.apps.rideatlanta.data.remote.trains.GetTrainsIntentService;
 import com.andrewvora.apps.rideatlanta.views.SimpleDividerItemDecoration;
 
 import java.util.ArrayList;
@@ -38,14 +34,14 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
 
     public static final String TAG = TrainRoutesFragment.class.getSimpleName();
 
-    @BindView(R.id.trains_list) RecyclerView mTrainsRecyclerView;
-    @BindView(R.id.loading_train_routes_view) ProgressBar mProgressBar;
-    @BindView(R.id.swipe_to_refresh_layout) SwipeRefreshLayout mSwipeRefreshLayout;
-    @BindView(R.id.no_trains_running_view) View mEmptyStateView;
+    @BindView(R.id.trains_list) RecyclerView trainsRecyclerView;
+    @BindView(R.id.loading_train_routes_view) ProgressBar progressBar;
+    @BindView(R.id.swipe_to_refresh_layout) SwipeRefreshLayout swipeRefreshLayout;
+    @BindView(R.id.no_trains_running_view) View emptyStateView;
 
-    private TrainRoutesContract.Presenter mPresenter;
-    private TrainRoutesAdapter mTrainAdapter;
-    private TrainItemListener mTrainItemListener = new TrainItemListener() {
+    private TrainRoutesContract.Presenter presenter;
+    private TrainRoutesAdapter trainAdapter;
+    private TrainItemListener trainItemListener = new TrainItemListener() {
         @Override
         public void onItemClicked(int position) {
 
@@ -53,12 +49,12 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
 
         @Override
         public void onFavoriteItem(int position) {
-            mPresenter.favoriteRoute(mTrainAdapter.getTrain(position));
+            presenter.favoriteRoute(trainAdapter.getTrain(position));
 
             // must be called after presenter method
-            updateFavoriteStatusOf(mTrainAdapter.getTrain(position));
+            updateFavoriteStatusOf(trainAdapter.getTrain(position));
 
-            mTrainAdapter.notifyItemChanged(position);
+            trainAdapter.notifyItemChanged(position);
         }
     };
 
@@ -71,7 +67,7 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
         super.onCreate(savedInstanceState);
 
         List<Train> placeholderList = new ArrayList<>();
-        mTrainAdapter = new TrainRoutesAdapter(placeholderList, mTrainItemListener);
+        trainAdapter = new TrainRoutesAdapter(placeholderList, trainItemListener);
     }
 
     @Nullable
@@ -80,20 +76,20 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
         View view = inflater.inflate(R.layout.fragment_train_routes, container, false);
         ButterKnife.bind(this, view);
 
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                mPresenter.refreshTrainRoutes();
-                mSwipeRefreshLayout.setRefreshing(false);
+                presenter.refreshTrainRoutes();
+                swipeRefreshLayout.setRefreshing(false);
             }
         });
 
-        mTrainsRecyclerView.setAdapter(mTrainAdapter);
-        mTrainsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mTrainsRecyclerView.addItemDecoration(new SimpleDividerItemDecoration(getViewContext()));
+        trainsRecyclerView.setAdapter(trainAdapter);
+        trainsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        trainsRecyclerView.addItemDecoration(new SimpleDividerItemDecoration(getViewContext()));
 
-        if(mPresenter != null) {
-            mPresenter.onRestoreState(savedInstanceState);
+        if(presenter != null) {
+            presenter.onRestoreState(savedInstanceState);
         }
 
         return view;
@@ -103,8 +99,8 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
     public void onResume() {
         super.onResume();
 
-        if(mPresenter != null) {
-            mPresenter.start();
+        if(presenter != null) {
+            presenter.start();
         }
     }
 
@@ -112,8 +108,8 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
     public void onPause() {
         super.onPause();
 
-        if(mPresenter != null) {
-            mPresenter.stop();
+        if(presenter != null) {
+            presenter.stop();
         }
     }
 
@@ -121,14 +117,14 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        if(mPresenter != null) {
-            mPresenter.onSaveState(outState);
+        if(presenter != null) {
+            presenter.onSaveState(outState);
         }
     }
 
     @Override
     public void setPresenter(TrainRoutesContract.Presenter presenter) {
-        mPresenter = presenter;
+        this.presenter = presenter;
     }
 
     @Override
@@ -136,10 +132,10 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
         String key = train.getFavoriteRouteKey();
 
         if(train.isFavorited()) {
-            mTrainAdapter.getFavoriteRouteIds().add(key);
+            trainAdapter.getFavoriteRouteIds().add(key);
         }
         else {
-            mTrainAdapter.getFavoriteRouteIds().remove(key);
+            trainAdapter.getFavoriteRouteIds().remove(key);
         }
     }
 
@@ -151,39 +147,24 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
             favRouteIds.add(route.getFavoriteRouteKey());
         }
 
-        mTrainAdapter.setFavoritedRouteIds(favRouteIds);
-        mTrainAdapter.notifyDataSetChanged();
+        trainAdapter.setFavoritedRouteIds(favRouteIds);
+        trainAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void onTrainRoutesLoaded(List<Train> trainList) {
-        mSwipeRefreshLayout.setRefreshing(false);
-        mProgressBar.setVisibility(View.GONE);
+        swipeRefreshLayout.setRefreshing(false);
+        progressBar.setVisibility(View.GONE);
 
-        mTrainAdapter.setTrains(trainList);
-        mTrainAdapter.notifyDataSetChanged();
+        trainAdapter.setTrains(trainList);
+        trainAdapter.notifyDataSetChanged();
 
         if(trainList.isEmpty()) {
-            mEmptyStateView.setVisibility(View.VISIBLE);
+            emptyStateView.setVisibility(View.VISIBLE);
         }
         else {
-            mEmptyStateView.setVisibility(View.GONE);
+            emptyStateView.setVisibility(View.GONE);
         }
-    }
-
-    @Override
-    public void subscribeReceiver(@NonNull BroadcastReceiver receiver) {
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(GetTrainsIntentService.ACTION_TRAINS_UPDATED);
-
-        LocalBroadcastManager.getInstance(getViewContext())
-                .registerReceiver(receiver, intentFilter);
-    }
-
-    @Override
-    public void unsubscribeReceiver(@NonNull BroadcastReceiver receiver) {
-        LocalBroadcastManager.getInstance(getViewContext())
-                .unregisterReceiver(receiver);
     }
 
     @Override
@@ -191,7 +172,7 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
         return getActivity().getApplication();
     }
 
-    public interface TrainItemListener {
+    interface TrainItemListener {
         void onItemClicked(int position);
         void onFavoriteItem(int position);
     }

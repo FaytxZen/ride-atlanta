@@ -1,14 +1,10 @@
 package com.andrewvora.apps.rideatlanta.data.repos;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
-import com.andrewvora.apps.rideatlanta.data.local.buses.BusesLocalSource;
 import com.andrewvora.apps.rideatlanta.data.models.Bus;
-import com.andrewvora.apps.rideatlanta.data.remote.buses.BusesRemoteSource;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,6 +12,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import io.reactivex.Observable;
+import io.reactivex.functions.Function;
 
 /**
  * Repo class that handles the syncing and fetching of data between the local and remote data
@@ -27,142 +26,121 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class BusesRepo implements BusesDataSource {
 
-    private static BusesRepo mInstance;
-
-    @NonNull private Map<String, Bus> mCachedBuses;
-    @NonNull private BusesDataSource mRemoteSource;
+    @NonNull private Map<String, Bus> cachedBuses;
+    @NonNull private BusesDataSource remoteSource;
 
     // NOTE: currently not leveraging local source
-    @NonNull private BusesDataSource mLocalSource;
+    @NonNull private BusesDataSource localSource;
 
-    private boolean mCacheIsDirty;
+    private boolean cacheIsDirty;
 
-    private BusesRepo(@NonNull BusesDataSource remoteSource,
+    public BusesRepo(@NonNull BusesDataSource remoteSource,
                      @NonNull BusesDataSource localSource)
     {
-        mRemoteSource = remoteSource;
-        mLocalSource = localSource;
+        this.remoteSource = remoteSource;
+        this.localSource = localSource;
 
-        mCachedBuses = new ConcurrentHashMap<>();
-    }
-
-    public static BusesRepo getInstance(@NonNull Context context) {
-        if(mInstance == null) {
-            BusesDataSource remoteSource = BusesRemoteSource.getInstance(context);
-            BusesDataSource localSource = BusesLocalSource.getInstance(context);
-
-            mInstance = new BusesRepo(remoteSource, localSource);
-        }
-
-        return mInstance;
+        cachedBuses = new ConcurrentHashMap<>();
     }
 
     @Override
-    public void getBuses(@NonNull final GetBusesCallback callback) {
-        if(mCacheIsDirty) {
-            getBusRoutesFromRemote(callback);
+    public Observable<List<Bus>> getBuses() {
+        if(cacheIsDirty) {
+            return getBusRoutesFromRemote();
         }
         else {
-            List<Bus> buses = new ArrayList<>(mCachedBuses.values());
-            Collections.sort(buses, new BusComparator());
-
-            callback.onFinished(buses);
+            List<Bus> buses = new ArrayList<>(cachedBuses.values());
+            return Observable.just(buses).map(new Function<List<Bus>, List<Bus>>() {
+				@Override
+				public List<Bus> apply(@io.reactivex.annotations.NonNull List<Bus> buses) throws Exception {
+					Collections.sort(buses, new BusComparator());
+					return buses;
+				}
+			});
         }
     }
 
-    @Override
-    public void getBuses(@NonNull GetBusesCallback callback, @NonNull String... routeIds) {
+	@Override
+	public Observable<List<Bus>> getFreshBuses() {
+		return getBusRoutesFromRemote();
+	}
 
-    }
+	@Override
+	public Observable<List<Bus>> getBuses(@NonNull String... routeIds) {
+		return Observable.empty();
+	}
 
-    @Override
-    public void getBus(@NonNull final Bus bus, @NonNull final GetBusCallback callback) {
-        final Bus cachedRoute = mCachedBuses.get(getKeyFor(bus));
+	@Override
+	public Observable<Bus> getBus(@NonNull Bus bus) {
+		final Bus cachedRoute = cachedBuses.get(getKeyFor(bus));
 
-        if(cachedRoute != null) {
-            callback.onFinished(cachedRoute);
-        }
-        else {
-            mRemoteSource.getBus(bus, new GetBusCallback() {
-                @Override
-                public void onFinished(Bus bus) {
-                    callback.onFinished(bus);
-                    cacheBusRoute(bus);
-                }
+		if(cachedRoute != null) {
+			return Observable.just(cachedRoute);
+		}
+		else {
+			return remoteSource.getBus(bus).map(new Function<Bus, Bus>() {
+				@Override
+				public Bus apply(@io.reactivex.annotations.NonNull Bus bus) throws Exception {
+					cacheBusRoute(bus);
+					return bus;
+				}
+			});
+		}
+	}
 
-                @Override
-                public void onError(Object error) {
-                    callback.onError(error);
-                }
-            });
-        }
-    }
+	@Override
+	public Observable<Long> deleteAllBus() {
+		remoteSource.deleteAllBus();
+		cachedBuses.clear();
 
-    @Override
-    public void deleteAllBus(@Nullable DeleteBusesCallback callback) {
-        mRemoteSource.deleteAllBus(null);
+		return Observable.just(0L);
+	}
 
-        mCachedBuses.clear();
+	@Override
+	public Observable<Long> saveBus(@NonNull Bus route) {
+		// only saves the routes locally since we're pulling from a read-only API
+		try {
+			cacheBusRoute(route);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 
-        if(callback != null) {
-            callback.onDeleted();
-        }
-    }
-
-    @Override
-    public void saveBus(@NonNull Bus route) {
-        // only saves the routes locally since we're pulling from a read-only API
-        try {
-            cacheBusRoute(route);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+		return Observable.just(0L);
+	}
 
     @Override
     public boolean hasCachedData() {
-        return !mCachedBuses.isEmpty();
+        return !cachedBuses.isEmpty();
     }
 
     @Override
     public void reloadBuses() {
-        mCacheIsDirty = true;
+        cacheIsDirty = true;
     }
 
-    private void getBusRoutesFromRemote(@NonNull final GetBusesCallback callback) {
-        mRemoteSource.getBuses(new GetBusesCallback() {
-            @Override
-            public void onFinished(List<Bus> buses) {
-                reloadCachedBusRoutes(buses);
-
-                callback.onFinished(buses);
-            }
-
-            @Override
-            public void onError(Object error) {
-                callback.onError(error);
-            }
-        });
+    private Observable<List<Bus>> getBusRoutesFromRemote() {
+        return remoteSource.getBuses().map(new Function<List<Bus>, List<Bus>>() {
+			@Override
+			public List<Bus> apply(@io.reactivex.annotations.NonNull List<Bus> buses) throws Exception {
+				reloadCachedBusRoutes(buses);
+				return buses;
+			}
+		});
     }
 
     private void reloadCachedBusRoutes(final List<Bus> routesList) {
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                mCachedBuses.clear();
+		cachedBuses.clear();
 
-                for(Bus route : routesList) {
-                    cacheBusRoute(route);
-                }
+		for(Bus route : routesList) {
+			cacheBusRoute(route);
+		}
 
-                mCacheIsDirty = false;
-            }
-        });
+		cacheIsDirty = false;
     }
 
     private void cacheBusRoute(@NonNull Bus bus) {
-        mCachedBuses.put(getKeyFor(bus), bus);
+        cachedBuses.put(getKeyFor(bus), bus);
     }
 
     private String getKeyFor(@NonNull Bus bus) {

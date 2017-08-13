@@ -7,7 +7,6 @@ import com.andrewvora.apps.rideatlanta.data.contracts.NotificationsDataSource;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
 import com.twitter.sdk.android.core.TwitterApiClient;
-import com.twitter.sdk.android.core.TwitterCore;
 import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.models.Tweet;
 import com.twitter.sdk.android.core.services.StatusesService;
@@ -21,25 +20,20 @@ import retrofit2.Call;
  * Created by faytx on 10/22/2016.
  * @author Andrew Vorakrajangthiti
  */
-
 public class NotificationsRemoteSource implements NotificationsDataSource {
 
     private static final long TWITTER_USER_ID = 28942750L;
     private static final int MAX_TWEETS = 50;
 
-    private TwitterApiClient mTwitterApiClient;
+    private TwitterApiClient twitterClient;
 
-    private NotificationsRemoteSource() {
-        mTwitterApiClient = TwitterCore.getInstance().getApiClient();
-    }
-
-    public static synchronized NotificationsRemoteSource getInstance() {
-        return new NotificationsRemoteSource();
+    public NotificationsRemoteSource(TwitterApiClient twitterClient) {
+        this.twitterClient = twitterClient;
     }
 
     @Override
     public void getNotifications(@NonNull final GetNotificationsCallback callback) {
-        StatusesService statusesService = mTwitterApiClient.getStatusesService();
+        StatusesService statusesService = twitterClient.getStatusesService();
         final Call<List<Tweet>> call = statusesService.userTimeline(TWITTER_USER_ID,
                 null,
                 MAX_TWEETS,
@@ -74,6 +68,11 @@ public class NotificationsRemoteSource implements NotificationsDataSource {
                 callback.onError(exception);
             }
         });
+    }
+
+    @Override
+    public void getFreshNotifications(@NonNull GetNotificationsCallback callback) {
+        getNotifications(callback);
     }
 
     @Override

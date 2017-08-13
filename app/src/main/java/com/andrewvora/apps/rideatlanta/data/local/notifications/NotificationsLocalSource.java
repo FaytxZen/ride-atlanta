@@ -6,10 +6,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 
-import com.andrewvora.apps.rideatlanta.data.models.Notification;
 import com.andrewvora.apps.rideatlanta.data.contracts.NotificationsDataSource;
 import com.andrewvora.apps.rideatlanta.data.local.RideAtlantaDbHelper;
 import com.andrewvora.apps.rideatlanta.data.local.notifications.NotificationsDbContract.NotificationsTable;
+import com.andrewvora.apps.rideatlanta.data.models.Notification;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,20 +21,10 @@ import java.util.List;
 
 public class NotificationsLocalSource implements NotificationsDataSource {
 
-    private static NotificationsLocalSource mInstance;
-
-    private RideAtlantaDbHelper mDbHelper;
+    private RideAtlantaDbHelper dbHelper;
 
     private NotificationsLocalSource(@NonNull Context context) {
-        mDbHelper = new RideAtlantaDbHelper(context);
-    }
-
-    public static NotificationsLocalSource getInstance(@NonNull Context context) {
-        if(mInstance == null) {
-            mInstance = new NotificationsLocalSource(context);
-        }
-
-        return mInstance;
+        dbHelper = new RideAtlantaDbHelper(context);
     }
 
     @Override
@@ -43,8 +33,13 @@ public class NotificationsLocalSource implements NotificationsDataSource {
     }
 
     @Override
+    public void getFreshNotifications(@NonNull GetNotificationsCallback callback) {
+        getNotifications(callback);
+    }
+
+    @Override
     public void getNotifications(@NonNull GetNotificationsCallback callback) {
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
 
         String[] columns = NotificationsTable.getColumns();
         String selection = "1=1";
@@ -64,7 +59,7 @@ public class NotificationsLocalSource implements NotificationsDataSource {
 
     @Override
     public void deleteAllNotifications() {
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         try {
             db.delete(NotificationsTable.TABLE_NAME, "1=1", null);
@@ -75,7 +70,7 @@ public class NotificationsLocalSource implements NotificationsDataSource {
 
     @Override
     public void saveNotification(@NonNull Notification notification) {
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
         final boolean isNewRecord = notification.getId() == null;
 
         ContentValues contentValues = new ContentValues();

@@ -1,13 +1,10 @@
 package com.andrewvora.apps.rideatlanta.favoriteroutes;
 
 import android.app.Fragment;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -21,18 +18,25 @@ import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
 import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
 import com.andrewvora.apps.rideatlanta.data.models.Bus;
 import com.andrewvora.apps.rideatlanta.data.models.Train;
-import com.andrewvora.apps.rideatlanta.data.remote.buses.GetBusesIntentService;
-import com.andrewvora.apps.rideatlanta.data.remote.trains.GetTrainsIntentService;
-import com.andrewvora.apps.rideatlanta.data.repos.BusesRepo;
-import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
-import com.andrewvora.apps.rideatlanta.data.repos.TrainsRepo;
+import com.andrewvora.apps.rideatlanta.di.DataModule;
 import com.andrewvora.apps.rideatlanta.views.SimpleDividerItemDecoration;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import dagger.android.AndroidInjection;
+import io.reactivex.Completable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.functions.Action;
+import io.reactivex.observers.DisposableCompletableObserver;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by faytx on 10/22/2016.
@@ -46,25 +50,24 @@ public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesCo
         void onUnfavorited(int position, @NonNull FavoriteRouteDataObject obj);
     }
 
-    @BindView(R.id.favorite_routes_recycler_view) RecyclerView mFavoriteRoutesRecyclerView;
-    @BindView(R.id.no_favorited_routes_view) View mEmptyStateView;
+    @BindView(R.id.favorite_routes_recycler_view) RecyclerView favoriteRoutesRecyclerView;
+    @BindView(R.id.no_favorited_routes_view) View emptyStateView;
 
-    private FavoriteRoutesContract.Presenter mPresenter;
-    private FavoriteRoutesAdapter mFavRoutesAdapter;
-    private BusesDataSource mBusRepo;
-    private TrainsRepo mTrainRepo;
-    private FavoriteRoutesDataSource mFavRouteRepo;
+    private FavoriteRoutesContract.Presenter presenter;
+    private FavoriteRoutesAdapter favRoutesAdapter;
+	private CompositeDisposable disposables = new CompositeDisposable();
 
-    private AdapterCallback mCallback = new AdapterCallback() {
+    @Inject @Named(DataModule.BUS_SOURCE)
+	BusesDataSource busRepo;
+    @Inject @Named(DataModule.TRAIN_SOURCE)
+	TrainsDataSource trainRepo;
+    @Inject @Named(DataModule.FAVS_SOURCE)
+	FavoriteRoutesDataSource favRoutesRepo;
+
+    private AdapterCallback adapterCallback = new AdapterCallback() {
         @Override
         public void onUnfavorited(int position, @NonNull FavoriteRouteDataObject obj) {
-            // remove from database
-            updateRouteInDatabase(getViewContext(), obj);
-
-            // update the UI
-            mFavRoutesAdapter.notifyItemRemoved(position);
-
-            updateRecyclerView();
+			onRouteUnfavorited(position, obj);
         }
     };
 
@@ -72,16 +75,40 @@ public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesCo
         return new FavoriteRoutesFragment();
     }
 
-    @Override
+    private void onRouteUnfavorited(final int position, @NonNull final FavoriteRouteDataObject obj) {
+		disposables.add(Completable.fromAction(new Action() {
+			@Override
+			public void run() throws Exception {
+				updateRouteInDatabase(obj);
+			}
+		})
+		.subscribeOn(Schedulers.io())
+		.observeOn(AndroidSchedulers.mainThread())
+		.subscribeWith(new DisposableCompletableObserver() {
+			@Override
+			public void onComplete() {
+				// update the UI
+				favRoutesAdapter.notifyItemRemoved(position);
+				updateRecyclerView();
+			}
+
+			@Override
+			public void onError(@io.reactivex.annotations.NonNull Throwable e) { }
+		}));
+	}
+
+	@Override
+	public void onAttach(Context context) {
+		AndroidInjection.inject(this);
+		super.onAttach(context);
+	}
+
+	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         List<FavoriteRouteDataObject> placeholderList = new ArrayList<>();
-        mFavRoutesAdapter = new FavoriteRoutesAdapter(placeholderList, mCallback);
-
-        mFavRouteRepo = FavoriteRoutesRepo.getInstance(getViewContext());
-        mTrainRepo = TrainsRepo.getInstance(getViewContext());
-        mBusRepo = BusesRepo.getInstance(getViewContext());
+        favRoutesAdapter = new FavoriteRoutesAdapter(placeholderList, adapterCallback);
     }
 
     @Nullable
@@ -90,9 +117,9 @@ public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesCo
         View view = inflater.inflate(R.layout.fragment_favorite_routes, container, false);
         ButterKnife.bind(this, view);
 
-        mFavoriteRoutesRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mFavoriteRoutesRecyclerView.setAdapter(mFavRoutesAdapter);
-        mFavoriteRoutesRecyclerView.addItemDecoration(new SimpleDividerItemDecoration(getViewContext()));
+        favoriteRoutesRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        favoriteRoutesRecyclerView.setAdapter(favRoutesAdapter);
+        favoriteRoutesRecyclerView.addItemDecoration(new SimpleDividerItemDecoration(getViewContext()));
 
         return view;
     }
@@ -101,8 +128,8 @@ public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesCo
     public void onResume() {
         super.onResume();
 
-        if(mPresenter != null) {
-            mPresenter.start();
+        if(presenter != null) {
+            presenter.start();
         }
     }
 
@@ -110,14 +137,17 @@ public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesCo
     public void onPause() {
         super.onPause();
 
-        if(mPresenter != null) {
-            mPresenter.stop();
+        if(presenter != null) {
+            presenter.stop();
         }
+
+        disposables.dispose();
+		disposables.clear();
     }
 
     @Override
     public void setPresenter(FavoriteRoutesContract.Presenter presenter) {
-        mPresenter = presenter;
+        this.presenter = presenter;
     }
 
     @Override
@@ -126,119 +156,112 @@ public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesCo
     }
 
     @Override
-    public void subscribeReceiver(@NonNull BroadcastReceiver receiver) {
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(GetBusesIntentService.ACTION_BUSES_UPDATED);
-        intentFilter.addAction(GetTrainsIntentService.ACTION_TRAINS_UPDATED);
-
-        LocalBroadcastManager.getInstance(getViewContext())
-                .registerReceiver(receiver, intentFilter);
-    }
-
-    @Override
-    public void unsubscribeReceiver(@NonNull BroadcastReceiver receiver) {
-        LocalBroadcastManager.getInstance(getViewContext())
-                .unregisterReceiver(receiver);
-    }
-
-    @Override
     public void onFavoriteRoutesLoaded(List<FavoriteRouteDataObject> favRoutes) {
-        mFavRoutesAdapter.setFavoriteRoutes(favRoutes);
-        mFavRoutesAdapter.notifyDataSetChanged();
+        favRoutesAdapter.setFavoriteRoutes(favRoutes);
+        favRoutesAdapter.notifyDataSetChanged();
 
         updateRecyclerView();
     }
 
     @Override
     public void onRouteInformationLoaded(FavoriteRouteDataObject favRoute) {
-        final int adapterPosition = mFavRoutesAdapter.getPosition(favRoute);
+        final int adapterPosition = favRoutesAdapter.getPosition(favRoute);
 
         if(adapterPosition != FavoriteRoutesAdapter.NEW_INDEX) {
-            mFavRoutesAdapter.setFavoriteRoute(adapterPosition, favRoute);
+            favRoutesAdapter.setFavoriteRoute(adapterPosition, favRoute);
 
             notifyItemChanged(adapterPosition);
         }
         else {
-            int insertedIndex = mFavRoutesAdapter.getItemCount();
+            int insertedIndex = favRoutesAdapter.getItemCount();
 
-            mFavRoutesAdapter.getFavoriteRoutes().add(favRoute);
-            mFavRoutesAdapter.notifyItemInserted(insertedIndex);
+            favRoutesAdapter.getFavoriteRoutes().add(favRoute);
+            favRoutesAdapter.notifyItemInserted(insertedIndex);
         }
     }
 
     private void updateRecyclerView() {
-        final boolean adapterIsEmpty = mFavRoutesAdapter.getItemCount() == 0;
+        final boolean adapterIsEmpty = favRoutesAdapter.getItemCount() == 0;
 
         if(adapterIsEmpty) {
-            mEmptyStateView.setVisibility(View.VISIBLE);
+            emptyStateView.setVisibility(View.VISIBLE);
         }
         else {
-            mEmptyStateView.setVisibility(View.GONE);
+            emptyStateView.setVisibility(View.GONE);
         }
     }
 
     private void notifyItemChanged(int position) {
         if(isAdded() && isResumed()) {
-            mFavRoutesAdapter.notifyItemChanged(position);
+            favRoutesAdapter.notifyItemChanged(position);
         }
     }
 
-    private void updateRouteInDatabase(@NonNull Context context,
-                                       @NonNull FavoriteRouteDataObject route)
-    {
+    private void updateRouteInDatabase(@NonNull FavoriteRouteDataObject route) {
         // update fav routes table
-        mFavRouteRepo.deleteRoute(route);
+        favRoutesRepo.deleteRoute(route);
 
         // update train and bus tables
         if(route.getType().equals(FavoriteRouteDataObject.TYPE_BUS)) {
-            unfavoriteInBusTable(context, route);
+            unfavoriteInBusTable(route);
         }
         else if(route.getType().equals(FavoriteRouteDataObject.TYPE_TRAIN)) {
-            unfavoriteInTrainTable(context, route);
+            unfavoriteInTrainTable(route);
         }
     }
 
-    private void unfavoriteInTrainTable(@NonNull final Context context,
-                                        @NonNull FavoriteRouteDataObject route)
-    {
+    private void unfavoriteInTrainTable(@NonNull FavoriteRouteDataObject route) {
         // load object
         Train trainArg = new Train();
         trainArg.setTrainId(Long.parseLong(route.getRouteId()));
 
-        mTrainRepo.getTrain(trainArg, new TrainsDataSource.GetTrainRouteCallback() {
-                    @Override
-                    public void onFinished(Train train) {
-                        train.setFavorited(false);
+        disposables.add(trainRepo.getTrain(trainArg)
+				.subscribeOn(Schedulers.io())
+				.observeOn(AndroidSchedulers.mainThread())
+				.subscribeWith(new DisposableObserver<Train>() {
+					@Override
+					public void onNext(@io.reactivex.annotations.NonNull Train train) {
+						train.setFavorited(false);
+						trainRepo.saveTrain(train);
+					}
 
-                        mTrainRepo.saveTrain(train);
-                    }
+					@Override
+					public void onError(@io.reactivex.annotations.NonNull Throwable e) {
 
-                    @Override
-                    public void onError(Object error) {
+					}
 
-                    }
-                });
+					@Override
+					public void onComplete() {
+
+					}
+				}));
     }
 
-    private void unfavoriteInBusTable(@NonNull final Context context,
-                                      @NonNull FavoriteRouteDataObject route)
-    {
+    private void unfavoriteInBusTable(@NonNull FavoriteRouteDataObject route) {
         // load object
         Bus busArg = new Bus();
         busArg.setRouteId(route.getRouteId());
 
-        mBusRepo.getBus(busArg, new BusesDataSource.GetBusCallback() {
-            @Override
-            public void onFinished(Bus bus) {
-                bus.setFavorited(false);
+        disposables.add(busRepo.getBus(busArg)
+			.subscribeOn(Schedulers.io())
+			.observeOn(AndroidSchedulers.mainThread())
+			.subscribeWith(new DisposableObserver<Bus>() {
+				@Override
+				public void onNext(@io.reactivex.annotations.NonNull Bus bus) {
+					bus.setFavorited(false);
 
-                mBusRepo.saveBus(bus);
-            }
+					busRepo.saveBus(bus);
+				}
 
-            @Override
-            public void onError(Object error) {
+				@Override
+				public void onError(@io.reactivex.annotations.NonNull Throwable e) {
 
-            }
-        });
+				}
+
+				@Override
+				public void onComplete() {
+
+				}
+			}));
     }
 }

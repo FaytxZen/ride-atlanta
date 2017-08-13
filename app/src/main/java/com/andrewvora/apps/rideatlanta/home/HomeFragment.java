@@ -1,13 +1,10 @@
 package com.andrewvora.apps.rideatlanta.home;
 
 import android.app.Fragment;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -18,8 +15,6 @@ import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.contracts.AlertItemModel;
 import com.andrewvora.apps.rideatlanta.data.contracts.InfoItemModel;
 import com.andrewvora.apps.rideatlanta.data.contracts.RouteItemModel;
-import com.andrewvora.apps.rideatlanta.data.remote.buses.GetBusesIntentService;
-import com.andrewvora.apps.rideatlanta.data.remote.trains.GetTrainsIntentService;
 
 import java.util.List;
 
@@ -34,10 +29,10 @@ public class HomeFragment extends Fragment implements HomeContract.View {
 
     public static final String TAG = HomeFragment.class.getSimpleName();
 
-    @BindView(R.id.home_recycler_view) RecyclerView mHomeRecyclerView;
+    @BindView(R.id.home_recycler_view) RecyclerView homeRecyclerView;
 
-    private HomeContract.Presenter mPresenter;
-    private HomeAdapter mHomeAdapter;
+    private HomeContract.Presenter presenter;
+    private HomeAdapter homeAdapter;
 
     public static HomeFragment newInstance() {
         return new HomeFragment();
@@ -47,7 +42,7 @@ public class HomeFragment extends Fragment implements HomeContract.View {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mHomeAdapter = new HomeAdapter(null);
+        homeAdapter = new HomeAdapter(null);
     }
 
     @Nullable
@@ -56,8 +51,8 @@ public class HomeFragment extends Fragment implements HomeContract.View {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
         ButterKnife.bind(this, view);
 
-        mHomeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mHomeRecyclerView.setAdapter(mHomeAdapter);
+        homeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        homeRecyclerView.setAdapter(homeAdapter);
 
         return view;
     }
@@ -66,8 +61,8 @@ public class HomeFragment extends Fragment implements HomeContract.View {
     public void onResume() {
         super.onResume();
 
-        if(mPresenter != null) {
-            mPresenter.start();
+        if(presenter != null) {
+            presenter.start();
         }
     }
 
@@ -75,20 +70,20 @@ public class HomeFragment extends Fragment implements HomeContract.View {
     public void onPause() {
         super.onPause();
 
-        if(mPresenter != null) {
-            mPresenter.stop();
+        if(presenter != null) {
+            presenter.stop();
         }
     }
 
     @Override
     public void setPresenter(HomeContract.Presenter presenter) {
-        mPresenter = presenter;
+        this.presenter = presenter;
     }
 
     @Override
     public void displayAlerts(@NonNull List<AlertItemModel> alertItems) {
         for(AlertItemModel alertItem : alertItems) {
-            int position = mHomeAdapter.addListItem(alertItem);
+            int position = homeAdapter.addListItem(alertItem);
             updateItemInAdapter(position);
         }
     }
@@ -96,7 +91,7 @@ public class HomeFragment extends Fragment implements HomeContract.View {
     @Override
     public void displayInfoItems(@NonNull List<InfoItemModel> infoItems) {
         for(InfoItemModel infoItem : infoItems) {
-            int position = mHomeAdapter.addListItem(infoItem);
+            int position = homeAdapter.addListItem(infoItem);
             updateItemInAdapter(position);
         }
     }
@@ -104,9 +99,11 @@ public class HomeFragment extends Fragment implements HomeContract.View {
     @Override
     public void displayRouteItems(@NonNull List<RouteItemModel> routeItems) {
         for(RouteItemModel routeItem : routeItems) {
-            int position = mHomeAdapter.addListItem(routeItem);
+            int position = homeAdapter.addListItem(routeItem);
             updateItemInAdapter(position);
         }
+
+        presenter.startPolling();
     }
 
     @Override
@@ -114,29 +111,13 @@ public class HomeFragment extends Fragment implements HomeContract.View {
         return getActivity();
     }
 
-    @Override
-    public void subscribeReceiver(@NonNull BroadcastReceiver receiver) {
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(GetBusesIntentService.ACTION_BUSES_UPDATED);
-        intentFilter.addAction(GetTrainsIntentService.ACTION_TRAINS_UPDATED);
-
-        LocalBroadcastManager.getInstance(getViewContext())
-                .registerReceiver(receiver, intentFilter);
-    }
-
-    @Override
-    public void unsubscribeReceiver(@NonNull BroadcastReceiver receiver) {
-        LocalBroadcastManager.getInstance(getViewContext())
-                .unregisterReceiver(receiver);
-    }
-
     private void updateItemInAdapter(int position) {
         if(position >= 0) {
-            mHomeAdapter.notifyItemInserted(position);
-            mHomeRecyclerView.smoothScrollToPosition(0);
+            homeAdapter.notifyItemInserted(position);
+            homeRecyclerView.smoothScrollToPosition(0);
         }
         else {
-            mHomeAdapter.notifyDataSetChanged();
+            homeAdapter.notifyDataSetChanged();
         }
     }
 }

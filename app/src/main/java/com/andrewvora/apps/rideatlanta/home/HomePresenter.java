@@ -1,13 +1,11 @@
 package com.andrewvora.apps.rideatlanta.home;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.R;
+import com.andrewvora.apps.rideatlanta.data.RoutePollingHelper;
 import com.andrewvora.apps.rideatlanta.data.contracts.AlertItemModel;
 import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
@@ -26,6 +24,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.BiFunction;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
+
 /**
  * Created by faytx on 10/22/2016.
  * @author Andrew Vorakrajangthiti
@@ -34,30 +39,28 @@ public class HomePresenter implements HomeContract.Presenter {
 
     private static final int MAX_NOTIFICATIONS = 2;
 
-    @NonNull private HomeContract.View mView;
-    @NonNull private FavoriteRoutesDataSource mFavRoutesRepo;
-    @NonNull private NotificationsDataSource mNotificationRepo;
-    @NonNull private BusesDataSource mBusRepo;
-    @NonNull private TrainsDataSource mTrainRepo;
-
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-           refreshRouteInformation();
-        }
-    };
+    @NonNull private HomeContract.View view;
+    @NonNull private FavoriteRoutesDataSource favsRepo;
+    @NonNull private NotificationsDataSource notificationRepo;
+    @NonNull private BusesDataSource busRepo;
+    @NonNull private TrainsDataSource trainRepo;
+	@NonNull private RoutePollingHelper pollingHelper;
+	@NonNull private CompositeDisposable disposables;
 
     public HomePresenter(@NonNull HomeContract.View view,
-                         @NonNull FavoriteRoutesDataSource favRoutesRepo,
-                         @NonNull NotificationsDataSource notificationRepo,
-                         @NonNull BusesDataSource busRepo,
-                         @NonNull TrainsDataSource trainRepo)
+						 @NonNull FavoriteRoutesDataSource favRoutesRepo,
+						 @NonNull NotificationsDataSource notificationRepo,
+						 @NonNull BusesDataSource busRepo,
+						 @NonNull TrainsDataSource trainRepo,
+						 @NonNull RoutePollingHelper pollingHelper)
     {
-        mView = view;
-        mFavRoutesRepo = favRoutesRepo;
-        mNotificationRepo = notificationRepo;
-        mBusRepo = busRepo;
-        mTrainRepo = trainRepo;
+        this.view = view;
+        this.favsRepo = favRoutesRepo;
+        this.notificationRepo = notificationRepo;
+        this.busRepo = busRepo;
+        this.trainRepo = trainRepo;
+		this.disposables = new CompositeDisposable();
+		this.pollingHelper = pollingHelper;
     }
 
     @Override
@@ -71,24 +74,23 @@ public class HomePresenter implements HomeContract.Presenter {
         loadInfoItems();
         loadAlerts();
         loadFavoriteRoutes();
-
-        mView.subscribeReceiver(mReceiver);
     }
 
     @Override
     public void stop() {
-        mView.unsubscribeReceiver(mReceiver);
+		disposables.dispose();
+		disposables.clear();
     }
 
     @Override
     public void loadAlerts() {
-        final boolean hasNoCachedData = !mNotificationRepo.hasCachedData();
+        final boolean hasNoCachedData = !notificationRepo.hasCachedData();
 
         if(hasNoCachedData) {
-            mNotificationRepo.reloadNotifications();
+            notificationRepo.reloadNotifications();
         }
 
-        mNotificationRepo.getNotifications(new NotificationsDataSource.GetNotificationsCallback() {
+        notificationRepo.getNotifications(new NotificationsDataSource.GetNotificationsCallback() {
             @Override
             public void onFinished(List<Notification> notifications) {
                 List<AlertItemModel> alertItems = new ArrayList<>();
@@ -96,32 +98,31 @@ public class HomePresenter implements HomeContract.Presenter {
                     alertItems.add(notifications.get(i));
                 }
 
-                mView.displayAlerts(alertItems);
+                view.displayAlerts(alertItems);
             }
 
             @Override
             public void onError(Object error) { }
         });
-
     }
 
     @Override
     public void loadInfoItems() {
         // create item for See & Say
         InfoAlert seeAndSayInfoItem = new InfoAlert();
-        String infoText = mView.getViewContext().getString(R.string.text_see_and_say);
+        String infoText = view.getViewContext().getString(R.string.text_see_and_say);
         seeAndSayInfoItem.setInfoText(infoText);
 
         List<InfoItemModel> infoItemModels = new ArrayList<>();
         infoItemModels.add(seeAndSayInfoItem);
 
-        mView.displayInfoItems(infoItemModels);
+        view.displayInfoItems(infoItemModels);
     }
 
     @Override
     public void loadFavoriteRoutes() {
-        mFavRoutesRepo.reloadRoutes();
-        mFavRoutesRepo.getFavoriteRoutes(new FavoriteRoutesDataSource.GetFavoriteRoutesCallback() {
+        favsRepo.reloadRoutes();
+        favsRepo.getFavoriteRoutes(new FavoriteRoutesDataSource.GetFavoriteRoutesCallback() {
             @Override
             public void onFinished(List<FavoriteRoute> favRoutes) {
                 List<RouteItemModel> routeItems = new ArrayList<>();
@@ -129,11 +130,9 @@ public class HomePresenter implements HomeContract.Presenter {
                     routeItems.add(route);
                 }
 
-                mView.displayRouteItems(routeItems);
+                view.displayRouteItems(routeItems);
 
-                if(mBusRepo.hasCachedData() || mTrainRepo.hasCachedData()) {
-                    refreshRouteInformation();
-                }
+				refreshRouteInformationIfCached();
             }
 
             @Override
@@ -141,9 +140,15 @@ public class HomePresenter implements HomeContract.Presenter {
         });
     }
 
+	private void refreshRouteInformationIfCached() {
+		if(busRepo.hasCachedData() || trainRepo.hasCachedData()) {
+			refreshRouteInformation();
+		}
+	}
+
     @Override
     public void refreshRouteInformation() {
-        mFavRoutesRepo.getFavoriteRoutes(new FavoriteRoutesDataSource.GetFavoriteRoutesCallback() {
+        favsRepo.getFavoriteRoutes(new FavoriteRoutesDataSource.GetFavoriteRoutesCallback() {
             @Override
             public void onFinished(List<FavoriteRoute> favRoutes) {
                 updateRouteInformation(favRoutes);
@@ -160,79 +165,99 @@ public class HomePresenter implements HomeContract.Presenter {
     }
 
     private void refreshBusInformation(@NonNull final List<FavoriteRoute> routes) {
-        mBusRepo.getBuses(new BusesDataSource.GetBusesCallback() {
-            @Override
-            public void onFinished(List<Bus> buses) {
-                Map<String, Bus> busMap = new HashMap<>();
+        final Disposable disposable = busRepo.getBuses()
+			.subscribeOn(Schedulers.io())
+			.observeOn(AndroidSchedulers.mainThread())
+			.subscribeWith(new DisposableObserver<List<Bus>>() {
+				@Override
+				public void onNext(@io.reactivex.annotations.NonNull List<Bus> buses) {
+					Map<String, Bus> busMap = new HashMap<>();
 
-                for (Bus bus : buses) {
-                    busMap.put(bus.getFavoriteRouteKey(), bus);
-                }
+					for (Bus bus : buses) {
+						busMap.put(bus.getFavoriteRouteKey(), bus);
+					}
 
-                for(FavoriteRoute route : routes) {
-                    if(route.isBus() && busMap.containsKey(route.getFavoriteRouteKey())) {
-                        Bus bus = busMap.get(route.getFavoriteRouteKey());
+					for(FavoriteRoute route : routes) {
+						if(route.isBus() && busMap.containsKey(route.getFavoriteRouteKey())) {
+							Bus bus = busMap.get(route.getFavoriteRouteKey());
 
-                        route.setName(bus.getName());
-                        route.setDestination(bus.getDestination());
-                        route.setTimeUntilArrival(bus.getTimeTilArrival());
+							route.setName(bus.getName());
+							route.setDestination(bus.getDestination());
+							route.setTimeUntilArrival(bus.getTimeTilArrival());
 
-                        updateRouteOnView(route);
-                    }
-                }
-            }
+							updateRouteOnView(route);
+						}
+					}
+				}
 
-            @Override
-            public void onError(Object error) {
+				@Override
+				public void onError(@io.reactivex.annotations.NonNull Throwable e) {
 
-            }
-        });
+				}
+
+				@Override
+				public void onComplete() {
+
+				}
+			});
+
+		disposables.add(disposable);
     }
 
     private void refreshTrainInformation(@NonNull final List<FavoriteRoute> routes) {
-        mTrainRepo.getTrains(new TrainsDataSource.GetTrainRoutesCallback() {
-            @Override
-            public void onFinished(List<Train> trainList) {
-                Map<String, List<Train>> trainMap = new HashMap<>();
+        final Disposable disposable = trainRepo.getTrains()
+			.subscribeOn(Schedulers.io())
+			.observeOn(AndroidSchedulers.mainThread())
+			.subscribeWith(new DisposableObserver<List<Train>>() {
+				@Override
+				public void onNext(@io.reactivex.annotations.NonNull List<Train> trains) {
+					Map<String, List<Train>> trainMap = new HashMap<>();
 
-                for(Train train : trainList) {
-                    String key = train.getFavoriteRouteKey();
+					for(Train train : trains) {
+						String key = train.getFavoriteRouteKey();
 
-                    if(trainMap.containsKey(key)) {
-                        trainMap.get(key).add(train);
-                    }
-                    else {
-                        List<Train> matching = new ArrayList<>();
-                        matching.add(train);
+						if(trainMap.containsKey(key)) {
+							trainMap.get(key).add(train);
+						}
+						else {
+							List<Train> matching = new ArrayList<>();
+							matching.add(train);
 
-                        trainMap.put(key, matching);
-                    }
-                }
+							trainMap.put(key, matching);
+						}
+					}
 
-                for(FavoriteRoute route : routes) {
-                    if(!route.isBus() && trainMap.containsKey(route.getFavoriteRouteKey())) {
-                        List<Train> list = trainMap.get(route.getFavoriteRouteKey());
-                        String arrivalTime = Train.combineArrivalTimes(list);
+					for(FavoriteRoute route : routes) {
+						if(!route.isBus() && trainMap.containsKey(route.getFavoriteRouteKey())) {
+							List<Train> list = trainMap.get(route.getFavoriteRouteKey());
+							String arrivalTime = Train.combineArrivalTimes(list);
 
-                        route.setTimeUntilArrival(arrivalTime);
+							route.setTimeUntilArrival(arrivalTime);
 
-                        updateRouteOnView(route);
-                    }
-                }
-            }
+							updateRouteOnView(route);
+						}
+					}
+				}
 
-            @Override
-            public void onError(Object error) {
+				@Override
+				public void onError(@io.reactivex.annotations.NonNull Throwable e) {
 
-            }
-        });
+				}
+
+				@Override
+				public void onComplete() {
+
+				}
+			});
+
+		disposables.add(disposable);
     }
 
     private void updateRouteOnView(@NonNull FavoriteRoute favoriteRoute) {
         List<RouteItemModel> routeItemModels = new ArrayList<>();
         routeItemModels.add(favoriteRoute);
 
-        mView.displayRouteItems(routeItemModels);
+        view.displayRouteItems(routeItemModels);
 
         // only buses will change their names
         if(favoriteRoute.isBus()) {
@@ -249,8 +274,60 @@ public class HomePresenter implements HomeContract.Presenter {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                mFavRoutesRepo.saveRoute(favoriteRoute);
+                favsRepo.saveRoute(favoriteRoute);
             }
         });
     }
+
+	@Override
+	public void startPolling() {
+		startRoutePolling();
+		startNotificationPolling();
+	}
+
+	private void startRoutePolling() {
+		disposables.add(pollingHelper.getBusStream()
+				.zipWith(pollingHelper.getTrainStream(), new BiFunction<Integer, Integer, Integer>() {
+					@Override
+					public Integer apply(@io.reactivex.annotations.NonNull Integer integer,
+										 @io.reactivex.annotations.NonNull Integer integer2) throws Exception
+					{
+						return integer + integer2;
+					}
+				})
+				.subscribeOn(Schedulers.io())
+				.observeOn(AndroidSchedulers.mainThread())
+				.subscribeWith(new DisposableObserver<Integer>() {
+					@Override
+					public void onNext(@io.reactivex.annotations.NonNull Integer num) {
+						refreshRouteInformationIfCached();
+					}
+
+					@Override
+					public void onError(@io.reactivex.annotations.NonNull Throwable e) { }
+
+					@Override
+					public void onComplete() {
+						refreshRouteInformationIfCached();
+					}
+				}));
+	}
+
+	private void startNotificationPolling() {
+		disposables.add(pollingHelper.getNotificationStream()
+				.subscribeOn(Schedulers.io())
+				.observeOn(AndroidSchedulers.mainThread())
+				.subscribeWith(new DisposableObserver<Integer>() {
+					@Override
+					public void onNext(@io.reactivex.annotations.NonNull Integer num) {
+
+					}
+
+					@Override
+					public void onError(@io.reactivex.annotations.NonNull Throwable e) { }
+
+					@Override
+					public void onComplete() { }
+				}));
+	}
 }

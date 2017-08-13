@@ -1,6 +1,5 @@
 package com.andrewvora.apps.rideatlanta.buses;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
@@ -21,12 +20,11 @@ public interface BusRoutesContract {
         void loadBusRoutes();
         void refreshBusRoutes();
         void favoriteRoute(@NonNull Bus bus);
+        void startPolling();
     }
 
     interface View extends BaseView<BusRoutesContract.Presenter> {
         void onBusRoutesLoaded(List<Bus> routesList);
-        void subscribeReceiver(@NonNull BroadcastReceiver receiver);
-        void unsubscribeReceiver(@NonNull BroadcastReceiver receiver);
         void applyFavorites(@NonNull List<FavoriteRouteDataObject> favRoutes);
         void updateFavoriteStatusOf(@NonNull Bus bus);
 

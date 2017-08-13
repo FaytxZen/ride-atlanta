@@ -1,6 +1,5 @@
 package com.andrewvora.apps.rideatlanta.favoriteroutes;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
@@ -19,13 +18,12 @@ public interface FavoriteRoutesContract {
     interface Presenter extends BasePresenter {
         void loadFavoriteRoutes();
         void refreshRouteInformation();
+        void startPolling();
     }
 
     interface View extends BaseView<FavoriteRoutesContract.Presenter> {
         void onFavoriteRoutesLoaded(List<FavoriteRouteDataObject> favRoutes);
         void onRouteInformationLoaded(FavoriteRouteDataObject favRoute);
-        void subscribeReceiver(@NonNull BroadcastReceiver receiver);
-        void unsubscribeReceiver(@NonNull BroadcastReceiver receiver);
 
         Context getViewContext();
     }

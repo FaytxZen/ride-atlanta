@@ -1,11 +1,9 @@
 package com.andrewvora.apps.rideatlanta.buses;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
+import com.andrewvora.apps.rideatlanta.data.RoutePollingHelper;
 import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
@@ -16,6 +14,12 @@ import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesContract;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
+
 /**
  * Created by faytx on 10/22/2016.
  * @author Andrew Vorakrajangthiti
@@ -24,28 +28,25 @@ public class BusRoutesPresenter implements
         BusRoutesContract.Presenter,
         FavoriteRoutesContract.DataLoadedListener
 {
-    @NonNull private BusRoutesContract.View mView;
-    @NonNull private BusesDataSource mBusesRepo;
-    @NonNull private FavoriteRoutesDataSource mFavRoutesRepo;
-    @NonNull private FavoriteRoutesContract.LoadingCache mFavRoutesCache;
-
-    @NonNull
-    private BroadcastReceiver mBusesReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            loadBusRoutes();
-        }
-    };
+    @NonNull private BusRoutesContract.View busView;
+    @NonNull private BusesDataSource busRepo;
+    @NonNull private FavoriteRoutesDataSource favRouteRepo;
+    @NonNull private FavoriteRoutesContract.LoadingCache favRouteCache;
+	@NonNull private RoutePollingHelper pollingHelper;
+    @NonNull private CompositeDisposable disposables;
 
     public BusRoutesPresenter(@NonNull BusRoutesContract.View view,
                               @NonNull BusesDataSource busRepo,
                               @NonNull FavoriteRoutesDataSource routesRepo,
-                              @NonNull FavoriteRoutesContract.LoadingCache routesDataManager)
+                              @NonNull FavoriteRoutesContract.LoadingCache routesDataManager,
+							  @NonNull RoutePollingHelper pollingHelper)
     {
-        mView = view;
-        mBusesRepo = busRepo;
-        mFavRoutesRepo = routesRepo;
-        mFavRoutesCache = routesDataManager;
+        this.busView = view;
+        this.busRepo = busRepo;
+        this.favRouteRepo = routesRepo;
+        this.favRouteCache = routesDataManager;
+		this.disposables = new CompositeDisposable();
+		this.pollingHelper = pollingHelper;
     }
 
     @Override
@@ -56,84 +57,141 @@ public class BusRoutesPresenter implements
 
     @Override
     public void start() {
-        mFavRoutesCache.setListener(this);
-        mFavRoutesCache.loadFavoriteRoutes();
-
-        mView.subscribeReceiver(mBusesReceiver);
+        favRouteCache.setListener(this);
+        favRouteCache.loadFavoriteRoutes();
 
         loadBusRoutes();
     }
 
     @Override
     public void stop() {
-        mFavRoutesCache.setListener(null);
-        mView.unsubscribeReceiver(mBusesReceiver);
+        favRouteCache.setListener(null);
+
+        disposables.dispose();
     }
 
     @Override
     public void onFavoriteRoutesLoaded(@NonNull List<FavoriteRouteDataObject> favRoutes) {
-        mView.applyFavorites(favRoutes);
+        busView.applyFavorites(favRoutes);
     }
 
     @Override
     public void loadBusRoutes() {
         useCachedDataIfAvailable();
 
-        mBusesRepo.getBuses(createGetBusesCallbackInstance());
+        final Disposable disposable = busRepo.getBuses()
+				.subscribeOn(Schedulers.io())
+				.observeOn(AndroidSchedulers.mainThread())
+				.subscribeWith(new DisposableObserver<List<Bus>>() {
+					@Override
+					public void onNext(@io.reactivex.annotations.NonNull List<Bus> buses) {
+						updateView(buses);
+					}
+
+					@Override
+					public void onError(@io.reactivex.annotations.NonNull Throwable e) { }
+
+					@Override
+					public void onComplete() { }
+				});
+
+		disposables.add(disposable);
     }
 
     @Override
     public void refreshBusRoutes() {
-        mBusesRepo.reloadBuses();
-        mBusesRepo.getBuses(createGetBusesCallbackInstance());
+        busRepo.reloadBuses();
+
+        final Disposable disposable = busRepo.getBuses()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeWith(new DisposableObserver<List<Bus>>() {
+                @Override
+                public void onNext(@io.reactivex.annotations.NonNull List<Bus> buses) {
+                    updateView(buses);
+                }
+
+                @Override
+                public void onError(@io.reactivex.annotations.NonNull Throwable e) {}
+
+                @Override
+                public void onComplete() {}
+            });
+
+        disposables.add(disposable);
     }
 
     @Override
-    public void favoriteRoute(@NonNull Bus bus) {
+    public void favoriteRoute(@NonNull final Bus bus) {
         // toggle favorited value
         bus.setFavorited(!bus.isFavorited());
 
-        mBusesRepo.saveBus(bus);
+        final Disposable disposable = busRepo.saveBus(bus)
+			.subscribeOn(Schedulers.io())
+			.observeOn(AndroidSchedulers.mainThread())
+			.subscribeWith(new DisposableObserver<Long>() {
+				@Override
+				public void onNext(@io.reactivex.annotations.NonNull Long id) {
+					// set repo to get fresh data
+					favRouteRepo.reloadRoutes();
+					favRouteCache.setFavoritedRoutes(new ArrayList<FavoriteRouteDataObject>());
 
-        // set repo to get fresh data
-        mFavRoutesRepo.reloadRoutes();
-        mFavRoutesCache.setFavoritedRoutes(new ArrayList<FavoriteRouteDataObject>());
+					FavoriteRoute favoriteRoute = new FavoriteRoute(bus);
 
-        FavoriteRoute favoriteRoute = new FavoriteRoute(bus);
+					if(bus.isFavorited()) {
+						favRouteRepo.saveRoute(favoriteRoute);
+					}
+					else {
+						favRouteRepo.deleteRoute(favoriteRoute);
+					}
+				}
 
-        if(bus.isFavorited()) {
-            mFavRoutesRepo.saveRoute(favoriteRoute);
-        }
-        else {
-            mFavRoutesRepo.deleteRoute(favoriteRoute);
-        }
-    }
+				@Override
+				public void onError(@io.reactivex.annotations.NonNull Throwable e) { }
 
-    private BusesDataSource.GetBusesCallback createGetBusesCallbackInstance() {
-        return new BusesDataSource.GetBusesCallback() {
-            @Override
-            public void onFinished(List<Bus> buses) {
-                updateView(buses);
-            }
+				@Override
+				public void onComplete() { }
+			});
 
-            @Override
-            public void onError(Object error) {
-
-            }
-        };
+		disposables.add(disposable);
     }
 
     private void updateView(List<Bus> buses) {
-        mView.onBusRoutesLoaded(buses);
+        busView.onBusRoutesLoaded(buses);
     }
 
     private boolean hasNoCachedData() {
-        return !mBusesRepo.hasCachedData();
+        return !busRepo.hasCachedData();
     }
 
     private void useCachedDataIfAvailable() {
         if(hasNoCachedData()) {
-            mBusesRepo.reloadBuses();
+            busRepo.reloadBuses();
         }
     }
+
+	@Override
+	public void startPolling() {
+		disposables.add(pollingHelper.getBusStream()
+			.subscribeOn(Schedulers.io())
+			.observeOn(AndroidSchedulers.mainThread())
+			.subscribeWith(new DisposableObserver<Integer>() {
+				@Override
+				public void onNext(@io.reactivex.annotations.NonNull Integer integer) {
+					if(busRepo.hasCachedData()) {
+						loadBusRoutes();
+					}
+				}
+
+				@Override
+				public void onError(@io.reactivex.annotations.NonNull Throwable e) {
+
+				}
+
+				@Override
+				public void onComplete() {
+
+				}
+			}));
+	}
 }

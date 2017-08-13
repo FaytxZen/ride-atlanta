@@ -24,6 +24,7 @@ public interface HomeContract {
         void loadInfoItems();
         void loadFavoriteRoutes();
         void refreshRouteInformation();
+		void startPolling();
     }
 
     interface View extends BaseView<HomeContract.Presenter> {
@@ -32,8 +33,5 @@ public interface HomeContract {
         void displayAlerts(@NonNull List<AlertItemModel> alertItems);
         void displayInfoItems(@NonNull List<InfoItemModel> infoItems);
         void displayRouteItems(@NonNull List<RouteItemModel> routeItems);
-
-        void subscribeReceiver(@NonNull BroadcastReceiver receiver);
-        void unsubscribeReceiver(@NonNull BroadcastReceiver receiver);
     }
 }

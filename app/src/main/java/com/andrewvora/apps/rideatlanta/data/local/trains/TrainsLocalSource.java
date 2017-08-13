@@ -5,16 +5,17 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import com.andrewvora.apps.rideatlanta.R;
-import com.andrewvora.apps.rideatlanta.data.models.Train;
 import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
 import com.andrewvora.apps.rideatlanta.data.local.RideAtlantaDbHelper;
 import com.andrewvora.apps.rideatlanta.data.local.trains.TrainsDbContract.TrainsTable;
+import com.andrewvora.apps.rideatlanta.data.models.Train;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import io.reactivex.Observable;
 
 /**
  * Created by faytx on 10/22/2016.
@@ -23,27 +24,27 @@ import java.util.List;
 
 public class TrainsLocalSource implements TrainsDataSource {
 
-    private static TrainsLocalSource mInstance;
-    private RideAtlantaDbHelper mDbHelper;
-    private Context mContext;
+    private RideAtlantaDbHelper dbHelper;
+    private Context context;
 
-    private TrainsLocalSource(@NonNull Context context) {
-        mDbHelper = new RideAtlantaDbHelper(context);
-        mContext = context;
-    }
-
-    public static TrainsLocalSource getInstance(@NonNull Context context) {
-
-        if(mInstance == null) {
-            mInstance = new TrainsLocalSource(context);
-        }
-
-        return mInstance;
+    public TrainsLocalSource(@NonNull Context context) {
+        dbHelper = new RideAtlantaDbHelper(context);
+        this.context = context;
     }
 
     @Override
-    public void getTrains(@NonNull GetTrainRoutesCallback callback) {
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+    public Observable<List<Train>> getTrains() {
+        return Observable.just(getTrainsFromDatabase());
+    }
+
+    @Override
+    public Observable<List<Train>> getFreshTrains() {
+        return getTrains();
+    }
+
+    private List<Train> getTrainsFromDatabase() {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        List<Train> trainList = new ArrayList<>();
 
         try {
             String[] columns = TrainsTable.getColumns();
@@ -51,20 +52,24 @@ public class TrainsLocalSource implements TrainsDataSource {
 
             Cursor trainsCursor = db.query(TrainsTable.TABLE_NAME,
                     columns, selection, null, null, null, null);
-            List<Train> trainList = getTrainsFrom(trainsCursor);
-            callback.onFinished(trainList);
-
+            trainList = getTrainsFrom(trainsCursor);
             trainsCursor.close();
         }
         catch (Exception e) {
             e.printStackTrace();
-            callback.onError(e);
         }
+
+        return trainList;
     }
 
-    @Override
-    public void getTrains(@NonNull GetTrainRoutesCallback callback, @NonNull Long... trainIds) {
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+	@Override
+	public Observable<List<Train>> getTrains(@NonNull Long... trainIds) {
+		return Observable.just(getTrainsFromDatabase(trainIds));
+	}
+
+    private List<Train> getTrainsFromDatabase(@NonNull Long... trainIds) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+		List<Train> trainList = new ArrayList<>();
 
         try {
             String[] columns = TrainsTable.getColumns();
@@ -79,15 +84,14 @@ public class TrainsLocalSource implements TrainsDataSource {
 
             Cursor trainsCursor = db.query(TrainsTable.TABLE_NAME,
                     columns, selection, selectionArgs, null, null, null);
-            List<Train> trainList = getTrainsFrom(trainsCursor);
-            callback.onFinished(trainList);
-
+            trainList = getTrainsFrom(trainsCursor);
             trainsCursor.close();
         }
         catch (Exception e) {
             e.printStackTrace();
-            callback.onError(e);
         }
+
+        return trainList;
     }
 
     private String getIdsAsSqlString(@NonNull String... trainIds) {
@@ -104,14 +108,18 @@ public class TrainsLocalSource implements TrainsDataSource {
         return sb.toString();
     }
 
-    @Override
-    public void getTrains(@NonNull String station, @NonNull String line, @NonNull GetTrainRoutesCallback callback) {
-        // not used if no cache
-    }
+	@Override
+	public Observable<List<Train>> getTrains(@NonNull String station, @NonNull String line) {
+		return Observable.empty();
+	}
 
-    @Override
-    public void getTrain(@NonNull Train train, @NonNull GetTrainRouteCallback callback) {
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+	@Override
+	public Observable<Train> getTrain(@NonNull Train train) {
+		return Observable.just(getTrainFromDatabase(train));
+	}
+
+    private Train getTrainFromDatabase(@NonNull Train train) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
 
         try {
             String[] columns = TrainsTable.getColumns();
@@ -125,43 +133,44 @@ public class TrainsLocalSource implements TrainsDataSource {
             if(trainCursor.getCount() > 0) {
                 trainCursor.moveToFirst();
 
-                Train savedTrain = getTrainFrom(trainCursor);
-                callback.onFinished(savedTrain);
+                return getTrainFrom(trainCursor);
             }
             else {
-                train.setWaitingTime(mContext.getString(R.string.text_adherence_unknown));
-                callback.onFinished(train);
+                train.setWaitingTime(context.getString(R.string.text_adherence_unknown));
+                return train;
             }
         }
         catch (Exception e) {
             e.printStackTrace();
-            callback.onError(e);
+			return new Train();
         }
     }
 
-    @Override
-    public void deleteAllTrains(@Nullable DeleteTrainRoutesCallback callback) {
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+	@Override
+	public Observable<Long> deleteAllTrains() {
+		return Observable.just(deleteAllTrainsFromDatabase());
+	}
+
+    private long deleteAllTrainsFromDatabase() {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         try {
-            db.delete(TrainsTable.TABLE_NAME, "1=1", null);
-
-            if(callback != null) {
-                callback.onDeleted();
-            }
+            return db.delete(TrainsTable.TABLE_NAME, "1=1", null);
         }
         catch (Exception e) {
             e.printStackTrace();
-
-            if(callback != null) {
-                callback.onError(e);
-            }
         }
+
+        return -1;
     }
 
-    @Override
-    public void saveTrain(@NonNull Train route) {
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+	@Override
+	public Observable<Long> saveTrain(@NonNull Train route) {
+		return Observable.just(saveTrainInDatabase(route));
+	}
+
+	private long saveTrainInDatabase(@NonNull Train route) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
         final boolean newRecord = route.getId() == null;
 
         ContentValues contentValues = new ContentValues();
@@ -177,10 +186,12 @@ public class TrainsLocalSource implements TrainsDataSource {
         contentValues.put(TrainsTable.COLUMN_FAVORITED, route.isFavorited() ? 1 : 0);
 
         if(newRecord) {
-            long id = db.insertWithOnConflict(TrainsTable.TABLE_NAME,
+            final long id = db.insertWithOnConflict(TrainsTable.TABLE_NAME,
                     null, contentValues, SQLiteDatabase.CONFLICT_ROLLBACK);
 
-            route.setId(id);
+			route.setId(id);
+
+			return id;
         }
         else {
             contentValues.put(TrainsTable._ID, route.getId());
@@ -191,7 +202,7 @@ public class TrainsLocalSource implements TrainsDataSource {
                     route.getTrainId().toString()
             };
 
-            db.updateWithOnConflict(TrainsTable.TABLE_NAME,
+            return db.updateWithOnConflict(TrainsTable.TABLE_NAME,
                     contentValues, whereClause, whereArgs, SQLiteDatabase.CONFLICT_ROLLBACK);
         }
     }

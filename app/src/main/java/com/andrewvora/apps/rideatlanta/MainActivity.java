@@ -5,7 +5,6 @@ import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
@@ -24,13 +23,13 @@ import com.andrewvora.apps.rideatlanta.breezebalance.BreezeBalanceActivity;
 import com.andrewvora.apps.rideatlanta.buses.BusRoutesContract;
 import com.andrewvora.apps.rideatlanta.buses.BusRoutesFragment;
 import com.andrewvora.apps.rideatlanta.buses.BusRoutesPresenter;
+import com.andrewvora.apps.rideatlanta.data.RoutePollingHelper;
 import com.andrewvora.apps.rideatlanta.data.SharedPrefsManager;
-import com.andrewvora.apps.rideatlanta.data.remote.buses.GetBusesIntentService;
-import com.andrewvora.apps.rideatlanta.data.remote.trains.GetTrainsIntentService;
-import com.andrewvora.apps.rideatlanta.data.repos.BusesRepo;
-import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
-import com.andrewvora.apps.rideatlanta.data.repos.NotificationsRepo;
-import com.andrewvora.apps.rideatlanta.data.repos.TrainsRepo;
+import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
+import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
+import com.andrewvora.apps.rideatlanta.data.contracts.NotificationsDataSource;
+import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
+import com.andrewvora.apps.rideatlanta.di.DataModule;
 import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesContract;
 import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesFragment;
 import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesLoadingCache;
@@ -46,57 +45,63 @@ import com.andrewvora.apps.rideatlanta.trains.TrainRoutesContract;
 import com.andrewvora.apps.rideatlanta.trains.TrainRoutesFragment;
 import com.andrewvora.apps.rideatlanta.trains.TrainRoutesPresenter;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import dagger.android.AndroidInjection;
+import dagger.android.AndroidInjector;
+import dagger.android.DispatchingAndroidInjector;
+import dagger.android.HasFragmentInjector;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements HasFragmentInjector {
 
-    private static final long POLLING_INTERVAL_IN_MILLIS = 30 * 1000;
+    @BindView(R.id.toolbar_icon) ImageButton toolbarIconView;
+    @BindView(R.id.toolbar_title) TextView toolbarTitleView;
+    @BindView(R.id.toolbar) Toolbar toolbar;
+    @BindView(R.id.bottom_bar) BottomNavigationView bottomBar;
 
-    @BindView(R.id.toolbar_icon) ImageButton mToolbarIconView;
-    @BindView(R.id.toolbar_title) TextView mToolbarTitleView;
-    @BindView(R.id.toolbar) Toolbar mToolbar;
-    @BindView(R.id.bottom_bar) BottomNavigationView mBottomBar;
+	@Inject DispatchingAndroidInjector<Fragment> fragmentInjector;
 
-    private FavoriteRoutesLoadingCache mFavRouteDataManager;
-    private SharedPrefsManager mPrefManager;
-    private Handler mPollingHandler;
-    private Runnable mPollingTask = new Runnable() {
-        @Override
-        public void run() {
-            Intent getBusesIntent = new Intent(getApplication(), GetBusesIntentService.class);
-            Intent getTrainsIntent = new Intent(getApplication(), GetTrainsIntentService.class);
+	@Inject @Named(DataModule.BUS_SOURCE)
+	BusesDataSource busRepo;
+	@Inject @Named(DataModule.TRAIN_SOURCE)
+	TrainsDataSource trainRepo;
+	@Inject @Named(DataModule.FAVS_SOURCE)
+	FavoriteRoutesDataSource favsRepo;
+    @Inject @Named(DataModule.NOTIFICATION_SOURCE)
+    NotificationsDataSource notificationRepo;
 
-            startService(getBusesIntent);
-            startService(getTrainsIntent);
+	@Inject
+	RoutePollingHelper pollingHelper;
 
-            mPollingHandler.postDelayed(this, POLLING_INTERVAL_IN_MILLIS);
-        }
-    };
+    private FavoriteRoutesLoadingCache favRouteDataManager;
+    private SharedPrefsManager prefManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+		AndroidInjection.inject(this);
+		super.onCreate(savedInstanceState);
+
         setTitle("");
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        setSupportActionBar(mToolbar);
+        setSupportActionBar(toolbar);
 
-        mFavRouteDataManager = (FavoriteRoutesLoadingCache)
+        favRouteDataManager = (FavoriteRoutesLoadingCache)
                 getFragmentManager().findFragmentByTag(FavoriteRoutesLoadingCache.TAG);
 
-        if(mFavRouteDataManager == null) {
-            mFavRouteDataManager = FavoriteRoutesLoadingCache.createInstance();
+        if(favRouteDataManager == null) {
+            favRouteDataManager = FavoriteRoutesLoadingCache.createInstance();
         }
 
-        mPollingHandler = new Handler();
+        prefManager = new SharedPrefsManager(getApplication());
+        applySelectedTab(prefManager.getSelectedTab());
 
-        mPrefManager = new SharedPrefsManager(getApplication());
-        applySelectedTab(mPrefManager.getSelectedTab());
-
-        mBottomBar.setSelectedItemId(mPrefManager.getSelectedTab());
-        mBottomBar.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+        bottomBar.setSelectedItemId(prefManager.getSelectedTab());
+        bottomBar.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 applySelectedTab(item.getItemId());
@@ -128,20 +133,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
 
-        mPrefManager.setSelectedTab(tabId);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        mPollingHandler.post(mPollingTask);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mPollingHandler.removeCallbacks(mPollingTask);
+        prefManager.setSelectedTab(tabId);
     }
 
     @Override
@@ -171,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void setTitle(@StringRes int titleId) {
-        mToolbarTitleView.setText(titleId);
+        toolbarTitleView.setText(titleId);
     }
 
     private void onBusesTabSelected() {
@@ -186,9 +178,10 @@ public class MainActivity extends AppCompatActivity {
 
         BusRoutesContract.Presenter presenter = new BusRoutesPresenter(
                 fragment,
-                BusesRepo.getInstance(this),
-                FavoriteRoutesRepo.getInstance(this),
-                mFavRouteDataManager);
+                busRepo,
+                favsRepo,
+                favRouteDataManager,
+				pollingHelper);
         fragment.setPresenter(presenter);
 
         startFragment(R.id.fragment_container, fragment, BusRoutesFragment.TAG, false);
@@ -207,9 +200,10 @@ public class MainActivity extends AppCompatActivity {
 
         TrainRoutesContract.Presenter presenter = new TrainRoutesPresenter(
                 fragment,
-                TrainsRepo.getInstance(this),
-                FavoriteRoutesRepo.getInstance(this),
-                mFavRouteDataManager);
+                trainRepo,
+                favsRepo,
+                favRouteDataManager,
+				pollingHelper);
 
         fragment.setPresenter(presenter);
 
@@ -230,10 +224,11 @@ public class MainActivity extends AppCompatActivity {
 
         HomeContract.Presenter presenter = new HomePresenter(
                 fragment,
-                FavoriteRoutesRepo.getInstance(this),
-                NotificationsRepo.getInstance(this),
-                BusesRepo.getInstance(this),
-                TrainsRepo.getInstance(this));
+                favsRepo,
+                notificationRepo,
+                busRepo,
+                trainRepo,
+				pollingHelper);
         fragment.setPresenter(presenter);
 
         startFragment(R.id.fragment_container, fragment, HomeFragment.TAG, false);
@@ -251,9 +246,10 @@ public class MainActivity extends AppCompatActivity {
 
         FavoriteRoutesContract.Presenter presenter = new FavoriteRoutesPresenter(
                 fragment,
-                FavoriteRoutesRepo.getInstance(this),
-                BusesRepo.getInstance(this),
-                TrainsRepo.getInstance(this));
+                favsRepo,
+                busRepo,
+                trainRepo,
+				pollingHelper);
         fragment.setPresenter(presenter);
 
         startFragment(R.id.fragment_container, fragment, FavoriteRoutesFragment.TAG, false);
@@ -292,14 +288,14 @@ public class MainActivity extends AppCompatActivity {
 
         NotificationsContract.Presenter presenter = new NotificationsPresenter(
                 fragment,
-                NotificationsRepo.getInstance(this));
+                notificationRepo);
         fragment.setPresenter(presenter);
 
         startFragment(R.id.fragment_container, fragment, NotificationsFragment.TAG, false);
     }
 
     private void setToolbarIcon(@DrawableRes int resId) {
-        mToolbarIconView.setImageDrawable(ContextCompat.getDrawable(this, resId));
+        toolbarIconView.setImageDrawable(ContextCompat.getDrawable(this, resId));
     }
 
     private void startFragment(@IdRes int parentId, @NonNull Fragment fragment,
@@ -312,9 +308,14 @@ public class MainActivity extends AppCompatActivity {
         ft.replace(parentId, fragment, tag);
 
         if(getFragmentManager().findFragmentByTag(FavoriteRoutesLoadingCache.TAG) == null) {
-            ft.add(mFavRouteDataManager, FavoriteRoutesLoadingCache.TAG);
+            ft.add(favRouteDataManager, FavoriteRoutesLoadingCache.TAG);
         }
 
         ft.commit();
     }
+
+	@Override
+	public AndroidInjector<Fragment> fragmentInjector() {
+		return fragmentInjector;
+	}
 }

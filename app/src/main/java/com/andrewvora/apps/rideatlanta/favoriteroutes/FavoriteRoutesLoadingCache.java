@@ -1,6 +1,7 @@
 package com.andrewvora.apps.rideatlanta.favoriteroutes;
 
 import android.app.Fragment;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -11,10 +12,15 @@ import android.support.annotation.Nullable;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
 import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
-import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
+import com.andrewvora.apps.rideatlanta.di.DataModule;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import dagger.android.AndroidInjection;
 
 /**
  * Created on 5/12/2017.
@@ -24,6 +30,8 @@ import java.util.List;
 public class FavoriteRoutesLoadingCache extends Fragment implements FavoriteRoutesContract.LoadingCache {
 
     public static final String TAG = FavoriteRoutesLoadingCache.class.getSimpleName();
+
+    @Inject @Named(DataModule.FAVS_SOURCE) FavoriteRoutesDataSource favsRepo;
 
     @NonNull private List<FavoriteRouteDataObject> mFavoriteRoutes;
     @Nullable private FavoriteRoutesContract.DataLoadedListener mListener;
@@ -36,7 +44,13 @@ public class FavoriteRoutesLoadingCache extends Fragment implements FavoriteRout
         return new FavoriteRoutesLoadingCache();
     }
 
-    @Override
+	@Override
+	public void onAttach(Context context) {
+		super.onAttach(context);
+		AndroidInjection.inject(this);
+	}
+
+	@Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
@@ -55,9 +69,7 @@ public class FavoriteRoutesLoadingCache extends Fragment implements FavoriteRout
     @Override
     public void loadFavoriteRoutes() {
         if(mFavoriteRoutes.isEmpty()) {
-            GetFavRoutesTask getFavRoutesTask = new GetFavRoutesTask(
-                    this,
-                    FavoriteRoutesRepo.getInstance(getActivity().getApplication()));
+            GetFavRoutesTask getFavRoutesTask = new GetFavRoutesTask(this, favsRepo);
 
             getFavRoutesTask.execute();
         }

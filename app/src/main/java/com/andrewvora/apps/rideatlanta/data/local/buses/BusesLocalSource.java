@@ -5,85 +5,94 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
-import com.andrewvora.apps.rideatlanta.data.models.Bus;
 import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
 import com.andrewvora.apps.rideatlanta.data.local.RideAtlantaDbHelper;
 import com.andrewvora.apps.rideatlanta.data.local.buses.BusesDbContract.BusesTable;
+import com.andrewvora.apps.rideatlanta.data.models.Bus;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import io.reactivex.Observable;
 
 /**
  * Created by faytx on 10/22/2016.
  * @author Andrew Vorakrajangthiti
  */
-
 public class BusesLocalSource implements BusesDataSource {
 
-    private static BusesLocalSource mInstance;
-    private RideAtlantaDbHelper mDbHelper;
+    private RideAtlantaDbHelper dbHelper;
 
-    private BusesLocalSource(@NonNull Context context) {
-        mDbHelper = new RideAtlantaDbHelper(context);
+    public BusesLocalSource(@NonNull Context context) {
+        dbHelper = new RideAtlantaDbHelper(context);
     }
 
-    public static BusesLocalSource getInstance(@NonNull Context context) {
-        if(mInstance == null) {
-            mInstance = new BusesLocalSource(context);
-        }
+	@Override
+	public Observable<List<Bus>> getFreshBuses() {
+		return getBuses();
+	}
 
-        return mInstance;
-    }
+	@Override
+	public Observable<List<Bus>> getBuses() {
+		return Observable.just(getBusesFromDatabase());
+	}
 
-    @Override
-    public void getBuses(@NonNull GetBusesCallback callback) {
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+    private List<Bus> getBusesFromDatabase() {
+        final SQLiteDatabase db = dbHelper.getReadableDatabase();
+		List<Bus> busList = new ArrayList<>();
 
         try {
-            String[] columns = BusesTable.getColumns();
-            String selection = "1=1";
+            final String[] columns = BusesTable.getColumns();
+            final String selection = "1=1";
 
-            Cursor busesCursor = db.query(BusesTable.TABLE_NAME,
+            final Cursor busesCursor = db.query(BusesTable.TABLE_NAME,
                     columns, selection, null, null, null, null);
-            List<Bus> busList = getBusesFrom(busesCursor);
-            callback.onFinished(busList);
-
+            busList = getBusesFrom(busesCursor);
             busesCursor.close();
         }
         catch (Exception e) {
             e.printStackTrace();
-            callback.onError(e);
         }
+
+        return busList;
     }
 
-    @Override
-    public void getBuses(@NonNull GetBusesCallback callback, @NonNull String... routeIds) {
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+	@Override
+	public Observable<List<Bus>> getBuses(@NonNull String... routeIds) {
+		return Observable.just(getBusesFromDatabase(routeIds));
+	}
+
+	private List<Bus> getBusesFromDatabase(@NonNull String... routeIds) {
+        final SQLiteDatabase db = dbHelper.getReadableDatabase();
+		List<Bus> busList = new ArrayList<>();
 
         try {
-            String[] columns = BusesTable.getColumns();
-            String selection = String.format("%s IN (%s)",
+            final String[] columns = BusesTable.getColumns();
+            final String selection = String.format("%s IN (%s)",
                     BusesTable.COLUMN_ROUTEID,
                     getIdsAsSqlString(routeIds));
 
-            Cursor busesCursor = db.query(BusesTable.TABLE_NAME,
+            final Cursor busesCursor = db.query(BusesTable.TABLE_NAME,
                     columns, selection, routeIds, null, null, null);
-            List<Bus> busList = getBusesFrom(busesCursor);
-            callback.onFinished(busList);
 
+            busList = getBusesFrom(busesCursor);
             busesCursor.close();
         }
         catch (Exception e) {
             e.printStackTrace();
-            callback.onError(e);
         }
+
+        return busList;
     }
 
-    @Override
-    public void getBus(@NonNull Bus bus, @NonNull GetBusCallback callback) {
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+	@Override
+	public Observable<Bus> getBus(@NonNull Bus bus) {
+		return Observable.just(getBusFromDatabase(bus));
+	}
+
+	private Bus getBusFromDatabase(@NonNull Bus bus) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
 
         try {
             String[] columns = BusesTable.getColumns();
@@ -97,39 +106,41 @@ public class BusesLocalSource implements BusesDataSource {
             if(busCursor.getCount() > 0) {
                 busCursor.moveToFirst();
 
-                Bus savedBus = getBusFrom(busCursor);
-                callback.onFinished(savedBus);
+                return getBusFrom(busCursor);
             }
         }
         catch (Exception e) {
             e.printStackTrace();
-            callback.onError(e);
         }
+
+        return bus;
     }
 
-    @Override
-    public void deleteAllBus(@Nullable DeleteBusesCallback callback) {
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+	@Override
+	public Observable<Long> deleteAllBus() {
+		return Observable.just(deleteAllBusesFromDatabase());
+	}
 
-        try {
-            db.delete(BusesTable.TABLE_NAME, "1=1", null);
+	private long deleteAllBusesFromDatabase() {
+		SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-            if(callback != null) {
-                callback.onDeleted();
-            }
+		try {
+			return db.delete(BusesTable.TABLE_NAME, "1=1", null);
 
-        } catch (Exception e) {
-            e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-            if(callback != null) {
-                callback.onError(e);
-            }
-        }
-    }
+		return -1L;
+	}
 
-    @Override
-    public void saveBus(@NonNull Bus route) {
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+	@Override
+	public Observable<Long> saveBus(@NonNull Bus route) {
+		return Observable.just(saveBusInDatabase(route));
+	}
+
+	private long saveBusInDatabase(@NonNull Bus route) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
         final boolean newRecord = route.getId() == null;
 
         ContentValues contentValues = new ContentValues();
@@ -148,10 +159,12 @@ public class BusesLocalSource implements BusesDataSource {
         contentValues.put(BusesTable.COLUMN_FAVORITED, route.isFavorited() ? 1 : 0);
 
         if(newRecord) {
-            long id = db.insertWithOnConflict(BusesTable.TABLE_NAME,
+            final long id = db.insertWithOnConflict(BusesTable.TABLE_NAME,
                     null, contentValues, SQLiteDatabase.CONFLICT_ROLLBACK);
 
-            route.setId(id);
+			route.setId(id);
+
+			return id;
         }
         else {
             contentValues.put(BusesTable._ID, route.getId());
@@ -159,7 +172,7 @@ public class BusesLocalSource implements BusesDataSource {
             String whereClause = BusesTable._ID + "=? and " + BusesTable.COLUMN_ROUTEID + "=?";
             String[] whereArgs = new String[] { route.getId().toString(), route.getRouteId() };
 
-            db.updateWithOnConflict(BusesTable.TABLE_NAME,
+            return db.updateWithOnConflict(BusesTable.TABLE_NAME,
                     contentValues, whereClause, whereArgs, SQLiteDatabase.CONFLICT_ROLLBACK);
         }
     }

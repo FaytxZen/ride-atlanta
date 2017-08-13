@@ -1,33 +1,29 @@
 package com.andrewvora.apps.rideatlanta;
 
+import android.app.Activity;
 import android.app.Application;
+import android.os.Bundle;
 
-import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
-import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
-import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
-import com.andrewvora.apps.rideatlanta.data.repos.BusesRepo;
-import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
-import com.andrewvora.apps.rideatlanta.data.repos.TrainsRepo;
+import com.andrewvora.apps.rideatlanta.data.RoutePollingHelper;
+import com.andrewvora.apps.rideatlanta.di.components.DaggerAppComponent;
 import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.TwitterAuthConfig;
 
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjector;
+import dagger.android.DispatchingAndroidInjector;
+import dagger.android.HasActivityInjector;
 import io.fabric.sdk.android.Fabric;
 
 /**
  * Created by faytx on 11/11/2016.
  * @author Andrew Vorakrajangthiti
  */
+public class RideAtlantaApplication extends Application implements HasActivityInjector {
 
-public class RideAtlantaApplication extends Application {
-
-    @SuppressWarnings({"FieldCanBeLocal", "unused"})
-    private static BusesDataSource sBusRepo;
-
-    @SuppressWarnings({"FieldCanBeLocal", "unused"})
-    private static TrainsDataSource sTrainRepo;
-
-    @SuppressWarnings({"FieldCanBeLocal", "unused"})
-    private static FavoriteRoutesDataSource sFavRouteRepo;
+	@Inject
+	DispatchingAndroidInjector<Activity> dispatchingActivityInjector;
 
     @Override
     public void onCreate() {
@@ -37,11 +33,13 @@ public class RideAtlantaApplication extends Application {
         final String twitterSecret = BuildConfig.TWITTER_SECRET;
 
         TwitterAuthConfig twitterAuthConfig = new TwitterAuthConfig(twitterKey, twitterSecret);
-
         Fabric.with(this, new Twitter(twitterAuthConfig));
 
-        sBusRepo = BusesRepo.getInstance(this);
-        sTrainRepo = TrainsRepo.getInstance(this);
-        sFavRouteRepo = FavoriteRoutesRepo.getInstance(this);
+		DaggerAppComponent.builder().application(this).build().inject(this);
+    }
+
+    @Override
+    public AndroidInjector<Activity> activityInjector() {
+        return dispatchingActivityInjector;
     }
 }

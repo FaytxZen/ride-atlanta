@@ -1,14 +1,10 @@
 package com.andrewvora.apps.rideatlanta.data.repos;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
-import com.andrewvora.apps.rideatlanta.data.local.trains.TrainsLocalSource;
 import com.andrewvora.apps.rideatlanta.data.models.Train;
-import com.andrewvora.apps.rideatlanta.data.remote.trains.TrainsRemoteSource;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,6 +12,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import io.reactivex.Observable;
+import io.reactivex.functions.Function;
 
 /**
  * Repo class that handles the syncing and fetching of data between the local and remote data
@@ -26,38 +25,26 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class TrainsRepo implements TrainsDataSource {
 
-    public static final String KEY_DELIMITER = "\\$";
-
-    private static TrainsRepo mInstance;
+    private static final String KEY_DELIMITER = "\\$";
 
     // Note: currently not leveraging the local source
-    private TrainsDataSource mLocalSource;
-    private TrainsDataSource mRemoteSource;
+    private TrainsDataSource localSource;
+    private TrainsDataSource remoteSource;
 
     @NonNull
-    private Map<String, Train> mCachedTrains;
-    private boolean mCacheIsDirty;
+    private Map<String, Train> cachedTrains;
+    private boolean cacheIsDirty;
 
-    private TrainsRepo(@NonNull TrainsDataSource remoteSource,
-                       @NonNull TrainsDataSource localSource)
+    public TrainsRepo(@NonNull TrainsDataSource remoteSource,
+                      @NonNull TrainsDataSource localSource)
     {
-        mLocalSource = localSource;
-        mRemoteSource = remoteSource;
+        this.localSource = localSource;
+        this.remoteSource = remoteSource;
 
-        mCachedTrains = new ConcurrentHashMap<>();
+        cachedTrains = new ConcurrentHashMap<>();
     }
 
-    public static TrainsRepo getInstance(@NonNull Context context) {
-        if(mInstance == null) {
-            TrainsDataSource remoteSource = TrainsRemoteSource.getInstance(context);
-            TrainsDataSource localSource = TrainsLocalSource.getInstance(context);
-            mInstance = new TrainsRepo(remoteSource, localSource);
-        }
-
-        return mInstance;
-    }
-
-    public static String getKeyFor(@NonNull Train train) {
+    private static String getKeyFor(@NonNull Train train) {
         return  train.getTrainId().toString() + KEY_DELIMITER +
                 train.getLine() + KEY_DELIMITER +
                 train.getStation();
@@ -65,33 +52,47 @@ public class TrainsRepo implements TrainsDataSource {
 
     @Override
     public boolean hasCachedData() {
-        return !mCachedTrains.isEmpty();
+        return !cachedTrains.isEmpty();
     }
 
     @Override
-    public void getTrains(@NonNull final GetTrainRoutesCallback callback) {
-        if(!mCachedTrains.isEmpty() && !mCacheIsDirty) {
-            List<Train> cachedTrainList = new ArrayList<>(mCachedTrains.values());
-            Collections.sort(cachedTrainList, new TrainsComparator());
+    public Observable<List<Train>> getTrains() {
+        if(!cachedTrains.isEmpty() && !cacheIsDirty) {
+            List<Train> cachedTrainList = new ArrayList<>(cachedTrains.values());
 
-            callback.onFinished(cachedTrainList);
+            return Observable.just(cachedTrainList).map(new Function<List<Train>, List<Train>>() {
+                @Override
+                public List<Train> apply(@io.reactivex.annotations.NonNull List<Train> trains) throws Exception {
+                    Collections.sort(trains, new TrainsComparator());
+                    return trains;
+                }
+            });
         }
-        else if(mCacheIsDirty) {
-            getTrainsFromRemote(callback);
+        else {
+            return getTrainsFromRemote();
         }
     }
 
-    @Override
-    public void getTrains(@NonNull String station, @NonNull String line, @NonNull GetTrainRoutesCallback callback) {
+	@Override
+	public Observable<List<Train>> getFreshTrains() {
+		return getTrainsFromRemote();
+	}
 
-        if(mCachedTrains.isEmpty()) {
-            callback.onFinished(new ArrayList<Train>());
+	@Override
+    public Observable<List<Train>> getTrains(@NonNull Long... trainIds) {
+        return remoteSource.getTrains(trainIds);
+    }
+
+    @Override
+    public Observable<List<Train>> getTrains(@NonNull String station, @NonNull String line) {
+        if(cachedTrains.isEmpty()) {
+            return Observable.empty();
         }
         else {
             List<Train> matchingTrains = new ArrayList<>();
 
-            for(String key : mCachedTrains.keySet()) {
-                final Train train = mCachedTrains.get(key);
+            for(String key : cachedTrains.keySet()) {
+                final Train train = cachedTrains.get(key);
                 final boolean matched = train.getStation().equals(station) &&
                         train.getLine().equals(line);
 
@@ -100,93 +101,69 @@ public class TrainsRepo implements TrainsDataSource {
                 }
             }
 
-            callback.onFinished(matchingTrains);
+            return Observable.just(matchingTrains);
         }
     }
 
-    @Override
-    public void getTrains(@NonNull GetTrainRoutesCallback callback, @NonNull Long... trainIds) {
-        mRemoteSource.getTrains(callback, trainIds);
-    }
+	@Override
+	public Observable<Train> getTrain(@NonNull Train train) {
+		final Train cachedTrain = cachedTrains.get(getKeyFor(train));
 
-    @Override
-    public void getTrain(@NonNull final Train train, @NonNull final GetTrainRouteCallback callback)
-    {
-        final Train cachedTrain = mCachedTrains.get(getKeyFor(train));
+		if(cachedTrain != null) {
+			return Observable.just(cachedTrain);
+		}
+		else {
+			return remoteSource.getTrain(train).map(new Function<Train, Train>() {
+				@Override
+				public Train apply(@io.reactivex.annotations.NonNull Train train) throws Exception {
+					cacheTrain(train);
+					return train;
+				}
+			});
+		}
+	}
 
-        if(cachedTrain != null) {
-            callback.onFinished(cachedTrain);
-        }
-        else {
-            mRemoteSource.getTrain(train, new GetTrainRouteCallback() {
-                @Override
-                public void onFinished(Train train) {
-                    callback.onFinished(train);
-                    cacheTrain(train);
-                }
+	@Override
+	public Observable<Long> deleteAllTrains() {
+		remoteSource.deleteAllTrains();
+		cachedTrains.clear();
 
-                @Override
-                public void onError(Object error) {
-                    callback.onError(error);
-                }
-            });
-        }
-    }
+		return Observable.just(0L);
+	}
 
-    @Override
-    public void deleteAllTrains(@Nullable DeleteTrainRoutesCallback callback) {
-        mRemoteSource.deleteAllTrains(null);
-
-        mCachedTrains.clear();
-
-        if(callback != null) {
-            callback.onDeleted();
-        }
-    }
-
-    @Override
-    public void saveTrain(@NonNull Train route) {
-        cacheTrain(route);
-    }
+	@Override
+	public Observable<Long> saveTrain(@NonNull Train route) {
+		cacheTrain(route);
+		return Observable.just(0L);
+	}
 
     @Override
     public void reloadTrains() {
-        mCacheIsDirty = true;
+        cacheIsDirty = true;
     }
 
-    private void getTrainsFromRemote(@NonNull final GetTrainRoutesCallback callback) {
-        mRemoteSource.getTrains(new GetTrainRoutesCallback() {
+    private Observable<List<Train>> getTrainsFromRemote() {
+        return remoteSource.getTrains().map(new Function<List<Train>, List<Train>>() {
             @Override
-            public void onFinished(List<Train> trainList) {
-                reloadCachedTrains(trainList);
-
-                callback.onFinished(trainList);
-            }
-
-            @Override
-            public void onError(Object error) {
-                callback.onError(error);
+            public List<Train> apply(@io.reactivex.annotations.NonNull List<Train> trains) throws Exception {
+                reloadCachedTrains(trains);
+                return trains;
             }
         });
     }
 
     private void reloadCachedTrains(final List<Train> trainList) {
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                mCachedTrains.clear();
+		cachedTrains.clear();
 
-                for(Train train : trainList) {
-                    cacheTrain(train);
-                }
+		for(Train train : trainList) {
+			cacheTrain(train);
+		}
 
-                mCacheIsDirty = false;
-            }
-        });
+		cacheIsDirty = false;
     }
 
     private void cacheTrain(Train train) {
-        mCachedTrains.put(getKeyFor(train), train);
+        cachedTrains.put(getKeyFor(train), train);
     }
 
     private static class TrainsComparator implements Comparator<Train> {

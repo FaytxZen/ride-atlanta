@@ -17,6 +17,7 @@ public interface NotificationsDataSource {
         void onError(Object error);
     }
 
+    void getFreshNotifications(@NonNull GetNotificationsCallback callback);
     void getNotifications(@NonNull GetNotificationsCallback callback);
     void deleteAllNotifications();
     void saveNotification(@NonNull Notification notification);

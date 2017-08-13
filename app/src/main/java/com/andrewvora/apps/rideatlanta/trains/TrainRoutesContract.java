@@ -22,12 +22,11 @@ public interface TrainRoutesContract {
         void refreshTrainRoutes();
         void loadTrainRoutes();
         void favoriteRoute(@NonNull Train route);
+        void startPolling();
     }
 
     interface View extends BaseView<TrainRoutesContract.Presenter> {
         void onTrainRoutesLoaded(List<Train> trainList);
-        void subscribeReceiver(@NonNull BroadcastReceiver receiver);
-        void unsubscribeReceiver(@NonNull BroadcastReceiver receiver);
         void applyFavorites(List<FavoriteRouteDataObject> favRoutes);
         void updateFavoriteStatusOf(@NonNull Train train);
 

@@ -8,20 +8,24 @@ import com.andrewvora.apps.rideatlanta.data.models.Notification;
 
 import java.util.List;
 
+import io.reactivex.disposables.CompositeDisposable;
+
 /**
  * Created by faytx on 10/22/2016.
  * @author Andrew Vorakrajangthiti
  */
 public class NotificationsPresenter implements NotificationsContract.Presenter {
 
-    private NotificationsContract.View mView;
-    private NotificationsDataSource mNotificationRepo;
+    private NotificationsContract.View view;
+    private NotificationsDataSource notificationRepo;
+    private CompositeDisposable disposables;
 
     public NotificationsPresenter(@NonNull NotificationsContract.View view,
                                   @NonNull NotificationsDataSource notificationsRepo)
     {
-        mView = view;
-        mNotificationRepo = notificationsRepo;
+        this.view = view;
+        this.notificationRepo = notificationsRepo;
+		this.disposables = new CompositeDisposable();
     }
 
     @Override
@@ -37,12 +41,13 @@ public class NotificationsPresenter implements NotificationsContract.Presenter {
 
     @Override
     public void stop() {
-
+		disposables.dispose();
+		disposables.clear();
     }
 
     @Override
     public void refreshNotifications() {
-        mNotificationRepo.reloadNotifications();
+        notificationRepo.reloadNotifications();
 
         loadNotifications();
     }
@@ -51,10 +56,10 @@ public class NotificationsPresenter implements NotificationsContract.Presenter {
     public void loadNotifications() {
         useCachedDataIfAvailable();
 
-        mNotificationRepo.getNotifications(new NotificationsDataSource.GetNotificationsCallback() {
+        notificationRepo.getNotifications(new NotificationsDataSource.GetNotificationsCallback() {
             @Override
             public void onFinished(List<Notification> notifications) {
-                mView.onNotificationsLoaded(notifications);
+				view.onNotificationsLoaded(notifications);
             }
 
             @Override
@@ -66,11 +71,11 @@ public class NotificationsPresenter implements NotificationsContract.Presenter {
 
     private void useCachedDataIfAvailable() {
         if(!hasCachedData()) {
-            mNotificationRepo.reloadNotifications();
+            notificationRepo.reloadNotifications();
         }
     }
 
     private boolean hasCachedData() {
-        return mNotificationRepo.hasCachedData();
+        return notificationRepo.hasCachedData();
     }
 }

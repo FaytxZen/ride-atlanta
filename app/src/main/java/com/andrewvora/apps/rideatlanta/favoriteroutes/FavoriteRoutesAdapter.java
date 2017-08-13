@@ -139,15 +139,17 @@ public class FavoriteRoutesAdapter extends
         return new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                int position = holder.getAdapterPosition();
-                FavoriteRouteDataObject route = mFavoriteRoutesList
-                        .get(position);
+                final int position = holder.getAdapterPosition();
 
-                // remove from list
-                mFavoriteRoutesList.remove(position);
+                if(position < getItemCount()) {
+					FavoriteRouteDataObject route = mFavoriteRoutesList.get(position);
 
-                // alert listener
-                mListener.onUnfavorited(position, route);
+					// remove from list
+					mFavoriteRoutesList.remove(position);
+
+					// alert listener
+					mListener.onUnfavorited(position, route);
+                }
             }
         };
     }

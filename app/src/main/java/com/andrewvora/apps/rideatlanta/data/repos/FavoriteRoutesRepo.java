@@ -1,11 +1,9 @@
 package com.andrewvora.apps.rideatlanta.data.repos;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
-import com.andrewvora.apps.rideatlanta.data.local.routes.FavoriteRoutesLocalSource;
 import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
 
 import java.util.ArrayList;
@@ -19,41 +17,29 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class FavoriteRoutesRepo implements FavoriteRoutesDataSource {
 
-    private static FavoriteRoutesRepo mInstance;
+    @NonNull private FavoriteRoutesDataSource remoteSource;
+    @NonNull private FavoriteRoutesDataSource localSource;
 
-    @NonNull private FavoriteRoutesDataSource mRemoteSource;
-    @NonNull private FavoriteRoutesDataSource mLocalSource;
+    @NonNull private Map<String, FavoriteRoute> cachedRoutes;
 
-    @NonNull private Map<String, FavoriteRoute> mCachedRoutes;
+    private boolean cacheIsDirty;
 
-    private boolean mCacheIsDirty;
-
-    private FavoriteRoutesRepo(@NonNull FavoriteRoutesDataSource remoteSource,
+    public FavoriteRoutesRepo(@NonNull FavoriteRoutesDataSource remoteSource,
                                @NonNull FavoriteRoutesDataSource localSource)
     {
-        mRemoteSource = remoteSource;
-        mLocalSource = localSource;
+        this.remoteSource = remoteSource;
+        this.localSource = localSource;
 
-        mCachedRoutes = new ConcurrentHashMap<>();
-    }
-
-    public static FavoriteRoutesRepo getInstance(@NonNull Context context) {
-        if(mInstance == null) {
-            // routes is local-only at this point in time
-            FavoriteRoutesDataSource localSource = FavoriteRoutesLocalSource.getInstance(context);
-            mInstance = new FavoriteRoutesRepo(localSource, localSource);
-        }
-
-        return mInstance;
+        cachedRoutes = new ConcurrentHashMap<>();
     }
 
     @Override
     public void getFavoriteRoutes(@NonNull final GetFavoriteRoutesCallback callback) {
-        if(!mCachedRoutes.isEmpty() && !mCacheIsDirty) {
-            callback.onFinished(new ArrayList<>(mCachedRoutes.values()));
+        if(!cachedRoutes.isEmpty() && !cacheIsDirty) {
+            callback.onFinished(new ArrayList<>(cachedRoutes.values()));
         }
         else {
-            mLocalSource.getFavoriteRoutes(new GetFavoriteRoutesCallback() {
+            localSource.getFavoriteRoutes(new GetFavoriteRoutesCallback() {
                 @Override
                 public void onFinished(List<FavoriteRoute> favRoutes) {
                     reloadCachedRoutes(favRoutes);
@@ -72,13 +58,13 @@ public class FavoriteRoutesRepo implements FavoriteRoutesDataSource {
     public void getFavoriteRoute(@NonNull String id,
                                  @NonNull final GetFavoriteRouteCallback callback)
     {
-        final FavoriteRoute cachedRoute = mCachedRoutes.get(id);
+        final FavoriteRoute cachedRoute = cachedRoutes.get(id);
 
         if(cachedRoute != null) {
             callback.onFinished(cachedRoute);
         }
         else {
-            mLocalSource.getFavoriteRoute(id, new GetFavoriteRouteCallback() {
+            localSource.getFavoriteRoute(id, new GetFavoriteRouteCallback() {
                 @Override
                 public void onFinished(FavoriteRoute route) {
                     callback.onFinished(route);
@@ -97,7 +83,7 @@ public class FavoriteRoutesRepo implements FavoriteRoutesDataSource {
     public void saveRoute(@NonNull FavoriteRoute route) {
         // this app only saves things locally
         try {
-            mLocalSource.saveRoute(route);
+            localSource.saveRoute(route);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -105,41 +91,41 @@ public class FavoriteRoutesRepo implements FavoriteRoutesDataSource {
 
     @Override
     public void deleteAllRoutes() {
-        mLocalSource.deleteAllRoutes();
-        mRemoteSource.deleteAllRoutes();
+        localSource.deleteAllRoutes();
+        remoteSource.deleteAllRoutes();
 
-        mCachedRoutes.clear();
+        cachedRoutes.clear();
     }
 
     @Override
     public void deleteRoute(@NonNull FavoriteRouteDataObject route) {
-        mLocalSource.deleteRoute(route);
+        localSource.deleteRoute(route);
 
-        mCachedRoutes.remove(getMapKeyFor(route));
+        cachedRoutes.remove(getMapKeyFor(route));
     }
 
     @Override
     public boolean hasCachedData() {
-        return !mCachedRoutes.isEmpty();
+        return !cachedRoutes.isEmpty();
     }
 
     @Override
     public void reloadRoutes() {
-        mCacheIsDirty = true;
+        cacheIsDirty = true;
     }
 
     private void reloadCachedRoutes(@NonNull List<FavoriteRoute> favoriteRoutes) {
-        mCachedRoutes.clear();
+        cachedRoutes.clear();
 
         for(FavoriteRoute route : favoriteRoutes) {
             cacheRoute(route);
         }
 
-        mCacheIsDirty = false;
+        cacheIsDirty = false;
     }
 
     private void cacheRoute(FavoriteRoute route) {
-        mCachedRoutes.put(getMapKeyFor(route), route);
+        cachedRoutes.put(getMapKeyFor(route), route);
     }
 
     private String getMapKeyFor(@NonNull FavoriteRouteDataObject route) {

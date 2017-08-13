@@ -29,12 +29,12 @@ public class NotificationsFragment extends Fragment implements NotificationsCont
 
     public static final String TAG = NotificationsFragment.class.getSimpleName();
 
-    @BindView(R.id.notifications_list) RecyclerView mNotificationsRecyclerView;
-    @BindView(R.id.loading_notifications_view) ProgressBar mLoadingView;
-    @BindView(R.id.notifications_refresh_layout) SwipeRefreshLayout mNotificationsRefreshLayout;
+    @BindView(R.id.notifications_list) RecyclerView notificationsRecyclerView;
+    @BindView(R.id.loading_notifications_view) ProgressBar loadingView;
+    @BindView(R.id.notifications_refresh_layout) SwipeRefreshLayout notificationsRefreshLayout;
 
-    private NotificationsContract.Presenter mPresenter;
-    private NotificationsAdapter mNotificationsAdapter;
+    private NotificationsContract.Presenter presenter;
+    private NotificationsAdapter notificationsAdapter;
 
     public static NotificationsFragment newInstance() {
         return new NotificationsFragment();
@@ -45,7 +45,7 @@ public class NotificationsFragment extends Fragment implements NotificationsCont
         super.onCreate(savedInstanceState);
 
         List<Notification> placeholderList = new ArrayList<>();
-        mNotificationsAdapter = new NotificationsAdapter(placeholderList);
+        notificationsAdapter = new NotificationsAdapter(placeholderList);
     }
 
     @Nullable
@@ -54,19 +54,19 @@ public class NotificationsFragment extends Fragment implements NotificationsCont
         View view = inflater.inflate(R.layout.fragment_notifications, container, false);
         ButterKnife.bind(this, view);
 
-        mNotificationsRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        notificationsRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if(mPresenter != null) {
-                    mPresenter.loadNotifications();
+                if(presenter != null) {
+                    presenter.refreshNotifications();
                 }
             }
         });
 
-        mNotificationsRecyclerView.setAdapter(mNotificationsAdapter);
-        mNotificationsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        notificationsRecyclerView.setAdapter(notificationsAdapter);
+        notificationsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        mNotificationsRecyclerView.addItemDecoration(new SimpleDividerItemDecoration(getActivity()));
+        notificationsRecyclerView.addItemDecoration(new SimpleDividerItemDecoration(getActivity()));
 
         return view;
     }
@@ -75,22 +75,22 @@ public class NotificationsFragment extends Fragment implements NotificationsCont
     public void onResume() {
         super.onResume();
 
-        if(mPresenter != null) {
-            mPresenter.start();
+        if(presenter != null) {
+            presenter.start();
         }
     }
 
     @Override
     public void setPresenter(NotificationsContract.Presenter presenter) {
-        mPresenter = presenter;
+        this.presenter = presenter;
     }
 
     @Override
     public void onNotificationsLoaded(List<Notification> notificationList) {
-        mLoadingView.setVisibility(View.GONE);
-        mNotificationsRefreshLayout.setRefreshing(false);
+        loadingView.setVisibility(View.GONE);
+        notificationsRefreshLayout.setRefreshing(false);
 
-        mNotificationsAdapter.setNotifications(notificationList);
-        mNotificationsAdapter.notifyDataSetChanged();
+        notificationsAdapter.setNotifications(notificationList);
+        notificationsAdapter.notifyDataSetChanged();
     }
 }
