@@ -13,6 +13,7 @@ import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesContract;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -61,6 +62,7 @@ public class TrainRoutesPresenter implements
         favCache.loadFavoriteRoutes();
 
         loadTrainRoutes();
+		startPolling();
     }
 
     @Override
@@ -182,6 +184,7 @@ public class TrainRoutesPresenter implements
 	@Override
 	public void startPolling() {
 		disposables.add(pollingHelper.getTrainStream()
+			.delay(15, TimeUnit.SECONDS)
 			.subscribeOn(Schedulers.io())
 			.observeOn(AndroidSchedulers.mainThread())
 			.subscribeWith(new DisposableObserver<Integer>() {

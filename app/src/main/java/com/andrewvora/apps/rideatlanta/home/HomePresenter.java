@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -74,6 +75,8 @@ public class HomePresenter implements HomeContract.Presenter {
         loadInfoItems();
         loadAlerts();
         loadFavoriteRoutes();
+
+		startPolling();
     }
 
     @Override
@@ -90,20 +93,26 @@ public class HomePresenter implements HomeContract.Presenter {
             notificationRepo.reloadNotifications();
         }
 
-        notificationRepo.getNotifications(new NotificationsDataSource.GetNotificationsCallback() {
-            @Override
-            public void onFinished(List<Notification> notifications) {
-                List<AlertItemModel> alertItems = new ArrayList<>();
-                for(int i = 0; i < MAX_NOTIFICATIONS && i < notifications.size(); i++) {
-                    alertItems.add(notifications.get(i));
-                }
+        disposables.add(notificationRepo.getNotifications()
+			.subscribeOn(Schedulers.io())
+			.observeOn(AndroidSchedulers.mainThread())
+			.subscribeWith(new DisposableObserver<List<Notification>>() {
+				@Override
+				public void onNext(@io.reactivex.annotations.NonNull List<Notification> notifications) {
+					List<AlertItemModel> alertItems = new ArrayList<>();
+					for(int i = 0; i < MAX_NOTIFICATIONS && i < notifications.size(); i++) {
+						alertItems.add(notifications.get(i));
+					}
 
-                view.displayAlerts(alertItems);
-            }
+					view.displayAlerts(alertItems);
+				}
 
-            @Override
-            public void onError(Object error) { }
-        });
+				@Override
+				public void onError(@io.reactivex.annotations.NonNull Throwable e) { }
+
+				@Override
+				public void onComplete() { }
+			}));
     }
 
     @Override
@@ -122,22 +131,32 @@ public class HomePresenter implements HomeContract.Presenter {
     @Override
     public void loadFavoriteRoutes() {
         favsRepo.reloadRoutes();
-        favsRepo.getFavoriteRoutes(new FavoriteRoutesDataSource.GetFavoriteRoutesCallback() {
-            @Override
-            public void onFinished(List<FavoriteRoute> favRoutes) {
-                List<RouteItemModel> routeItems = new ArrayList<>();
-                for(FavoriteRoute route : favRoutes) {
-                    routeItems.add(route);
-                }
+        favsRepo.getFavoriteRoutes()
+			.subscribeOn(Schedulers.io())
+			.observeOn(AndroidSchedulers.mainThread())
+			.subscribeWith(new DisposableObserver<List<FavoriteRoute>>() {
+				@Override
+				public void onNext(@io.reactivex.annotations.NonNull List<FavoriteRoute> routes) {
+					List<RouteItemModel> listToPassOn = new ArrayList<>();
+					for(FavoriteRoute route : routes) {
+						listToPassOn.add(route);
+					}
 
-                view.displayRouteItems(routeItems);
+					view.displayRouteItems(listToPassOn);
 
-				refreshRouteInformationIfCached();
-            }
+					refreshRouteInformationIfCached();
+				}
 
-            @Override
-            public void onError(Object error) { }
-        });
+				@Override
+				public void onError(@io.reactivex.annotations.NonNull Throwable e) {
+
+				}
+
+				@Override
+				public void onComplete() {
+
+				}
+			});
     }
 
 	private void refreshRouteInformationIfCached() {
@@ -148,15 +167,21 @@ public class HomePresenter implements HomeContract.Presenter {
 
     @Override
     public void refreshRouteInformation() {
-        favsRepo.getFavoriteRoutes(new FavoriteRoutesDataSource.GetFavoriteRoutesCallback() {
-            @Override
-            public void onFinished(List<FavoriteRoute> favRoutes) {
-                updateRouteInformation(favRoutes);
-            }
+        favsRepo.getFavoriteRoutes()
+			.subscribeOn(Schedulers.io())
+			.observeOn(AndroidSchedulers.mainThread())
+			.subscribeWith(new DisposableObserver<List<FavoriteRoute>>() {
+				@Override
+				public void onNext(@io.reactivex.annotations.NonNull List<FavoriteRoute> routes) {
+					updateRouteInformation(routes);
+				}
 
-            @Override
-            public void onError(Object error) { }
-        });
+				@Override
+				public void onError(@io.reactivex.annotations.NonNull Throwable e) { }
+
+				@Override
+				public void onComplete() { }
+			});
     }
 
     private void updateRouteInformation(@NonNull final List<FavoriteRoute> routes) {
@@ -287,6 +312,7 @@ public class HomePresenter implements HomeContract.Presenter {
 
 	private void startRoutePolling() {
 		disposables.add(pollingHelper.getBusStream()
+				.delay(15, TimeUnit.SECONDS)
 				.zipWith(pollingHelper.getTrainStream(), new BiFunction<Integer, Integer, Integer>() {
 					@Override
 					public Integer apply(@io.reactivex.annotations.NonNull Integer integer,
@@ -315,6 +341,7 @@ public class HomePresenter implements HomeContract.Presenter {
 
 	private void startNotificationPolling() {
 		disposables.add(pollingHelper.getNotificationStream()
+				.delay(15, TimeUnit.SECONDS)
 				.subscribeOn(Schedulers.io())
 				.observeOn(AndroidSchedulers.mainThread())
 				.subscribeWith(new DisposableObserver<Integer>() {

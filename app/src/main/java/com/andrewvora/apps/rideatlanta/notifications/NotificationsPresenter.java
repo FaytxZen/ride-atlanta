@@ -8,7 +8,10 @@ import com.andrewvora.apps.rideatlanta.data.models.Notification;
 
 import java.util.List;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by faytx on 10/22/2016.
@@ -56,17 +59,21 @@ public class NotificationsPresenter implements NotificationsContract.Presenter {
     public void loadNotifications() {
         useCachedDataIfAvailable();
 
-        notificationRepo.getNotifications(new NotificationsDataSource.GetNotificationsCallback() {
-            @Override
-            public void onFinished(List<Notification> notifications) {
-				view.onNotificationsLoaded(notifications);
-            }
+        disposables.add(notificationRepo.getNotifications()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeWith(new DisposableObserver<List<Notification>>() {
+                @Override
+                public void onNext(@io.reactivex.annotations.NonNull List<Notification> notifications) {
+                    view.onNotificationsLoaded(notifications);
+                }
 
-            @Override
-            public void onError(Object error) {
+                @Override
+                public void onError(@io.reactivex.annotations.NonNull Throwable e) { }
 
-            }
-        });
+                @Override
+                public void onComplete() { }
+            }));
     }
 
     private void useCachedDataIfAvailable() {

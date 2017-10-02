@@ -14,6 +14,10 @@ import com.andrewvora.apps.rideatlanta.data.local.routes.FavoriteRoutesDbContrac
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 
 /**
  * Created by faytx on 10/24/2016.
@@ -27,91 +31,117 @@ public class FavoriteRoutesLocalSource implements FavoriteRoutesDataSource {
         dbHelper = new RideAtlantaDbHelper(context);
     }
 
-    @Override
-    public void getFavoriteRoutes(@NonNull GetFavoriteRoutesCallback callback) {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
+	@Override
+	public Observable<List<FavoriteRoute>> getFavoriteRoutes() {
+		return Observable.defer(new Callable<ObservableSource<? extends List<FavoriteRoute>>>() {
+			@Override
+			public ObservableSource<? extends List<FavoriteRoute>> call() throws Exception {
+				return Observable.just(getFavoriteRoutesFromDatabase());
+			}
+		});
+	}
 
-        try {
-            String[] columns = FavoriteRoutesTable.getColumns();
-            String selection = "1=1";
+    private List<FavoriteRoute> getFavoriteRoutesFromDatabase() {
+		final SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-            Cursor routesCursor = db.query(FavoriteRoutesTable.TABLE_NAME,
-                    columns, selection, null, null, null, null);
-            List<FavoriteRoute> favoriteRoutes = getRoutesFrom(routesCursor);
-            routesCursor.close();
+		try {
+			final String[] columns = FavoriteRoutesTable.getColumns();
+			final String selection = "1=1";
 
-            callback.onFinished(favoriteRoutes);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            callback.onError(e);
-        }
-    }
+			final Cursor routesCursor = db.query(FavoriteRoutesTable.TABLE_NAME,
+					columns, selection, null, null, null, null);
+			final List<FavoriteRoute> favoriteRoutes = getRoutesFrom(routesCursor);
+			routesCursor.close();
 
-    @Override
-    public void getFavoriteRoute(@NonNull String recordId, @NonNull GetFavoriteRouteCallback callback) {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
+			return favoriteRoutes;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-        try {
-            String[] columns = FavoriteRoutesTable.getColumns();
-            String selection = FavoriteRoutesTable._ID + "=?";
-            String[] selectionArgs = new String[] { recordId };
-            String numResultsNeeded = "1";
+		return new ArrayList<>();
+	}
 
-            Cursor routeCursor = db.query(FavoriteRoutesTable.TABLE_NAME,
-                    columns, selection, selectionArgs, null, null, null, numResultsNeeded);
-            FavoriteRoute favoriteRoute = getRouteFrom(routeCursor);
-            routeCursor.close();
+	@Override
+	public Observable<FavoriteRoute> getFavoriteRoute(@NonNull String routeId) {
+		final FavoriteRoute route = getFavoriteRouteFromDatabase(routeId);
 
-            callback.onFinished(favoriteRoute);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            callback.onError(e);
-        }
-    }
+		return route != null ?
+				Observable.just(route) :
+				Observable.<FavoriteRoute>empty();
+	}
 
-    @Override
-    public void saveRoute(@NonNull FavoriteRoute route) {
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        final boolean isNewRecord = route.getId() == null;
+	private FavoriteRoute getFavoriteRouteFromDatabase(@NonNull String routeId) {
+		final SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(FavoriteRoutesTable.COLUMN_ROUTE_ID, route.getRouteId());
-        contentValues.put(FavoriteRoutesTable.COLUMN_TYPE, route.getType());
-        contentValues.put(FavoriteRoutesTable.COLUMN_NAME, route.getName());
-        contentValues.put(FavoriteRoutesTable.COLUMN_DESTINATION, route.getDestination());
-        contentValues.put(FavoriteRoutesTable.COLUMN_TIME_TIL_ARRIVAL, String.valueOf(Integer.MIN_VALUE));
+		try {
+			final String[] columns = FavoriteRoutesTable.getColumns();
+			final String selection = FavoriteRoutesTable._ID + "=?";
+			final String[] selectionArgs = new String[] { routeId };
+			final String numResultsNeeded = "1";
 
-        if(isNewRecord) {
-            long id = db.insertWithOnConflict(FavoriteRoutesTable.TABLE_NAME,
-                    null, contentValues, SQLiteDatabase.CONFLICT_ROLLBACK);
+			final Cursor routeCursor = db.query(FavoriteRoutesTable.TABLE_NAME,
+					columns, selection, selectionArgs, null, null, null, numResultsNeeded);
+			final FavoriteRoute favoriteRoute = getRouteFrom(routeCursor);
+			routeCursor.close();
 
-            route.setId(id);
-        }
-        else {
-            String whereClause = FavoriteRoutesTable.COLUMN_ROUTE_ID + "=?";
-            String[] whereArgs = new String[] { route.getRouteId() };
+			return favoriteRoute;
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 
-            db.updateWithOnConflict(FavoriteRoutesTable.TABLE_NAME,
-                    contentValues, whereClause, whereArgs, SQLiteDatabase.CONFLICT_ROLLBACK);
-        }
-    }
+		return null;
+	}
 
-    @Override
-    public void deleteAllRoutes() {
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        db.delete(FavoriteRoutesTable.TABLE_NAME, "1=1", null);
-    }
+	@Override
+	public Observable<Long> saveRoute(@NonNull FavoriteRoute route) {
+		final SQLiteDatabase db = dbHelper.getWritableDatabase();
+		final boolean isNewRecord = route.getId() == null;
 
-    @Override
-    public void deleteRoute(@NonNull FavoriteRouteDataObject route) {
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+		final ContentValues contentValues = new ContentValues();
+		contentValues.put(FavoriteRoutesTable.COLUMN_ROUTE_ID, route.getRouteId());
+		contentValues.put(FavoriteRoutesTable.COLUMN_TYPE, route.getType());
+		contentValues.put(FavoriteRoutesTable.COLUMN_NAME, route.getName());
+		contentValues.put(FavoriteRoutesTable.COLUMN_DESTINATION, route.getDestination());
+		contentValues.put(FavoriteRoutesTable.COLUMN_TIME_TIL_ARRIVAL, String.valueOf(Integer.MIN_VALUE));
 
-        String whereClause = FavoriteRoutesTable.COLUMN_ROUTE_ID + "=?";
-        String[] whereArgs = { route.getRouteId() };
-        db.delete(FavoriteRoutesTable.TABLE_NAME, whereClause, whereArgs);
-    }
+		if(isNewRecord) {
+			final long id = db.insertWithOnConflict(FavoriteRoutesTable.TABLE_NAME,
+					null, contentValues, SQLiteDatabase.CONFLICT_ROLLBACK);
+
+			route.setId(id);
+
+			return Observable.just(id);
+		}
+		else {
+			final String whereClause = FavoriteRoutesTable.COLUMN_ROUTE_ID + "=?";
+			final String[] whereArgs = new String[] { route.getRouteId() };
+
+			final long recordsUpdated = db.updateWithOnConflict(FavoriteRoutesTable.TABLE_NAME,
+					contentValues, whereClause, whereArgs, SQLiteDatabase.CONFLICT_ROLLBACK);
+
+			return Observable.just(recordsUpdated);
+		}
+	}
+
+	@Override
+	public Observable<Long> deleteAllRoutes() {
+		final SQLiteDatabase db = dbHelper.getWritableDatabase();
+		final long recordsDeleted = db.delete(FavoriteRoutesTable.TABLE_NAME, "1=1", null);
+
+		return Observable.just(recordsDeleted);
+	}
+
+	@Override
+	public Observable<Long> deleteRoute(@NonNull FavoriteRouteDataObject route) {
+		final SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+		final String whereClause = FavoriteRoutesTable.COLUMN_ROUTE_ID + "=?";
+		final String[] whereArgs = { route.getRouteId() };
+		final long recordsDeleted = db.delete(FavoriteRoutesTable.TABLE_NAME, whereClause, whereArgs);
+
+		return Observable.just(recordsDeleted);
+	}
 
     @Override
     public boolean hasCachedData() {

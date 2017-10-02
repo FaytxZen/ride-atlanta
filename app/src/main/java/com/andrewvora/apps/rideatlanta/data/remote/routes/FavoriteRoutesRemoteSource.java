@@ -8,6 +8,10 @@ import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
 import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
 import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
 
+import java.util.List;
+
+import io.reactivex.Observable;
+
 /**
  * Created by faytx on 10/24/2016.
  * @author Andrew Vorakrajangthiti
@@ -31,31 +35,31 @@ public class FavoriteRoutesRemoteSource implements FavoriteRoutesDataSource {
     }
 
     @Override
-    public void getFavoriteRoutes(@NonNull GetFavoriteRoutesCallback callback) {
-
+    public Observable<List<FavoriteRoute>> getFavoriteRoutes() {
+        return Observable.empty();
     }
 
     @Override
-    public void getFavoriteRoute(@NonNull String routeId, @NonNull GetFavoriteRouteCallback callback) {
-
+    public Observable<FavoriteRoute> getFavoriteRoute(@NonNull String routeId) {
+        return Observable.empty();
     }
 
-    @Override
-    public void saveRoute(@NonNull FavoriteRoute route) {
+	@Override
+	public Observable<Long> saveRoute(@NonNull FavoriteRoute route) {
+		return Observable.empty();
+	}
 
-    }
+	@Override
+	public Observable<Long> deleteAllRoutes() {
+		return Observable.empty();
+	}
 
-    @Override
-    public void deleteAllRoutes() {
-        // no route is stored on a remote server
-    }
+	@Override
+	public Observable<Long> deleteRoute(@NonNull FavoriteRouteDataObject route) {
+		return Observable.empty();
+	}
 
-    @Override
-    public void deleteRoute(@NonNull FavoriteRouteDataObject route) {
-
-    }
-
-    @Override
+	@Override
     public void reloadRoutes() {
 
     }

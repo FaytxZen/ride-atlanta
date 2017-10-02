@@ -102,8 +102,6 @@ public class HomeFragment extends Fragment implements HomeContract.View {
             int position = homeAdapter.addListItem(routeItem);
             updateItemInAdapter(position);
         }
-
-        presenter.startPolling();
     }
 
     @Override

@@ -2,19 +2,19 @@ package com.andrewvora.apps.rideatlanta.data.remote.notifications;
 
 import android.support.annotation.NonNull;
 
-import com.andrewvora.apps.rideatlanta.data.models.Notification;
 import com.andrewvora.apps.rideatlanta.data.contracts.NotificationsDataSource;
-import com.twitter.sdk.android.core.Callback;
-import com.twitter.sdk.android.core.Result;
+import com.andrewvora.apps.rideatlanta.data.models.Notification;
 import com.twitter.sdk.android.core.TwitterApiClient;
-import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.models.Tweet;
 import com.twitter.sdk.android.core.services.StatusesService;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
-import retrofit2.Call;
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 
 /**
  * Created by faytx on 10/22/2016.
@@ -32,47 +32,55 @@ public class NotificationsRemoteSource implements NotificationsDataSource {
     }
 
     @Override
-    public void getNotifications(@NonNull final GetNotificationsCallback callback) {
-        StatusesService statusesService = twitterClient.getStatusesService();
-        final Call<List<Tweet>> call = statusesService.userTimeline(TWITTER_USER_ID,
-                null,
-                MAX_TWEETS,
-                null,
-                null,
-                null,
-                false,
-                null,
-                false);
+    public Observable<List<Notification>> getNotifications() {
+        return Observable.defer(new Callable<ObservableSource<? extends List<Notification>>>() {
+			@Override
+			public ObservableSource<List<Notification>> call() throws Exception {
+				return Observable.just(getNotificationsFromClient());
+			}
+		});
+    }
 
-        call.enqueue(new Callback<List<Tweet>>() {
-            @Override
-            public void success(Result<List<Tweet>> result) {
+    private List<Notification> getNotificationsFromClient() {
+        final StatusesService statusesService = twitterClient.getStatusesService();
 
-                List<Notification> notifications = new ArrayList<>();
-                List<Tweet> tweets = result.data;
+		try {
+			final List<Tweet> tweets = statusesService.userTimeline(TWITTER_USER_ID,
+					null,
+					MAX_TWEETS,
+					null,
+					null,
+					null,
+					false,
+					null,
+					false)
+					.execute()
+					.body();
 
-                for(Tweet tweet : tweets) {
-                    Notification notification = new Notification();
-                    notification.setNotificationId(String.valueOf(tweet.getId()));
-                    notification.setPostedAt(tweet.createdAt);
-                    notification.setMessage(tweet.text);
+			final List<Notification> notifications = new ArrayList<>();
 
-                    notifications.add(notification);
-                }
+			if (tweets != null) {
+				for(Tweet tweet : tweets) {
+					Notification notification = new Notification();
+					notification.setNotificationId(String.valueOf(tweet.getId()));
+					notification.setPostedAt(tweet.createdAt);
+					notification.setMessage(tweet.text);
 
-                callback.onFinished(notifications);
-            }
+					notifications.add(notification);
+				}
+			}
 
-            @Override
-            public void failure(TwitterException exception) {
-                callback.onError(exception);
-            }
-        });
+			return notifications;
+		} catch (IOException ioe) {
+			ioe.printStackTrace();
+		}
+
+		return new ArrayList<>();
     }
 
     @Override
-    public void getFreshNotifications(@NonNull GetNotificationsCallback callback) {
-        getNotifications(callback);
+    public Observable<List<Notification>> getFreshNotifications() {
+        return getNotifications();
     }
 
     @Override
@@ -80,17 +88,17 @@ public class NotificationsRemoteSource implements NotificationsDataSource {
         return false;
     }
 
-    @Override
-    public void deleteAllNotifications() {
-        // remote notifications are read-only
-    }
+	@Override
+	public Observable<Long> deleteAllNotifications() {
+		return Observable.just(1L);
+	}
 
-    @Override
-    public void saveNotification(@NonNull Notification notification) {
-        // remote notifications are read-only
-    }
+	@Override
+	public Observable<Long> saveNotification(@NonNull Notification notification) {
+		return Observable.just(1L);
+	}
 
-    @Override
+	@Override
     public void reloadNotifications() {
         // reloading is handled in the NotificationsRepo
     }

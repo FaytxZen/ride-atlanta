@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.reactivex.Observable;
+import io.reactivex.functions.Function;
+
 /**
  * Created by faytx on 10/22/2016.
  * @author Andrew Vorakrajangthiti
@@ -35,15 +38,15 @@ public class NotificationsRepo implements NotificationsDataSource {
         return !cachedNotifications.isEmpty();
     }
 
-    @Override
-    public void getNotifications(@NonNull final GetNotificationsCallback callback) {
-        if(!cachedNotifications.isEmpty() && !mCacheIsDirty) {
-            callback.onFinished(getCachedNotifications());
-        }
-        else {
-            getNotificationsFromRemote(callback);
-        }
-    }
+	@Override
+	public Observable<List<Notification>> getNotifications() {
+		if(!cachedNotifications.isEmpty() && !mCacheIsDirty) {
+			return Observable.just(getCachedNotifications());
+		}
+		else {
+			return getNotificationsFromRemote();
+		}
+	}
 
     private List<Notification> getCachedNotifications() {
 		List<Notification> notifications = new ArrayList<>(cachedNotifications.values());
@@ -53,20 +56,21 @@ public class NotificationsRepo implements NotificationsDataSource {
 	}
 
 	@Override
-	public void getFreshNotifications(@NonNull GetNotificationsCallback callback) {
-		getNotificationsFromRemote(callback);
+	public Observable<List<Notification>> getFreshNotifications() {
+		return getNotificationsFromRemote();
 	}
 
 	@Override
-    public void deleteAllNotifications() {
+    public Observable<Long> deleteAllNotifications() {
         remoteSource.deleteAllNotifications();
-
         cachedNotifications.clear();
+
+		return Observable.just(0L);
     }
 
     @Override
-    public void saveNotification(@NonNull Notification notification) {
-
+    public Observable<Long> saveNotification(@NonNull Notification notification) {
+		return Observable.just(0L);
     }
 
     @Override
@@ -74,20 +78,15 @@ public class NotificationsRepo implements NotificationsDataSource {
         mCacheIsDirty = true;
     }
 
-    private void getNotificationsFromRemote(@NonNull final GetNotificationsCallback callback) {
-        remoteSource.getNotifications(new GetNotificationsCallback() {
-            @Override
-            public void onFinished(List<Notification> notifications) {
-                reloadCachedNotifications(notifications);
-
-                callback.onFinished(notifications);
-            }
-
-            @Override
-            public void onError(Object error) {
-                callback.onError(error);
-            }
-        });
+    private Observable<List<Notification>> getNotificationsFromRemote() {
+        return remoteSource.getNotifications()
+				.map(new Function<List<Notification>, List<Notification>>() {
+					@Override
+					public List<Notification> apply(@io.reactivex.annotations.NonNull List<Notification> notifications) throws Exception {
+						reloadCachedNotifications(notifications);
+						return notifications;
+					}
+				});
     }
 
     private void reloadCachedNotifications(@NonNull List<Notification> notifications) {
@@ -105,7 +104,7 @@ public class NotificationsRepo implements NotificationsDataSource {
         cachedNotifications.put(notification.getNotificationId(), notification);
     }
 
-	static class NotificationComparator implements Comparator<Notification> {
+	private static class NotificationComparator implements Comparator<Notification> {
 		@Override
 		public int compare(Notification n1, Notification n2) {
 			long n1Time = DateHelper.getInstance()

@@ -13,12 +13,15 @@ import com.andrewvora.apps.rideatlanta.data.models.Notification;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 
 /**
  * Created by faytx on 10/22/2016.
  * @author Andrew Vorakrajangthiti
  */
-
 public class NotificationsLocalSource implements NotificationsDataSource {
 
     private RideAtlantaDbHelper dbHelper;
@@ -33,69 +36,92 @@ public class NotificationsLocalSource implements NotificationsDataSource {
     }
 
     @Override
-    public void getFreshNotifications(@NonNull GetNotificationsCallback callback) {
-        getNotifications(callback);
+    public Observable<List<Notification>> getFreshNotifications() {
+        return getNotifications();
     }
 
     @Override
-    public void getNotifications(@NonNull GetNotificationsCallback callback) {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-
-        String[] columns = NotificationsTable.getColumns();
-        String selection = "1=1";
-
-        try {
-            Cursor notificationsCursor = db.query(NotificationsTable.TABLE_NAME,
-                    columns, selection, null, null, null, null);
-
-            List<Notification> notificationList = getNotificationsFrom(notificationsCursor);
-            callback.onFinished(notificationList);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            callback.onError(e);
-        }
+    public Observable<List<Notification>> getNotifications() {
+        return Observable.defer(new Callable<ObservableSource<? extends List<Notification>>>() {
+			@Override
+			public ObservableSource<List<Notification>> call() throws Exception {
+				return Observable.just(getNotificationsFromDatabase());
+			}
+		});
     }
 
-    @Override
-    public void deleteAllNotifications() {
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+    private List<Notification> getNotificationsFromDatabase() {
+		SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        try {
-            db.delete(NotificationsTable.TABLE_NAME, "1=1", null);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+		String[] columns = NotificationsTable.getColumns();
+		String selection = "1=1";
+
+		try {
+			Cursor notificationsCursor = db.query(NotificationsTable.TABLE_NAME,
+					columns, selection, null, null, null, null);
+
+			return getNotificationsFrom(notificationsCursor);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return new ArrayList<>();
+	}
+
+    @Override
+    public Observable<Long> deleteAllNotifications() {
+       return Observable.defer(new Callable<ObservableSource<? extends Long>>() {
+		   @Override
+		   public ObservableSource<Long> call() throws Exception {
+			   return Observable.just(deleteAllNotificationsFromDatabase());
+		   }
+	   });
     }
 
-    @Override
-    public void saveNotification(@NonNull Notification notification) {
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        final boolean isNewRecord = notification.getId() == null;
+    private long deleteAllNotificationsFromDatabase() {
+		try {
+			return dbHelper.getWritableDatabase()
+					.delete(NotificationsTable.TABLE_NAME, "1=1", null);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(NotificationsTable.COLUMN_NOTIFICATION_ID,
-                notification.getNotificationId());
-        contentValues.put(NotificationsTable.COLUMN_MESSAGE, notification.getMessage());
-        contentValues.put(NotificationsTable.COLUMN_ALERT_DATE, notification.getPostedAt());
+		return -1L;
+	}
 
-        if(isNewRecord) {
-            db.insertWithOnConflict(NotificationsTable.TABLE_NAME,
-                    null, contentValues, SQLiteDatabase.CONFLICT_ROLLBACK);
-        }
-        else {
-            contentValues.put(NotificationsTable._ID, notification.getId());
+	@Override
+	public Observable<Long> saveNotification(@NonNull Notification notification) {
+		return Observable.just(saveNotificationInDatabase(notification));
+	}
 
-            String whereClause = NotificationsTable._ID + "=? and " +
-                    NotificationsTable.COLUMN_NOTIFICATION_ID + "=?";
-            String[] whereArgs = new String[] {
-                    notification.getId().toString(),
-                    notification.getNotificationId()
-            };
+    private long saveNotificationInDatabase(@NonNull Notification notification) {
+		SQLiteDatabase db = dbHelper.getWritableDatabase();
+		final boolean isNewRecord = notification.getId() == null;
 
-            db.updateWithOnConflict(NotificationsTable.TABLE_NAME,
-                    contentValues, whereClause, whereArgs, SQLiteDatabase.CONFLICT_ROLLBACK);
-        }
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(NotificationsTable.COLUMN_NOTIFICATION_ID,
+				notification.getNotificationId());
+		contentValues.put(NotificationsTable.COLUMN_MESSAGE, notification.getMessage());
+		contentValues.put(NotificationsTable.COLUMN_ALERT_DATE, notification.getPostedAt());
+
+		if(isNewRecord) {
+			return db.insertWithOnConflict(NotificationsTable.TABLE_NAME,
+					null, contentValues, SQLiteDatabase.CONFLICT_ROLLBACK);
+		}
+		else {
+			contentValues.put(NotificationsTable._ID, notification.getId());
+
+			String whereClause = NotificationsTable._ID + "=? and " +
+					NotificationsTable.COLUMN_NOTIFICATION_ID + "=?";
+			String[] whereArgs = new String[] {
+					notification.getId().toString(),
+					notification.getNotificationId()
+			};
+
+			return db.updateWithOnConflict(NotificationsTable.TABLE_NAME,
+					contentValues, whereClause, whereArgs, SQLiteDatabase.CONFLICT_ROLLBACK);
+		}
     }
 
     @Override

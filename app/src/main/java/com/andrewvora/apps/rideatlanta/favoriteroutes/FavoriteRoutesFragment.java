@@ -226,14 +226,10 @@ public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesCo
 					}
 
 					@Override
-					public void onError(@io.reactivex.annotations.NonNull Throwable e) {
-
-					}
+					public void onError(@io.reactivex.annotations.NonNull Throwable e) { }
 
 					@Override
-					public void onComplete() {
-
-					}
+					public void onComplete() { }
 				}));
     }
 
@@ -254,14 +250,10 @@ public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesCo
 				}
 
 				@Override
-				public void onError(@io.reactivex.annotations.NonNull Throwable e) {
-
-				}
+				public void onError(@io.reactivex.annotations.NonNull Throwable e) { }
 
 				@Override
-				public void onComplete() {
-
-				}
+				public void onComplete() { }
 			}));
     }
 }

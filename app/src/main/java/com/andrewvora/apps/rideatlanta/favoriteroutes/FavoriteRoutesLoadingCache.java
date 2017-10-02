@@ -21,6 +21,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import dagger.android.AndroidInjection;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created on 5/12/2017.
@@ -103,27 +106,35 @@ public class FavoriteRoutesLoadingCache extends Fragment implements FavoriteRout
 
         @Override
         protected List<FavoriteRouteDataObject> doInBackground(Void... params) {
-            mFavRoutesRepo.getFavoriteRoutes(new FavoriteRoutesDataSource.GetFavoriteRoutesCallback() {
-                @Override
-                public void onFinished(List<FavoriteRoute> favRoutes) {
-                    if(mHolder.getListener() != null) {
-                        List<FavoriteRouteDataObject> result = new ArrayList<>();
+            mFavRoutesRepo.getFavoriteRoutes()
+					.subscribeOn(Schedulers.io())
+					.observeOn(AndroidSchedulers.mainThread())
+					.subscribeWith(new DisposableObserver<List<FavoriteRoute>>() {
+						@Override
+						public void onNext(@io.reactivex.annotations.NonNull List<FavoriteRoute> routes) {
+							if(mHolder.getListener() != null) {
+								List<FavoriteRouteDataObject> result = new ArrayList<>();
 
-                        for(FavoriteRoute route : favRoutes) {
-                            result.add(route);
-                        }
+								for(FavoriteRoute route : routes) {
+									result.add(route);
+								}
 
-                        mHolder.setFavoritedRoutes(result);
+								mHolder.setFavoritedRoutes(result);
 
-                        passDataToListener();
-                    }
-                }
+								passDataToListener();
+							}
+						}
 
-                @Override
-                public void onError(Object error) {
+						@Override
+						public void onError(@io.reactivex.annotations.NonNull Throwable e) {
 
-                }
-            });
+						}
+
+						@Override
+						public void onComplete() {
+
+						}
+					});
 
             return null;
         }

@@ -3,9 +3,7 @@ package com.andrewvora.apps.rideatlanta.data;
 import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
 import com.andrewvora.apps.rideatlanta.data.contracts.NotificationsDataSource;
 import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
-import com.andrewvora.apps.rideatlanta.data.models.Notification;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -62,13 +60,7 @@ public class RoutePollingHelper {
 				.map(new Function<Long, Integer>() {
 					@Override
 					public Integer apply(@NonNull Long aLong) throws Exception {
-						notificationsDataSource.getFreshNotifications(new NotificationsDataSource.GetNotificationsCallback() {
-							@Override
-							public void onFinished(List<Notification> notifications) {}
-
-							@Override
-							public void onError(Object error) {}
-						});
+						notificationsDataSource.getFreshNotifications().blockingFirst();
 
 						return 1;
 					}
