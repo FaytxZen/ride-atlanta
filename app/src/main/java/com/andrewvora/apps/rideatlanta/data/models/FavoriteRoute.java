@@ -1,5 +1,7 @@
 package com.andrewvora.apps.rideatlanta.data.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
@@ -11,12 +13,13 @@ import com.andrewvora.apps.rideatlanta.data.contracts.RouteItemModel;
  * @author Andrew Vorakrajangthiti
  */
 
-public class FavoriteRoute extends BaseModel implements FavoriteRouteDataObject, RouteItemModel {
+public class FavoriteRoute extends BaseModel implements FavoriteRouteDataObject, RouteItemModel, Parcelable {
 
     private String routeId;
     private String type;
     private String name;
     private String destination;
+    private String direction;
     private String timeTilArrival;
 
     public FavoriteRoute() {
@@ -100,14 +103,64 @@ public class FavoriteRoute extends BaseModel implements FavoriteRouteDataObject,
     }
 
     @Override
+    public String getTravelDirection() {
+        return direction;
+    }
+
+    public void setDirection(String direction) {
+        this.direction = direction;
+    }
+
+    @Override
     public String getFavoriteRouteKey() {
-        return isBus() ? getName() : getName() + " " + getDestination();
+        return isBus() ? getName() : getName() + " " + getDestination() + " " + getTravelDirection();
     }
 
     @Override
     public String getIdentifier() {
         return getType().equals(TYPE_TRAIN) ?
-                getName() + getDestination() :
+                getName() + getDestination() + getTravelDirection() :
                 getRouteId();
     }
+
+    /*------------------------------------*
+     * Generated Parcelable Code
+     *------------------------------------*/
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.routeId);
+        dest.writeString(this.type);
+        dest.writeString(this.name);
+        dest.writeString(this.destination);
+        dest.writeString(this.direction);
+        dest.writeString(this.timeTilArrival);
+        dest.writeValue(this.id);
+    }
+
+    protected FavoriteRoute(Parcel in) {
+        this.routeId = in.readString();
+        this.type = in.readString();
+        this.name = in.readString();
+        this.destination = in.readString();
+        this.direction = in.readString();
+        this.timeTilArrival = in.readString();
+        this.id = (Long) in.readValue(Long.class.getClassLoader());
+    }
+
+    public static final Parcelable.Creator<FavoriteRoute> CREATOR = new Parcelable.Creator<FavoriteRoute>() {
+        @Override
+        public FavoriteRoute createFromParcel(Parcel source) {
+            return new FavoriteRoute(source);
+        }
+
+        @Override
+        public FavoriteRoute[] newArray(int size) {
+            return new FavoriteRoute[size];
+        }
+    };
 }

@@ -30,16 +30,16 @@ import butterknife.ButterKnife;
  */
 public class BusRoutesAdapter extends RecyclerView.Adapter<BusRoutesAdapter.BusRoutesViewHolder> {
 
-    @NonNull private List<Bus> mBusList;
-    @NonNull private Set<String> mFavoriteRouteIds;
-    @Nullable private BusRoutesFragment.BusItemListener mListener;
+    @NonNull private List<Bus> busList;
+    @NonNull private Set<String> favoriteRouteIds;
+    @Nullable private BusRoutesFragment.BusItemListener listener;
 
-    public BusRoutesAdapter(@Nullable List<Bus> buses,
-                            @Nullable BusRoutesFragment.BusItemListener listener)
+    BusRoutesAdapter(@Nullable List<Bus> buses,
+					 @Nullable BusRoutesFragment.BusItemListener listener)
     {
-        mBusList = buses == null ? new ArrayList<Bus>() : buses;
-        mListener = listener;
-        mFavoriteRouteIds = new HashSet<>();
+        this.busList = buses == null ? new ArrayList<Bus>() : buses;
+        this.listener = listener;
+        this.favoriteRouteIds = new HashSet<>();
     }
 
     @Override
@@ -52,7 +52,7 @@ public class BusRoutesAdapter extends RecyclerView.Adapter<BusRoutesAdapter.BusR
 
     @Override
     public void onBindViewHolder(final BusRoutesViewHolder holder, int position) {
-        final Bus bus = mBusList.get(position);
+        final Bus bus = busList.get(position);
 
         holder.vehicleIdTextView.setText(String.valueOf(bus.getRouteId()));
 
@@ -68,39 +68,49 @@ public class BusRoutesAdapter extends RecyclerView.Adapter<BusRoutesAdapter.BusR
 
         holder.statusTextView.setText(status);
 
-        final boolean isFavorited = mFavoriteRouteIds.contains(bus.getFavoriteRouteKey());
+        final boolean isFavorited = favoriteRouteIds.contains(bus.getFavoriteRouteKey());
         holder.favoriteButton.setSelected(isFavorited);
         bus.setFavorited(isFavorited);
 
         holder.favoriteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(mListener != null) {
-                    mListener.onFavoriteBus(holder.getAdapterPosition());
+                if (listener != null) {
+                    listener.onFavoriteBus(holder.getAdapterPosition());
                 }
+            }
+        });
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (listener != null) {
+                	final Bus clickedBus = busList.get(holder.getAdapterPosition());
+                	listener.onItemClicked(clickedBus);
+				}
             }
         });
     }
 
     @Override
     public int getItemCount() {
-        return mBusList.size();
+        return busList.size();
     }
 
     Bus getItemAtPosition(int position) {
-        return mBusList.get(position);
+        return busList.get(position);
     }
 
-    public void setFavoriteRouteIds(@NonNull Set<String> favRouteIds) {
-        mFavoriteRouteIds = favRouteIds;
+    void setFavoriteRouteIds(@NonNull Set<String> favRouteIds) {
+        favoriteRouteIds = favRouteIds;
     }
 
-    public Set<String> getFavoriteRouteIds() {
-        return mFavoriteRouteIds;
+    @NonNull
+    Set<String> getFavoriteRouteIds() {
+        return favoriteRouteIds;
     }
 
     public void setBuses(@Nullable List<Bus> buses) {
-        mBusList = buses == null ? new ArrayList<Bus>() : buses;
+        busList = buses == null ? new ArrayList<Bus>() : buses;
     }
 
     static class BusRoutesViewHolder extends RecyclerView.ViewHolder {

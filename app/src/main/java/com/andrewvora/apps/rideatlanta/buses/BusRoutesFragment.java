@@ -2,6 +2,7 @@ package com.andrewvora.apps.rideatlanta.buses;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -16,6 +17,7 @@ import android.widget.ProgressBar;
 import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 import com.andrewvora.apps.rideatlanta.data.models.Bus;
+import com.andrewvora.apps.rideatlanta.routedetails.RouteDetailsActivity;
 import com.andrewvora.apps.rideatlanta.views.SimpleDividerItemDecoration;
 
 import java.util.HashSet;
@@ -49,7 +51,8 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
     private BusItemListener busItemListener = new BusItemListener() {
         @Override
         public void onItemClicked(Bus bus) {
-
+            final Intent detailIntent = RouteDetailsActivity.start(bus);
+            startActivityForResult(detailIntent, 0);
         }
 
         @Override

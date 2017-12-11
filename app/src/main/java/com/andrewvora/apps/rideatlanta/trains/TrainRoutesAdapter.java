@@ -33,8 +33,8 @@ public class TrainRoutesAdapter extends
     @NonNull private Set<String> mFavoritedRouteIds;
     @Nullable private TrainRoutesFragment.TrainItemListener mItemListener;
 
-    public TrainRoutesAdapter(@NonNull List<Train> trainList,
-                              @Nullable TrainRoutesFragment.TrainItemListener listener)
+    TrainRoutesAdapter(@NonNull List<Train> trainList,
+					   @Nullable TrainRoutesFragment.TrainItemListener listener)
     {
         mTrainList = trainList;
         mItemListener  = listener;
@@ -59,6 +59,9 @@ public class TrainRoutesAdapter extends
         String destinationText = WordUtils.capitalizeWords(train.getStation());
         holder.destinationTextView.setText(destinationText);
 
+        // determine travel direction
+        holder.directionTextView.setText(train.getDirection());
+
         // determine train status
         holder.statusTextView.setText(train.getWaitingTime());
 
@@ -82,11 +85,11 @@ public class TrainRoutesAdapter extends
         return mTrainList.size();
     }
 
-    public void setFavoritedRouteIds(@NonNull Set<String> favRouteIds) {
+    void setFavoritedRouteIds(@NonNull Set<String> favRouteIds) {
         mFavoritedRouteIds = favRouteIds;
     }
 
-    public Set<String> getFavoriteRouteIds() {
+    Set<String> getFavoriteRouteIds() {
         return mFavoritedRouteIds;
     }
 
@@ -98,7 +101,7 @@ public class TrainRoutesAdapter extends
         return mTrainList;
     }
 
-    public Train getTrain(int position) {
+    Train getTrain(int position) {
         return mTrainList.get(position);
     }
 
@@ -115,6 +118,7 @@ public class TrainRoutesAdapter extends
         @BindView(R.id.train_destination_text_view) TextView destinationTextView;
         @BindView(R.id.train_line_text_view) TextView lineTextView;
         @BindView(R.id.train_status_text_view) TextView statusTextView;
+        @BindView(R.id.train_direction) TextView directionTextView;
         @BindView(R.id.train_favorite_button) ImageView favoriteButton;
 
         TrainRoutesViewHolder(@NonNull View view) {

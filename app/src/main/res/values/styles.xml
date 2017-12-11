@@ -25,6 +25,8 @@
 
     <style name="RouteTitleTextStyle" parent="BaseTextViewStyle">
         <item name="android:textSize">@dimen/train_title_text_size</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
     </style>
 
     <style name="RouteSubtitleTextStyle" parent="BaseTextViewStyle">
@@ -35,6 +37,29 @@
     <style name="RouteLabelTextStyle" parent="BaseTextViewStyle">
         <item name="android:textColor">@color/md_white_1000</item>
         <item name="android:textSize">@dimen/train_label_text_size</item>
+        <item name="android:background">@drawable/shape_round_grey</item>
+        <item name="android:paddingTop">2dp</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
+        <item name="android:paddingBottom">4dp</item>
+    </style>
+
+    <style name="TrainLabelTextStyle" parent="RouteLabelTextStyle">
+        <item name="android:drawableStart">@drawable/ic_train_white_24dp</item>
+        <item name="android:drawableLeft">@drawable/ic_train_white_24dp</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:textColor">@color/md_white_1000</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="BusLabelTextStyle" parent="RouteLabelTextStyle">
+        <item name="android:textSize">18sp</item>
+        <item name="android:background">@drawable/shape_round_rect_orange</item>
+        <item name="android:drawableLeft">@drawable/ic_bus_white_24dp</item>
+        <item name="android:paddingLeft">4dp</item>
+        <item name="android:paddingRight">8dp</item>
+        <item name="android:paddingTop">4dp</item>
+        <item name="android:paddingBottom">4dp</item>
     </style>
 
     <style name="NotificationTextStyle" parent="BaseTextViewStyle">

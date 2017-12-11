@@ -138,9 +138,7 @@ public class HomePresenter implements HomeContract.Presenter {
 				@Override
 				public void onNext(@io.reactivex.annotations.NonNull List<FavoriteRoute> routes) {
 					List<RouteItemModel> listToPassOn = new ArrayList<>();
-					for(FavoriteRoute route : routes) {
-						listToPassOn.add(route);
-					}
+					listToPassOn.addAll(routes);
 
 					view.displayRouteItems(listToPassOn);
 
@@ -148,14 +146,10 @@ public class HomePresenter implements HomeContract.Presenter {
 				}
 
 				@Override
-				public void onError(@io.reactivex.annotations.NonNull Throwable e) {
-
-				}
+				public void onError(@io.reactivex.annotations.NonNull Throwable e) { }
 
 				@Override
-				public void onComplete() {
-
-				}
+				public void onComplete() { }
 			});
     }
 

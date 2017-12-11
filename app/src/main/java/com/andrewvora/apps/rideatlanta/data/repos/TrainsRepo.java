@@ -47,6 +47,7 @@ public class TrainsRepo implements TrainsDataSource {
     private static String getKeyFor(@NonNull Train train) {
         return  train.getTrainId().toString() + KEY_DELIMITER +
                 train.getLine() + KEY_DELIMITER +
+				train.getDirection() + KEY_DELIMITER +
                 train.getStation();
     }
 
@@ -169,12 +170,15 @@ public class TrainsRepo implements TrainsDataSource {
     private static class TrainsComparator implements Comparator<Train> {
         @Override
         public int compare(Train o1, Train o2) {
-            if(o1.getLine().compareTo(o2.getLine()) != 0) {
+            if (o1.getLine().compareTo(o2.getLine()) != 0) {
                 return o1.getLine().compareTo(o2.getLine());
             }
-            else if(o1.getStation().compareTo(o2.getStation()) != 0) {
+            else if (o1.getStation().compareTo(o2.getStation()) != 0) {
                 return o1.getStation().compareTo(o2.getStation());
             }
+            else if (o1.getDirection().compareTo(o2.getDirection()) != 0) {
+            	return o1.getDirection().compareTo(o2.getDirection());
+			}
             else {
                 return o1.getRouteId().compareTo(o2.getRouteId());
             }

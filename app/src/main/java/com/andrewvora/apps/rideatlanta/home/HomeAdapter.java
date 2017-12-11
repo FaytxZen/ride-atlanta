@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -20,6 +19,7 @@ import com.andrewvora.apps.rideatlanta.data.contracts.HomeItemModel;
 import com.andrewvora.apps.rideatlanta.data.contracts.InfoItemModel;
 import com.andrewvora.apps.rideatlanta.data.contracts.RouteItemModel;
 import com.andrewvora.apps.rideatlanta.data.models.Bus;
+import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
 import com.andrewvora.apps.rideatlanta.data.models.Train;
 import com.andrewvora.apps.rideatlanta.seeandsay.SeeAndSayActivity;
 import com.andrewvora.apps.rideatlanta.utils.HtmlUtil;
@@ -39,19 +39,23 @@ import butterknife.ButterKnife;
  */
 public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    @NonNull private Map<String, HomeItemModel> mItemMap;
-    @NonNull private List<HomeItemModel> mItemList;
+	interface Listener {
+		void openRouteInfo(FavoriteRoute route);
+	}
 
-    public HomeAdapter(@Nullable List<HomeItemModel> listItemModels) {
-        mItemMap = new LinkedHashMap<>();
+	@NonNull private Map<String, HomeItemModel> itemMap;
+    @NonNull private List<HomeItemModel> itemList;
+    @NonNull private Listener listener;
 
-        if(listItemModels != null) {
-            for(HomeItemModel item : listItemModels) {
-                mItemMap.put(item.getIdentifier(), item);
-            }
-        }
+    HomeAdapter(@NonNull List<HomeItemModel> listItemModels, @NonNull Listener listener) {
+        this.itemMap = new LinkedHashMap<>();
+        this.listener = listener;
 
-        mItemList = new ArrayList<>(mItemMap.values());
+		for(HomeItemModel item : listItemModels) {
+			this.itemMap.put(item.getIdentifier(), item);
+		}
+
+        this.itemList = new ArrayList<>(itemMap.values());
     }
 
     @Override
@@ -92,28 +96,28 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        return mItemList.get(position).getViewType();
+        return itemList.get(position).getViewType();
     }
 
     @Override
     public int getItemCount() {
-        return mItemList.size();
+        return itemList.size();
     }
 
-    public int addListItem(@NonNull HomeItemModel model) {
-        if(mItemMap.containsKey(model.getIdentifier())) {
+    int addListItem(@NonNull HomeItemModel model) {
+        if(itemMap.containsKey(model.getIdentifier())) {
             int position = 0;
 
             for(int i = 0; i < getItemCount(); i++) {
-                if(mItemList.get(i).getIdentifier().equals(model.getIdentifier())) {
+                if(itemList.get(i).getIdentifier().equals(model.getIdentifier())) {
                     position = i;
                     break;
                 }
             }
 
             // update lists and maps
-            mItemMap.put(model.getIdentifier(), model);
-            mItemList.set(position, model);
+            itemMap.put(model.getIdentifier(), model);
+            itemList.set(position, model);
 
             // this is to differentiate between inserting and updating
             // if negative, it means we're updating
@@ -123,8 +127,8 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         else {
             // determine where to insert
             int indexToInsertAt = determineIndexToInsert(model);
-            mItemMap.put(model.getIdentifier(), model);
-            mItemList.add(indexToInsertAt, model);
+            itemMap.put(model.getIdentifier(), model);
+            itemList.add(indexToInsertAt, model);
 
             return indexToInsertAt;
         }
@@ -133,8 +137,8 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private int determineIndexToInsert(@NonNull HomeItemModel model) {
         if(model.getViewType() == HomeItemModel.VIEW_TYPE_ALERT_ITEM) {
 
-            for(int i = 0; i < mItemList.size(); i++) {
-                HomeItemModel homeItem = mItemList.get(i);
+            for(int i = 0; i < itemList.size(); i++) {
+                HomeItemModel homeItem = itemList.get(i);
                 final boolean isNotRoute = homeItem.getViewType() !=
                         HomeItemModel.VIEW_TYPE_ROUTE_ITEM;
 
@@ -154,7 +158,7 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     private void onBindInfoViewHolder(@NonNull InfoViewHolder holder, int position) {
-        InfoItemModel infoItemModel = (InfoItemModel) mItemList.get(position);
+        InfoItemModel infoItemModel = (InfoItemModel) itemList.get(position);
         Context context = holder.itemView.getContext();
 
         holder.infoTextView.setText(infoItemModel.getInfoText());
@@ -166,7 +170,7 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     private void onBindAlertViewHolder(@NonNull AlertViewHolder holder, int position) {
-        AlertItemModel alertItemModel = (AlertItemModel) mItemList.get(position);
+        AlertItemModel alertItemModel = (AlertItemModel) itemList.get(position);
 
         String decodedMsg = HtmlUtil.getDecodedHtml(alertItemModel.getAlertMessage());
 
@@ -181,12 +185,22 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         holder.timeStampTextView.setText(formattedTimeStamp);
     }
 
-    private void onBindRouteViewHolder(@NonNull RouteViewHolder holder, int position) {
-        RouteItemModel routeItemModel = (RouteItemModel) mItemList.get(position);
+    private void onBindRouteViewHolder(@NonNull final RouteViewHolder holder, int position) {
+        RouteItemModel routeItemModel = (RouteItemModel) itemList.get(position);
         Context context = holder.itemView.getContext();
 
         String destination = WordUtils.capitalizeWords(routeItemModel.getDestination());
         holder.destinationTextView.setText(destination);
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				final HomeItemModel model = itemList.get(holder.getAdapterPosition());
+				if (model instanceof FavoriteRoute) {
+					listener.openRouteInfo((FavoriteRoute) model);
+				}
+			}
+		});
 
         if(routeItemModel.isBus()) {
             int adherence = Bus.parseAdherence(routeItemModel.getTimeUntilArrival());

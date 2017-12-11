@@ -1,11 +1,18 @@
 package com.andrewvora.apps.rideatlanta.data.remote.buses;
 
+import android.app.Application;
 import android.support.annotation.NonNull;
 
+import com.andrewvora.apps.rideatlanta.R;
+import com.andrewvora.apps.rideatlanta.RideAtlantaApplication;
 import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
 import com.andrewvora.apps.rideatlanta.data.models.Bus;
 import com.andrewvora.apps.rideatlanta.data.remote.marta.MartaService;
+import com.andrewvora.apps.rideatlanta.utils.InputStreamConverter;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -20,14 +27,29 @@ import io.reactivex.functions.Function;
 public class BusesRemoteSource implements BusesDataSource {
 
     private MartaService service;
+    private Application app;
+	private Gson gson;
+	private InputStreamConverter converter;
 
-    public BusesRemoteSource(@NonNull MartaService service) {
+    public BusesRemoteSource(@NonNull Application app,
+							 @NonNull MartaService service,
+							 @NonNull Gson gson,
+							 @NonNull InputStreamConverter converter) {
         this.service = service;
+        this.app = app;
+        this.gson = gson;
+        this.converter = converter;
     }
 
 	@Override
 	public Observable<List<Bus>> getBuses() {
-		return service.getBuses().map(new Function<List<Bus>, List<Bus>>() {
+    	if (RideAtlantaApplication.USE_LOCAL) {
+    		final InputStream busesFileStream = app.getResources().openRawResource(R.raw.buses);
+    		final String busesJsonStr = converter.getString(busesFileStream);
+    		final List<Bus> buses = gson.fromJson(busesJsonStr, new TypeToken<List<Bus>>(){}.getType());
+			Collections.sort(buses, new BusComparator());
+    		return Observable.just(buses);
+		} else return service.getBuses().map(new Function<List<Bus>, List<Bus>>() {
 					@Override
 					public List<Bus> apply(@io.reactivex.annotations.NonNull List<Bus> buses) throws Exception {
 						Collections.sort(buses, new BusComparator());

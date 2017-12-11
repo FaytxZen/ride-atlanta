@@ -1,11 +1,18 @@
 package com.andrewvora.apps.rideatlanta.data.remote.trains;
 
+import android.app.Application;
 import android.support.annotation.NonNull;
 
+import com.andrewvora.apps.rideatlanta.R;
+import com.andrewvora.apps.rideatlanta.RideAtlantaApplication;
 import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
 import com.andrewvora.apps.rideatlanta.data.models.Train;
 import com.andrewvora.apps.rideatlanta.data.remote.marta.MartaService;
+import com.andrewvora.apps.rideatlanta.utils.InputStreamConverter;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -23,17 +30,33 @@ public class TrainsRemoteSource implements TrainsDataSource {
 
     private String apiKey;
 	private MartaService martaService;
+	private Application app;
+	private Gson gson;
+	private InputStreamConverter converter;
 
-    public TrainsRemoteSource(@NonNull String apiKey,
-                              @NonNull MartaService service)
+    public TrainsRemoteSource(@NonNull Application app,
+                              @NonNull String apiKey,
+                              @NonNull MartaService service,
+                              @NonNull Gson gson,
+                              @NonNull InputStreamConverter converter)
     {
         this.apiKey = apiKey;
 		this.martaService = service;
+		this.app = app;
+		this.gson = gson;
+		this.converter = converter;
     }
 
     @Override
     public Observable<List<Train>> getTrains() {
-        return martaService.getTrains(apiKey).map(new Function<List<Train>, List<Train>>() {
+        if (RideAtlantaApplication.USE_LOCAL) {
+            final InputStream trainsFileStream = app.getResources().openRawResource(R.raw.trains);
+            final String trainsJsonStr = converter.getString(trainsFileStream);
+            final List<Train> trains = gson.fromJson(trainsJsonStr, new TypeToken<List<Train>>(){}.getType());
+            Collections.sort(trains, new TrainsComparator());
+            return Observable.just(trains);
+        }
+        else return martaService.getTrains(apiKey).map(new Function<List<Train>, List<Train>>() {
             @Override
             public List<Train> apply(@io.reactivex.annotations.NonNull List<Train> trains) throws Exception {
                 Collections.sort(trains, new TrainsComparator());

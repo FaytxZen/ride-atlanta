@@ -2,6 +2,7 @@ package com.andrewvora.apps.rideatlanta.home;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -13,9 +14,13 @@ import android.view.ViewGroup;
 
 import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.contracts.AlertItemModel;
+import com.andrewvora.apps.rideatlanta.data.contracts.HomeItemModel;
 import com.andrewvora.apps.rideatlanta.data.contracts.InfoItemModel;
 import com.andrewvora.apps.rideatlanta.data.contracts.RouteItemModel;
+import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
+import com.andrewvora.apps.rideatlanta.routedetails.RouteDetailsActivity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -25,7 +30,7 @@ import butterknife.ButterKnife;
  * Created by faytx on 10/22/2016.
  * @author Andrew Vorakrajangthiti
  */
-public class HomeFragment extends Fragment implements HomeContract.View {
+public class HomeFragment extends Fragment implements HomeContract.View, HomeAdapter.Listener {
 
     public static final String TAG = HomeFragment.class.getSimpleName();
 
@@ -42,7 +47,7 @@ public class HomeFragment extends Fragment implements HomeContract.View {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        homeAdapter = new HomeAdapter(null);
+        homeAdapter = new HomeAdapter(new ArrayList<HomeItemModel>(), this);
     }
 
     @Nullable
@@ -117,5 +122,11 @@ public class HomeFragment extends Fragment implements HomeContract.View {
         else {
             homeAdapter.notifyDataSetChanged();
         }
+    }
+
+    @Override
+    public void openRouteInfo(FavoriteRoute route) {
+        final Intent detailsIntent = RouteDetailsActivity.start(route);
+        startActivityForResult(detailsIntent, 0);
     }
 }

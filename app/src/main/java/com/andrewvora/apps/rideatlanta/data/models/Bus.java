@@ -1,6 +1,8 @@
 package com.andrewvora.apps.rideatlanta.data.models;
 
 import android.content.Context;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.R;
@@ -12,7 +14,7 @@ import com.google.gson.annotations.SerializedName;
  * @author Andrew Vorakrajangthiti
  */
 
-public class Bus extends BaseModel implements FavoriteRouteDataObject {
+public class Bus extends BaseModel implements FavoriteRouteDataObject, Parcelable {
 
     @SerializedName("ADHERENCE")
     private Integer adherence;
@@ -186,7 +188,12 @@ public class Bus extends BaseModel implements FavoriteRouteDataObject {
         return String.valueOf(getAdherence());
     }
 
-    public static int parseAdherence(String adherence) {
+	@Override
+	public String getTravelDirection() {
+		return getDirection();
+	}
+
+	public static int parseAdherence(String adherence) {
         int arrivalTime;
 
         try {
@@ -223,4 +230,59 @@ public class Bus extends BaseModel implements FavoriteRouteDataObject {
 
         return status;
     }
+
+	/*------------------------------------*
+     * Generated Parcelable Code
+     *------------------------------------*/
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeValue(this.adherence);
+		dest.writeValue(this.blockId);
+		dest.writeString(this.blockAbbr);
+		dest.writeString(this.direction);
+		dest.writeString(this.latitude);
+		dest.writeString(this.longitude);
+		dest.writeString(this.msgTime);
+		dest.writeString(this.routeId);
+		dest.writeValue(this.stopId);
+		dest.writeString(this.timePoint);
+		dest.writeValue(this.tripId);
+		dest.writeValue(this.vehicleNumber);
+		dest.writeByte(this.favorited ? (byte) 1 : (byte) 0);
+		dest.writeValue(this.id);
+	}
+
+	protected Bus(Parcel in) {
+		this.adherence = (Integer) in.readValue(Integer.class.getClassLoader());
+		this.blockId = (Integer) in.readValue(Integer.class.getClassLoader());
+		this.blockAbbr = in.readString();
+		this.direction = in.readString();
+		this.latitude = in.readString();
+		this.longitude = in.readString();
+		this.msgTime = in.readString();
+		this.routeId = in.readString();
+		this.stopId = (Long) in.readValue(Long.class.getClassLoader());
+		this.timePoint = in.readString();
+		this.tripId = (Long) in.readValue(Long.class.getClassLoader());
+		this.vehicleNumber = (Long) in.readValue(Long.class.getClassLoader());
+		this.favorited = in.readByte() != 0;
+		this.id = (Long) in.readValue(Long.class.getClassLoader());
+	}
+
+	public static final Creator<Bus> CREATOR = new Creator<Bus>() {
+		@Override
+		public Bus createFromParcel(Parcel source) {
+			return new Bus(source);
+		}
+
+		@Override
+		public Bus[] newArray(int size) {
+			return new Bus[size];
+		}
+	};
 }

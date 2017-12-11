@@ -1,6 +1,8 @@
 package com.andrewvora.apps.rideatlanta.data.models;
 
 import android.content.Context;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.R;
@@ -13,7 +15,7 @@ import java.util.List;
  * Created by faytx on 10/23/2016.
  * @author Andrew Vorakrajangthiti
  */
-public class Train extends BaseModel implements FavoriteRouteDataObject, Cloneable {
+public class Train extends BaseModel implements FavoriteRouteDataObject, Cloneable, Parcelable {
 
     private static final String RED_LINE = "RED";
     private static final String BLUE_LINE = "BLUE";
@@ -159,6 +161,11 @@ public class Train extends BaseModel implements FavoriteRouteDataObject, Cloneab
         return getWaitingTime();
     }
 
+    @Override
+    public String getTravelDirection() {
+        return getDirection();
+    }
+
     public static String getFormattedTimeTilArrival(@NonNull Context context, @NonNull String tta) {
         final String unknownValue = String.valueOf(Integer.MIN_VALUE);
 
@@ -218,4 +225,56 @@ public class Train extends BaseModel implements FavoriteRouteDataObject, Cloneab
 
         return train;
     }
+
+    /*------------------------------------*
+     * Generated Parcelable Code
+     *------------------------------------*/
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(this.destination);
+		dest.writeString(this.direction);
+		dest.writeString(this.eventTime);
+		dest.writeString(this.line);
+		dest.writeString(this.nextArrival);
+		dest.writeString(this.station);
+		dest.writeValue(this.trainId);
+		dest.writeValue(this.waitingSeconds);
+		dest.writeString(this.waitingTime);
+		dest.writeByte(this.favorited ? (byte) 1 : (byte) 0);
+		dest.writeValue(this.id);
+	}
+
+	public Train() {
+	}
+
+	protected Train(Parcel in) {
+		this.destination = in.readString();
+		this.direction = in.readString();
+		this.eventTime = in.readString();
+		this.line = in.readString();
+		this.nextArrival = in.readString();
+		this.station = in.readString();
+		this.trainId = (Long) in.readValue(Long.class.getClassLoader());
+		this.waitingSeconds = (Integer) in.readValue(Integer.class.getClassLoader());
+		this.waitingTime = in.readString();
+		this.favorited = in.readByte() != 0;
+		this.id = (Long) in.readValue(Long.class.getClassLoader());
+	}
+
+	public static final Creator<Train> CREATOR = new Creator<Train>() {
+		@Override
+		public Train createFromParcel(Parcel source) {
+			return new Train(source);
+		}
+
+		@Override
+		public Train[] newArray(int size) {
+			return new Train[size];
+		}
+	};
 }

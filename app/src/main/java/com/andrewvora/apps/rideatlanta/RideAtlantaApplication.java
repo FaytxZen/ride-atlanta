@@ -22,6 +22,8 @@ import io.fabric.sdk.android.Fabric;
  */
 public class RideAtlantaApplication extends Application implements HasActivityInjector {
 
+	public static final boolean USE_LOCAL = true;
+
 	@Inject
 	DispatchingAndroidInjector<Activity> dispatchingActivityInjector;
 

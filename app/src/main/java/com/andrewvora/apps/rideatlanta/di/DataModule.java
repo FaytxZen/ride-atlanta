@@ -2,6 +2,7 @@ package com.andrewvora.apps.rideatlanta.di;
 
 import android.app.Application;
 
+import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.RoutePollingHelper;
 import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
@@ -19,6 +20,8 @@ import com.andrewvora.apps.rideatlanta.data.repos.BusesRepo;
 import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
 import com.andrewvora.apps.rideatlanta.data.repos.NotificationsRepo;
 import com.andrewvora.apps.rideatlanta.data.repos.TrainsRepo;
+import com.andrewvora.apps.rideatlanta.utils.InputStreamConverter;
+import com.google.gson.Gson;
 import com.twitter.sdk.android.core.TwitterApiClient;
 
 import javax.inject.Named;
@@ -50,6 +53,8 @@ public class DataModule {
 	private static final String FAVS_LOCAL_SOURCE = "favs_local";
 
 	private static final String NOTIFICATION_REMOTE_SOURCE = "notification_remote";
+
+	private static final boolean USE_LOCAL = true;
 
 	@Provides
 	@Singleton
@@ -100,10 +105,11 @@ public class DataModule {
     @Singleton
     @Named(TRAIN_REMOTE_SOURCE)
     TrainsDataSource providesTrainRemoteSource(@Named(MARTA_API_KEY) String apiKey,
+                                               Gson gson,
                                                Application app,
                                                MartaService service)
     {
-        return new TrainsRemoteSource(apiKey, service);
+        return new TrainsRemoteSource(app, apiKey, service, gson, new InputStreamConverter());
     }
 
     @Provides
@@ -116,8 +122,8 @@ public class DataModule {
     @Provides
     @Singleton
     @Named(BUS_REMOTE_SOURCE)
-    BusesDataSource providesBusesRemoteSource(Application app, MartaService service) {
-        return new BusesRemoteSource(service);
+    BusesDataSource providesBusesRemoteSource(Application app, MartaService service, Gson gson) {
+        return new BusesRemoteSource(app, service, gson, new InputStreamConverter());
     }
 
     @Provides
