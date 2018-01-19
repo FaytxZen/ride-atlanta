@@ -54,14 +54,11 @@ public class NotificationsFragment extends Fragment implements NotificationsCont
         View view = inflater.inflate(R.layout.fragment_notifications, container, false);
         ButterKnife.bind(this, view);
 
-        notificationsRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                if(presenter != null) {
-                    presenter.refreshNotifications();
-                }
-            }
-        });
+        notificationsRefreshLayout.setOnRefreshListener(() -> {
+			if(presenter != null) {
+				presenter.refreshNotifications();
+			}
+		});
 
         notificationsRecyclerView.setAdapter(notificationsAdapter);
         notificationsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -72,11 +69,18 @@ public class NotificationsFragment extends Fragment implements NotificationsCont
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-
+    public void onStart() {
+        super.onStart();
         if(presenter != null) {
             presenter.start();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if(presenter != null) {
+            presenter.stop();
         }
     }
 

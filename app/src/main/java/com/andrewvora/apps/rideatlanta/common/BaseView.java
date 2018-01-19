@@ -5,6 +5,5 @@ package com.andrewvora.apps.rideatlanta.common;
  * @author Andrew Vorakrajangthiti
  */
 public interface BaseView<Presenter> {
-
     void setPresenter(Presenter presenter);
 }

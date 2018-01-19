@@ -1,7 +1,6 @@
 package com.andrewvora.apps.rideatlanta.favoriteroutes;
 
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.data.RoutePollingHelper;
@@ -56,12 +55,6 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
     }
 
     @Override
-    public void onSaveState(Bundle outState) { }
-
-    @Override
-    public void onRestoreState(Bundle savedState) { }
-
-    @Override
     public void start() {
         loadFavoriteRoutes();
 		startPolling();
@@ -75,7 +68,7 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
 
     @Override
     public void loadFavoriteRoutes() {
-        favRoutesRepo.getFavoriteRoutes()
+        disposables.add(favRoutesRepo.getFavoriteRoutes()
 			.subscribeOn(Schedulers.io())
 			.observeOn(AndroidSchedulers.mainThread())
 			.subscribeWith(new DisposableObserver<List<FavoriteRoute>>() {
@@ -84,9 +77,7 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
 					final List<FavoriteRouteDataObject> resultList = new ArrayList<>();
 
 					// load saved routes
-					for(FavoriteRoute route : routes) {
-						resultList.add(route);
-					}
+					resultList.addAll(routes);
 
 					// display on UI
 					view.onFavoriteRoutesLoaded(resultList);
@@ -101,12 +92,12 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
 
 				@Override
 				public void onComplete() { }
-			});
+			}));
     }
 
     @Override
     public void refreshRouteInformation() {
-        favRoutesRepo.getFavoriteRoutes()
+        disposables.add(favRoutesRepo.getFavoriteRoutes()
 			.subscribeOn(Schedulers.io())
 			.observeOn(AndroidSchedulers.mainThread())
 			.subscribeWith(new DisposableObserver<List<FavoriteRoute>>() {
@@ -120,7 +111,7 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
 
 				@Override
 				public void onComplete() { }
-			});
+			}));
     }
 
     private void updateRouteInformation(@NonNull final List<FavoriteRoute> routes) {
@@ -207,12 +198,7 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
 	@Override
 	public void startPolling() {
 		disposables.add(pollingHelper.getBusStream()
-			.zipWith(pollingHelper.getTrainStream(), new BiFunction<Integer, Integer, Integer>() {
-				@Override
-				public Integer apply(@io.reactivex.annotations.NonNull Integer integer, @io.reactivex.annotations.NonNull Integer integer2) throws Exception {
-					return integer + integer2;
-				}
-			})
+			.zipWith(pollingHelper.getTrainStream(), (integer, integer2) -> integer + integer2)
 			.subscribeOn(Schedulers.io())
 			.observeOn(AndroidSchedulers.mainThread())
 			.subscribeWith(new DisposableObserver<Integer>() {
@@ -235,11 +221,6 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
             favoriteRoute.setId(1L);
         }
 
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                favRoutesRepo.saveRoute(favoriteRoute);
-            }
-        });
+        AsyncTask.execute(() -> favRoutesRepo.saveRoute(favoriteRoute));
     }
 }

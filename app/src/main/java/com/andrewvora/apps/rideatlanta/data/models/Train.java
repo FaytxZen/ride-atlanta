@@ -56,11 +56,7 @@ public class Train extends BaseModel implements FavoriteRouteDataObject, Cloneab
         return getStation();
     }
 
-    public String getEndDestination() {
-        return destination;
-    }
-
-    public void setDestination(String destination) {
+	public void setDestination(String destination) {
         this.destination = destination;
     }
 

@@ -13,8 +13,10 @@ import com.andrewvora.apps.rideatlanta.data.models.Bus;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 
 /**
  * Created by faytx on 10/22/2016.
@@ -35,7 +37,12 @@ public class BusesLocalSource implements BusesDataSource {
 
 	@Override
 	public Observable<List<Bus>> getBuses() {
-		return Observable.just(getBusesFromDatabase());
+		return Observable.defer(new Callable<ObservableSource<? extends List<Bus>>>() {
+			@Override
+			public ObservableSource<? extends List<Bus>> call() throws Exception {
+				return Observable.just(getBusesFromDatabase());
+			}
+		});
 	}
 
     private List<Bus> getBusesFromDatabase() {
@@ -59,8 +66,13 @@ public class BusesLocalSource implements BusesDataSource {
     }
 
 	@Override
-	public Observable<List<Bus>> getBuses(@NonNull String... routeIds) {
-		return Observable.just(getBusesFromDatabase(routeIds));
+	public Observable<List<Bus>> getBuses(@NonNull final String... routeIds) {
+		return Observable.defer(new Callable<ObservableSource<? extends List<Bus>>>() {
+			@Override
+			public ObservableSource<? extends List<Bus>> call() throws Exception {
+				return Observable.just(getBusesFromDatabase(routeIds));
+			}
+		});
 	}
 
 	private List<Bus> getBusesFromDatabase(@NonNull String... routeIds) {
@@ -87,8 +99,13 @@ public class BusesLocalSource implements BusesDataSource {
     }
 
 	@Override
-	public Observable<Bus> getBus(@NonNull Bus bus) {
-		return Observable.just(getBusFromDatabase(bus));
+	public Observable<Bus> getBus(@NonNull final Bus bus) {
+		return Observable.defer(new Callable<ObservableSource<? extends Bus>>() {
+			@Override
+			public ObservableSource<? extends Bus> call() throws Exception {
+				return Observable.just(getBusFromDatabase(bus));
+			}
+		});
 	}
 
 	private Bus getBusFromDatabase(@NonNull Bus bus) {
@@ -118,7 +135,12 @@ public class BusesLocalSource implements BusesDataSource {
 
 	@Override
 	public Observable<Long> deleteAllBus() {
-		return Observable.just(deleteAllBusesFromDatabase());
+		return Observable.defer(new Callable<ObservableSource<? extends Long>>() {
+			@Override
+			public ObservableSource<? extends Long> call() throws Exception {
+				return Observable.just(deleteAllBusesFromDatabase());
+			}
+		});
 	}
 
 	private long deleteAllBusesFromDatabase() {
@@ -135,8 +157,13 @@ public class BusesLocalSource implements BusesDataSource {
 	}
 
 	@Override
-	public Observable<Long> saveBus(@NonNull Bus route) {
-		return Observable.just(saveBusInDatabase(route));
+	public Observable<Long> saveBus(@NonNull final Bus route) {
+		return Observable.defer(new Callable<ObservableSource<? extends Long>>() {
+			@Override
+			public ObservableSource<? extends Long> call() throws Exception {
+				return Observable.just(saveBusInDatabase(route));
+			}
+		});
 	}
 
 	private long saveBusInDatabase(@NonNull Bus route) {

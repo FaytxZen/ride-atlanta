@@ -1,6 +1,5 @@
 package com.andrewvora.apps.rideatlanta.trains;
 
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.data.RoutePollingHelper;
@@ -49,12 +48,6 @@ public class TrainRoutesPresenter implements
 		this.disposables = new CompositeDisposable();
 		this.pollingHelper = pollingHelper;
     }
-
-    @Override
-    public void onSaveState(Bundle outState) { }
-
-    @Override
-    public void onRestoreState(Bundle savedState) { }
 
     @Override
     public void start() {

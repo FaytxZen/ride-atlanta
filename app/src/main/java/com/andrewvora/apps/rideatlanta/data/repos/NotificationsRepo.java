@@ -11,9 +11,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 import io.reactivex.functions.Function;
 
 /**
@@ -41,7 +43,7 @@ public class NotificationsRepo implements NotificationsDataSource {
 	@Override
 	public Observable<List<Notification>> getNotifications() {
 		if(!cachedNotifications.isEmpty() && !mCacheIsDirty) {
-			return Observable.just(getCachedNotifications());
+			return Observable.defer(() -> Observable.just(getCachedNotifications()));
 		}
 		else {
 			return getNotificationsFromRemote();
@@ -79,14 +81,11 @@ public class NotificationsRepo implements NotificationsDataSource {
     }
 
     private Observable<List<Notification>> getNotificationsFromRemote() {
-        return remoteSource.getNotifications()
-				.map(new Function<List<Notification>, List<Notification>>() {
-					@Override
-					public List<Notification> apply(@io.reactivex.annotations.NonNull List<Notification> notifications) throws Exception {
-						reloadCachedNotifications(notifications);
-						return notifications;
-					}
-				});
+        return Observable.defer(() -> remoteSource.getNotifications()
+				.map(notifications -> {
+					reloadCachedNotifications(notifications);
+					return notifications;
+				}));
     }
 
     private void reloadCachedNotifications(@NonNull List<Notification> notifications) {
@@ -112,15 +111,7 @@ public class NotificationsRepo implements NotificationsDataSource {
 			long n2Time = DateHelper.getInstance()
 					.getTimeAsMilliseconds(n2.getTimeStamp(), DateHelper.TWITTER_TIME_STAMP_FORMAT);
 
-			if(n1Time < n2Time) {
-				return 1;
-			}
-			else if(n1Time > n2Time) {
-				return -1;
-			}
-			else {
-				return 0;
-			}
+			return Long.compare(n2Time, n1Time);
 		}
 	}
 }

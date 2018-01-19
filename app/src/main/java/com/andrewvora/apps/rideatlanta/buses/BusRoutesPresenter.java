@@ -1,6 +1,5 @@
 package com.andrewvora.apps.rideatlanta.buses;
 
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.data.RoutePollingHelper;
@@ -51,12 +50,6 @@ public class BusRoutesPresenter implements
     }
 
     @Override
-    public void onSaveState(Bundle outState) { }
-
-    @Override
-    public void onRestoreState(Bundle savedState) { }
-
-    @Override
     public void start() {
         favRouteCache.setListener(this);
         favRouteCache.loadFavoriteRoutes();
@@ -91,7 +84,9 @@ public class BusRoutesPresenter implements
 					}
 
 					@Override
-					public void onError(@io.reactivex.annotations.NonNull Throwable e) { }
+					public void onError(@io.reactivex.annotations.NonNull Throwable e) {
+						busView.refreshError(e);
+					}
 
 					@Override
 					public void onComplete() { }
@@ -114,7 +109,9 @@ public class BusRoutesPresenter implements
                 }
 
                 @Override
-                public void onError(@io.reactivex.annotations.NonNull Throwable e) {}
+                public void onError(@io.reactivex.annotations.NonNull Throwable e) {
+                	busView.refreshError(e);
+				}
 
                 @Override
                 public void onComplete() {}

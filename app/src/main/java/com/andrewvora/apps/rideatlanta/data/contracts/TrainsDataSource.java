@@ -19,6 +19,7 @@ public interface TrainsDataSource {
     Observable<List<Train>> getTrains(@NonNull Long... trainIds);
     Observable<Train> getTrain(@NonNull Train train);
     Observable<List<Train>> getTrains(@NonNull String station, @NonNull String line);
+    Observable<List<Train>> getTrains(@NonNull String station);
     Observable<Long> deleteAllTrains();
     Observable<Long> saveTrain(@NonNull Train route);
     void reloadTrains();

@@ -67,4 +67,13 @@
         You haven\'t favorited any routes, yet
     </string>
     <string name="menu_feedback">Send App Feedback</string>
+    <string name="menu_sort">Sort</string>
+
+    <string name="direction_west">West</string>
+    <string name="direction_east">East</string>
+    <string name="direction_north">North</string>
+    <string name="direction_south">South</string>
+    <string name="direction_unknown">Unknown</string>
+
+    <string name="error_refresh_buses">Could not fetch bus info. Try again.</string>
 </resources>

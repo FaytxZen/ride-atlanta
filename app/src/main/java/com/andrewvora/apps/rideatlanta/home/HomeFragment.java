@@ -47,7 +47,7 @@ public class HomeFragment extends Fragment implements HomeContract.View, HomeAda
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        homeAdapter = new HomeAdapter(new ArrayList<HomeItemModel>(), this);
+        homeAdapter = new HomeAdapter(new ArrayList<>(), this);
     }
 
     @Nullable
@@ -63,18 +63,16 @@ public class HomeFragment extends Fragment implements HomeContract.View, HomeAda
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-
+    public void onStart() {
+        super.onStart();
         if(presenter != null) {
             presenter.start();
         }
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-
+    public void onStop() {
+        super.onStop();
         if(presenter != null) {
             presenter.stop();
         }
@@ -126,7 +124,7 @@ public class HomeFragment extends Fragment implements HomeContract.View, HomeAda
 
     @Override
     public void openRouteInfo(FavoriteRoute route) {
-        final Intent detailsIntent = RouteDetailsActivity.start(route);
+        final Intent detailsIntent = RouteDetailsActivity.start(getActivity(), route);
         startActivityForResult(detailsIntent, 0);
     }
 }

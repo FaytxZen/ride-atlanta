@@ -47,7 +47,7 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
         @Override
         public void onItemClicked(int position) {
             final Train clickedTrain = trainAdapter.getTrain(position);
-            final Intent detailIntent = RouteDetailsActivity.start(clickedTrain);
+            final Intent detailIntent = RouteDetailsActivity.start(getActivity(), clickedTrain);
             startActivityForResult(detailIntent, 0);
         }
 
@@ -80,50 +80,32 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
         View view = inflater.inflate(R.layout.fragment_train_routes, container, false);
         ButterKnife.bind(this, view);
 
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                presenter.refreshTrainRoutes();
-                swipeRefreshLayout.setRefreshing(false);
-            }
-        });
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+			presenter.refreshTrainRoutes();
+			swipeRefreshLayout.setRefreshing(false);
+		});
 
         trainsRecyclerView.setAdapter(trainAdapter);
         trainsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         trainsRecyclerView.addItemDecoration(new SimpleDividerItemDecoration(getViewContext()));
 
-        if(presenter != null) {
-            presenter.onRestoreState(savedInstanceState);
-        }
-
         return view;
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-
+    public void onStart() {
+        super.onStart();
         if(presenter != null) {
             presenter.start();
         }
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-
-        if(presenter != null) {
-            presenter.stop();
-        }
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        if(presenter != null) {
-            presenter.onSaveState(outState);
-        }
+    public void onStop() {
+        super.onStop();
+		if(presenter != null) {
+			presenter.stop();
+		}
     }
 
     @Override

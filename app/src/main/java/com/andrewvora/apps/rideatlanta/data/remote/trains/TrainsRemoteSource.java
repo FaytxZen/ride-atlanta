@@ -20,7 +20,6 @@ import java.util.List;
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.functions.Function;
-import io.reactivex.functions.Predicate;
 
 /**
  * Created by faytx on 10/22/2016.
@@ -49,20 +48,16 @@ public class TrainsRemoteSource implements TrainsDataSource {
 
     @Override
     public Observable<List<Train>> getTrains() {
-        if (RideAtlantaApplication.USE_LOCAL) {
-            final InputStream trainsFileStream = app.getResources().openRawResource(R.raw.trains);
-            final String trainsJsonStr = converter.getString(trainsFileStream);
-            final List<Train> trains = gson.fromJson(trainsJsonStr, new TypeToken<List<Train>>(){}.getType());
-            Collections.sort(trains, new TrainsComparator());
-            return Observable.just(trains);
-        }
-        else return martaService.getTrains(apiKey).map(new Function<List<Train>, List<Train>>() {
-            @Override
-            public List<Train> apply(@io.reactivex.annotations.NonNull List<Train> trains) throws Exception {
-                Collections.sort(trains, new TrainsComparator());
-                return trains;
-            }
-        });
+        return Observable.defer(() -> {
+			final Observable<List<Train>> trainsObservable = RideAtlantaApplication.USE_LOCAL ?
+					Observable.just(getStubTrains()) :
+					martaService.getTrains(apiKey);
+
+			return trainsObservable.map(trains -> {
+				Collections.sort(trains, new TrainsComparator());
+				return trains;
+			});
+		});
     }
 
     @Override
@@ -72,35 +67,41 @@ public class TrainsRemoteSource implements TrainsDataSource {
 
     @Override
     public Observable<List<Train>> getTrains(@NonNull final Long... trainIds) {
-        return martaService.getTrains(apiKey)
-                .flatMap(new Function<List<Train>, ObservableSource<Train>>() {
-                    @Override
-                    public ObservableSource<Train> apply(@io.reactivex.annotations.NonNull List<Train> trains) throws Exception {
-                        return Observable.fromIterable(trains);
-                    }
-                })
-                .filter(new Predicate<Train>() {
-                    @Override
-                    public boolean test(@io.reactivex.annotations.NonNull Train train) throws Exception {
-                        for (Long trainId : trainIds) {
-                            if (trainId.equals(train.getTrainId())) {
-                                return true;
-                            }
-                        }
+        return Observable.defer(() -> martaService.getTrains(apiKey)
+				.flatMap((Function<List<Train>, ObservableSource<Train>>) Observable::fromIterable)
+				.filter(train -> {
+					for (Long trainId : trainIds) {
+						if (trainId.equals(train.getTrainId())) {
+							return true;
+						}
+					}
 
-                        return false;
-                    }
-                })
-                .toList()
-                .toObservable()
-                .map(new Function<List<Train>, List<Train>>() {
-                    @Override
-                    public List<Train> apply(@io.reactivex.annotations.NonNull List<Train> trains) throws Exception {
-                        Collections.sort(trains, new TrainsComparator());
-                        return trains;
-                    }
-                });
+					return false;
+				})
+				.toSortedList(new TrainsComparator())
+				.toObservable());
     }
+
+    @Override
+    public Observable<List<Train>> getTrains(@NonNull final String station) {
+    	return Observable.defer(() -> {
+			final Observable<List<Train>> trainsObservable = RideAtlantaApplication.USE_LOCAL ?
+					Observable.just(getStubTrains()) :
+					martaService.getTrains(apiKey);
+
+			return trainsObservable
+					.flatMap((Function<List<Train>, ObservableSource<Train>>) Observable::fromIterable)
+					.filter(train -> station.equals(train.getStation()))
+					.toSortedList(new TrainsComparator())
+					.toObservable();
+		});
+    }
+
+    private List<Train> getStubTrains() {
+		final InputStream trainsFileStream = app.getResources().openRawResource(R.raw.trains);
+		final String trainsJsonStr = converter.getString(trainsFileStream);
+		return gson.fromJson(trainsJsonStr, new TypeToken<List<Train>>(){}.getType());
+	}
 
     @Override
     public Observable<Train> getTrain(@NonNull Train train) {

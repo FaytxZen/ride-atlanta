@@ -9,11 +9,14 @@ import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
+import com.andrewvora.apps.rideatlanta.BuildConfig;
 import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 import com.andrewvora.apps.rideatlanta.data.models.Bus;
@@ -51,7 +54,7 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
     private BusItemListener busItemListener = new BusItemListener() {
         @Override
         public void onItemClicked(Bus bus) {
-            final Intent detailIntent = RouteDetailsActivity.start(bus);
+            final Intent detailIntent = RouteDetailsActivity.start(getActivity(), bus);
             startActivityForResult(detailIntent, 0);
         }
 
@@ -96,26 +99,20 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
         busesRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         busesRecyclerView.addItemDecoration(new SimpleDividerItemDecoration(getViewContext()));
 
-        if(presenter != null) {
-            presenter.onRestoreState(savedInstanceState);
-        }
-
         return view;
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-
+    public void onStart() {
+        super.onStart();
         if(presenter != null) {
             presenter.start();
         }
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-
+    public void onStop() {
+        super.onStop();
         if(presenter != null) {
             presenter.stop();
         }
@@ -167,5 +164,13 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
     @Override
     public Context getViewContext() {
         return getActivity().getApplication();
+    }
+
+    @Override
+    public void refreshError(@NonNull Throwable e) {
+        if (BuildConfig.DEBUG) {
+            Log.d(BusRoutesFragment.class.getSimpleName(), e.getMessage());
+        }
+        Toast.makeText(getViewContext(), R.string.error_refresh_buses, Toast.LENGTH_SHORT).show();
     }
 }

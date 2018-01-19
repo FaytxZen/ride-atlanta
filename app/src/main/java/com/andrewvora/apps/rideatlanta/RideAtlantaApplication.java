@@ -2,9 +2,7 @@ package com.andrewvora.apps.rideatlanta;
 
 import android.app.Activity;
 import android.app.Application;
-import android.os.Bundle;
 
-import com.andrewvora.apps.rideatlanta.data.RoutePollingHelper;
 import com.andrewvora.apps.rideatlanta.di.components.DaggerAppComponent;
 import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.TwitterAuthConfig;

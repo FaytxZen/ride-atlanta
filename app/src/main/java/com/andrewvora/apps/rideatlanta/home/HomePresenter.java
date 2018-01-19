@@ -1,7 +1,6 @@
 package com.andrewvora.apps.rideatlanta.home;
 
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.R;
@@ -28,7 +27,6 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.BiFunction;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 
@@ -63,12 +61,6 @@ public class HomePresenter implements HomeContract.Presenter {
 		this.disposables = new CompositeDisposable();
 		this.pollingHelper = pollingHelper;
     }
-
-    @Override
-    public void onSaveState(Bundle outState) { }
-
-    @Override
-    public void onRestoreState(Bundle savedState) { }
 
     @Override
     public void start() {
@@ -131,14 +123,13 @@ public class HomePresenter implements HomeContract.Presenter {
     @Override
     public void loadFavoriteRoutes() {
         favsRepo.reloadRoutes();
-        favsRepo.getFavoriteRoutes()
+        disposables.add(favsRepo.getFavoriteRoutes()
 			.subscribeOn(Schedulers.io())
 			.observeOn(AndroidSchedulers.mainThread())
 			.subscribeWith(new DisposableObserver<List<FavoriteRoute>>() {
 				@Override
 				public void onNext(@io.reactivex.annotations.NonNull List<FavoriteRoute> routes) {
-					List<RouteItemModel> listToPassOn = new ArrayList<>();
-					listToPassOn.addAll(routes);
+					List<RouteItemModel> listToPassOn = new ArrayList<>(routes);
 
 					view.displayRouteItems(listToPassOn);
 
@@ -150,7 +141,7 @@ public class HomePresenter implements HomeContract.Presenter {
 
 				@Override
 				public void onComplete() { }
-			});
+			}));
     }
 
 	private void refreshRouteInformationIfCached() {
@@ -161,7 +152,7 @@ public class HomePresenter implements HomeContract.Presenter {
 
     @Override
     public void refreshRouteInformation() {
-        favsRepo.getFavoriteRoutes()
+        disposables.add(favsRepo.getFavoriteRoutes()
 			.subscribeOn(Schedulers.io())
 			.observeOn(AndroidSchedulers.mainThread())
 			.subscribeWith(new DisposableObserver<List<FavoriteRoute>>() {
@@ -175,7 +166,7 @@ public class HomePresenter implements HomeContract.Presenter {
 
 				@Override
 				public void onComplete() { }
-			});
+			}));
     }
 
     private void updateRouteInformation(@NonNull final List<FavoriteRoute> routes) {
@@ -290,12 +281,7 @@ public class HomePresenter implements HomeContract.Presenter {
             favoriteRoute.setId(1L);
         }
 
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                favsRepo.saveRoute(favoriteRoute);
-            }
-        });
+        AsyncTask.execute(() -> favsRepo.saveRoute(favoriteRoute));
     }
 
 	@Override
@@ -307,14 +293,7 @@ public class HomePresenter implements HomeContract.Presenter {
 	private void startRoutePolling() {
 		disposables.add(pollingHelper.getBusStream()
 				.delay(15, TimeUnit.SECONDS)
-				.zipWith(pollingHelper.getTrainStream(), new BiFunction<Integer, Integer, Integer>() {
-					@Override
-					public Integer apply(@io.reactivex.annotations.NonNull Integer integer,
-										 @io.reactivex.annotations.NonNull Integer integer2) throws Exception
-					{
-						return integer + integer2;
-					}
-				})
+				.zipWith(pollingHelper.getTrainStream(), (integer, integer2) -> integer + integer2)
 				.subscribeOn(Schedulers.io())
 				.observeOn(AndroidSchedulers.mainThread())
 				.subscribeWith(new DisposableObserver<Integer>() {
