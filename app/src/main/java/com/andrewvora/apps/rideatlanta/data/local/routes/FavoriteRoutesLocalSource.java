@@ -7,17 +7,15 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
-import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
 import com.andrewvora.apps.rideatlanta.data.local.RideAtlantaDbHelper;
 import com.andrewvora.apps.rideatlanta.data.local.routes.FavoriteRoutesDbContract.FavoriteRoutesTable;
+import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
 
 /**
  * Created by faytx on 10/24/2016.
@@ -33,12 +31,7 @@ public class FavoriteRoutesLocalSource implements FavoriteRoutesDataSource {
 
 	@Override
 	public Observable<List<FavoriteRoute>> getFavoriteRoutes() {
-		return Observable.defer(new Callable<ObservableSource<? extends List<FavoriteRoute>>>() {
-			@Override
-			public ObservableSource<? extends List<FavoriteRoute>> call() throws Exception {
-				return Observable.just(getFavoriteRoutesFromDatabase());
-			}
-		});
+		return Observable.defer(() -> Observable.just(getFavoriteRoutesFromDatabase()));
 	}
 
     private List<FavoriteRoute> getFavoriteRoutesFromDatabase() {
@@ -67,7 +60,7 @@ public class FavoriteRoutesLocalSource implements FavoriteRoutesDataSource {
 
 		return route != null ?
 				Observable.just(route) :
-				Observable.<FavoriteRoute>empty();
+				Observable.empty();
 	}
 
 	private FavoriteRoute getFavoriteRouteFromDatabase(@NonNull String routeId) {

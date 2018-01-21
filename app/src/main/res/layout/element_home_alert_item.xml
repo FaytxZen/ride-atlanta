@@ -22,10 +22,8 @@
             android:layout_height="wrap_content"
             android:maxWidth="100dp"
             android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
             android:gravity="end"
             android:textSize="14sp"
             tools:text="May 26, 2017, 10:55 PM"/>
@@ -36,12 +34,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:drawableStart="@drawable/ic_error_outline_24dp"
-            android:drawableLeft="@drawable/ic_error_outline_24dp"
             android:drawablePadding="8dp"
             android:layout_toStartOf="@id/alert_time_stamp"
-            android:layout_toLeftOf="@+id/alert_time_stamp"
             android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:textSize="14sp"
             tools:text="Doraville, elevator 2 (platform to concourse); out of service. Board bus 25 from Brook or Lenox."/>

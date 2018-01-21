@@ -1,7 +1,6 @@
 package com.andrewvora.apps.rideatlanta.notifications;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +12,6 @@ import com.andrewvora.apps.rideatlanta.data.DateHelper;
 import com.andrewvora.apps.rideatlanta.data.models.Notification;
 import com.andrewvora.apps.rideatlanta.utils.HtmlUtil;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -32,7 +30,7 @@ public class NotificationsAdapter extends
     @NonNull
     private List<Notification> mNotificationList;
 
-    public NotificationsAdapter(@NonNull List<Notification> notificationList) {
+    NotificationsAdapter(@NonNull List<Notification> notificationList) {
         mNotificationList = notificationList;
     }
 

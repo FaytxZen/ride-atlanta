@@ -117,7 +117,11 @@ public class TrainsLocalSource implements TrainsDataSource {
 
     @Override
     public Observable<List<Train>> getTrains(@NonNull final String station) {
-        return Observable.defer(() -> Observable.just(getTrainsFromDatabase()).flatMap((Function<List<Train>, ObservableSource<Train>>) trains -> Observable.fromIterable(trains)).filter(train -> station.equals(train.getStation())).toList().toObservable());
+        return Observable.defer(() -> Observable.just(getTrainsFromDatabase())
+                .flatMap((Function<List<Train>, ObservableSource<Train>>) Observable::fromIterable)
+                .filter(train -> station.equals(train.getStation()))
+                .toList()
+                .toObservable());
     }
 
     @Override

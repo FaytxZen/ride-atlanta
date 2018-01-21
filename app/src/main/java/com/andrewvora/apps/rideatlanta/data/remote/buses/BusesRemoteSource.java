@@ -16,11 +16,8 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
-import io.reactivex.functions.Function;
 
 /**
  * Created by faytx on 10/22/2016.
@@ -53,12 +50,9 @@ public class BusesRemoteSource implements BusesDataSource {
 				Collections.sort(buses, new BusComparator());
 				return Observable.just(buses);
 			});
-		} else return Observable.defer(() -> service.getBuses().map(new Function<List<Bus>, List<Bus>>() {
-			@Override
-			public List<Bus> apply(@io.reactivex.annotations.NonNull List<Bus> buses) throws Exception {
-				Collections.sort(buses, new BusComparator());
-				return buses;
-			}
+		} else return Observable.defer(() -> service.getBuses().map(buses -> {
+			Collections.sort(buses, new BusComparator());
+			return buses;
 		}));
 	}
 

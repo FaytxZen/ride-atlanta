@@ -86,14 +86,11 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
         View view = inflater.inflate(R.layout.fragment_bus_routes, container, false);
         ButterKnife.bind(this, view);
 
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                if(presenter != null) {
-                    presenter.refreshBusRoutes();
-                }
-            }
-        });
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+			if(presenter != null) {
+				presenter.refreshBusRoutes();
+			}
+		});
 
         busesRecyclerView.setAdapter(busAdapter);
         busesRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));

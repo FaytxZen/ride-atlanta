@@ -1,7 +1,5 @@
 package com.andrewvora.apps.rideatlanta.data.local.notifications;
 
-import android.provider.BaseColumns;
-
 import com.andrewvora.apps.rideatlanta.data.local.common.BaseDbContract;
 
 /**

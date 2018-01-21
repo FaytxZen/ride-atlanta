@@ -2,7 +2,6 @@ package com.andrewvora.apps.rideatlanta.di;
 
 import android.app.Application;
 
-import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.RoutePollingHelper;
 import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;

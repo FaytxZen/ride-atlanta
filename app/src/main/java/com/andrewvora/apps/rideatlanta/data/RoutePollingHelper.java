@@ -7,8 +7,6 @@ import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.functions.Function;
 
 /**
  * Created on 8/12/2017.
@@ -33,37 +31,28 @@ public class RoutePollingHelper {
 
 	public Observable<Integer> getBusStream() {
 		return Observable.interval(BUS_INTERVAL, TimeUnit.SECONDS)
-				.map(new Function<Long, Integer>() {
-					@Override
-					public Integer apply(@NonNull Long aLong) throws Exception {
-						busesDataSource.getFreshBuses().blockingFirst();
+				.map(intervalIndex -> {
+					busesDataSource.getFreshBuses().blockingFirst();
 
-						return 1;
-					}
+					return intervalIndex.intValue();
 				});
 	}
 
 	public Observable<Integer> getTrainStream() {
 		return Observable.interval(TRAIN_INTERVAL, TimeUnit.SECONDS)
-				.map(new Function<Long, Integer>() {
-					@Override
-					public Integer apply(@NonNull Long aLong) throws Exception {
-						trainsDataSource.getFreshTrains().blockingFirst();
+				.map(intervalIndex -> {
+					trainsDataSource.getFreshTrains().blockingFirst();
 
-						return 1;
-					}
+					return intervalIndex.intValue();
 				});
 	}
 
 	public Observable<Integer> getNotificationStream() {
 		return Observable.interval(NOTIFICATION_INTERVAL, TimeUnit.SECONDS)
-				.map(new Function<Long, Integer>() {
-					@Override
-					public Integer apply(@NonNull Long aLong) throws Exception {
-						notificationsDataSource.getFreshNotifications().blockingFirst();
+				.map(intervalIndex -> {
+					notificationsDataSource.getFreshNotifications().blockingFirst();
 
-						return 1;
-					}
+					return intervalIndex.intValue();
 				});
 	}
 }

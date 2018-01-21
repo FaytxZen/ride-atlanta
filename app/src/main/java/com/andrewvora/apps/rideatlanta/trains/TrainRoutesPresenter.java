@@ -134,7 +134,7 @@ public class TrainRoutesPresenter implements
 				@Override
 				public void onNext(@io.reactivex.annotations.NonNull Long id) {
 					favDataSource.reloadRoutes();
-					favCache.setFavoritedRoutes(new ArrayList<FavoriteRouteDataObject>());
+					favCache.setFavoritedRoutes(new ArrayList<>());
 
 					FavoriteRoute favoriteRoute = new FavoriteRoute(route);
 

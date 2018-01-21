@@ -150,7 +150,7 @@ public class BusesRepo implements BusesDataSource {
     }
 
     private String getKeyFor(@NonNull Bus bus) {
-        return bus.getRouteId() + bus.getName();
+        return bus.getRouteId() + " " + bus.getDestination();
     }
 
     private static class BusComparator implements Comparator<Bus> {

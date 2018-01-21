@@ -20,7 +20,6 @@ import java.util.Map;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.BiFunction;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 
@@ -74,10 +73,9 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
 			.subscribeWith(new DisposableObserver<List<FavoriteRoute>>() {
 				@Override
 				public void onNext(@io.reactivex.annotations.NonNull List<FavoriteRoute> routes) {
-					final List<FavoriteRouteDataObject> resultList = new ArrayList<>();
 
 					// load saved routes
-					resultList.addAll(routes);
+					final List<FavoriteRouteDataObject> resultList = new ArrayList<>(routes);
 
 					// display on UI
 					view.onFavoriteRoutesLoaded(resultList);

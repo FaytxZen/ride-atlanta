@@ -48,7 +48,7 @@ public final class WordUtils {
     }
 
     private static String capitalizeHyphenatedWords(@NonNull String words) {
-        String[] tokens = words.split("\\-");
+        String[] tokens = words.split("-");
         StringBuilder result = new StringBuilder();
 
         for(String token : tokens) {

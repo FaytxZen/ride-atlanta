@@ -24,7 +24,7 @@ public class TrainRouteDetailsAdapter extends RecyclerView.Adapter<TrainRouteDet
 
 	@NonNull private List<Train> trains;
 
-	public TrainRouteDetailsAdapter(@NonNull List<Train> trains) {
+	TrainRouteDetailsAdapter(@NonNull List<Train> trains) {
 		this.trains = trains;
 	}
 

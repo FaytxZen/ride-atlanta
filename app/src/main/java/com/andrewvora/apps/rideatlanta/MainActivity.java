@@ -104,12 +104,9 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
         applySelectedTab(tabId);
 
         bottomBar.setSelectedItemId(prefManager.getSelectedTab());
-        bottomBar.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                applySelectedTab(item.getItemId());
-                return true;
-            }
+        bottomBar.setOnNavigationItemSelectedListener(item -> {
+            applySelectedTab(item.getItemId());
+            return true;
         });
     }
 

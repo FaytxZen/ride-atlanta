@@ -49,7 +49,7 @@ public class TrainRouteDetailsFragment extends Fragment implements TrainRouteDet
 	public void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		recyclerViewAdapter = new TrainRouteDetailsAdapter(new ArrayList<Train>());
+		recyclerViewAdapter = new TrainRouteDetailsAdapter(new ArrayList<>());
 	}
 
 	@Nullable

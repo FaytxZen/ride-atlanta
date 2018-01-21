@@ -14,7 +14,6 @@ import android.view.ViewGroup;
 
 import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.contracts.AlertItemModel;
-import com.andrewvora.apps.rideatlanta.data.contracts.HomeItemModel;
 import com.andrewvora.apps.rideatlanta.data.contracts.InfoItemModel;
 import com.andrewvora.apps.rideatlanta.data.contracts.RouteItemModel;
 import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;

@@ -133,7 +133,7 @@ public class BusRoutesPresenter implements
 				public void onNext(@io.reactivex.annotations.NonNull Long id) {
 					// set repo to get fresh data
 					favRouteRepo.reloadRoutes();
-					favRouteCache.setFavoritedRoutes(new ArrayList<FavoriteRouteDataObject>());
+					favRouteCache.setFavoritedRoutes(new ArrayList<>());
 
 					FavoriteRoute favoriteRoute = new FavoriteRoute(bus);
 

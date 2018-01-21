@@ -9,8 +9,7 @@ import org.mockito.Mock;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.doCallRealMethod;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -34,19 +33,19 @@ public class TrainRoutesAdapterTest extends BaseUnitTest {
     }
 
     @Test
-    public void getItemCount() throws Exception {
+    public void getItemCount() {
         when(mTrainList.size()).thenReturn(2);
 
         assertEquals(2, mAdapter.getItemCount());
     }
 
     @Test
-    public void getItemCount_empty() throws Exception {
+    public void getItemCount_empty() {
         assertEquals(0, mAdapter.getItemCount());
     }
 
     @Test
-    public void setTrains() throws Exception {
+    public void setTrains() {
         List<Train> newList = new ArrayList<>();
 
         mAdapter.setTrains(newList);
@@ -55,7 +54,7 @@ public class TrainRoutesAdapterTest extends BaseUnitTest {
     }
 
     @Test
-    public void getTrain() throws Exception {
+    public void getTrain() {
         Train train = mock(Train.class);
         when(mTrainList.get(0)).thenReturn(train);
 

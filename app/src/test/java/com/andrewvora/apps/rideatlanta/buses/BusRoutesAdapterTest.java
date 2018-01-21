@@ -36,7 +36,7 @@ public class BusRoutesAdapterTest extends BaseUnitTest {
     }
 
     @Test
-    public void getItemCount() throws Exception {
+    public void getItemCount() {
         int sizeToReturn = 5;
 
         when(mMockBusRoutes.size()).thenReturn(sizeToReturn);
@@ -45,21 +45,21 @@ public class BusRoutesAdapterTest extends BaseUnitTest {
     }
 
     @Test
-    public void getItemCount_constructorWithNullList() throws Exception {
+    public void getItemCount_constructorWithNullList() {
         mBusAdapter = new BusRoutesAdapter(null, mListener);
 
         assertEquals(0, mBusAdapter.getItemCount());
     }
 
     @Test
-    public void getItemCount_constructorWithEmptyList() throws Exception {
-        mBusAdapter = new BusRoutesAdapter(new ArrayList<Bus>(), mListener);
+    public void getItemCount_constructorWithEmptyList() {
+        mBusAdapter = new BusRoutesAdapter(new ArrayList<>(), mListener);
 
         assertEquals(0, mBusAdapter.getItemCount());
     }
 
     @Test
-    public void getItemAtPosition() throws Exception {
+    public void getItemAtPosition() {
         Bus mockBus1 = mock(Bus.class);
         Bus mockBus2 = mock(Bus.class);
 
@@ -71,13 +71,13 @@ public class BusRoutesAdapterTest extends BaseUnitTest {
     }
 
     @Test(expected = IndexOutOfBoundsException.class)
-    public void getItemAtPosition_throwsException() throws Exception {
+    public void getItemAtPosition_throwsException() {
         mBusAdapter.setBuses(null);
         mBusAdapter.getItemAtPosition(4);
     }
 
     @Test
-    public void setBuses() throws Exception {
+    public void setBuses() {
         Bus mockBus1 = mock(Bus.class);
         Bus mockBus2 = mock(Bus.class);
 
@@ -93,7 +93,7 @@ public class BusRoutesAdapterTest extends BaseUnitTest {
     }
 
     @Test
-    public void setBuses_nullList() throws Exception {
+    public void setBuses_nullList() {
         mBusAdapter.setBuses(null);
 
         assertEquals(0, mBusAdapter.getItemCount());

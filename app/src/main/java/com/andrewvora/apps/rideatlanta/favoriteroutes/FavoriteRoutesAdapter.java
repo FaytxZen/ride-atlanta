@@ -35,8 +35,8 @@ public class FavoriteRoutesAdapter extends
     @NonNull private List<FavoriteRouteDataObject> mFavoriteRoutesList;
     @NonNull private FavoriteRoutesFragment.AdapterCallback mListener;
 
-    public FavoriteRoutesAdapter(@NonNull List<FavoriteRouteDataObject> favoriteRoutes,
-                                 @NonNull FavoriteRoutesFragment.AdapterCallback listener)
+    FavoriteRoutesAdapter(@NonNull List<FavoriteRouteDataObject> favoriteRoutes,
+                          @NonNull FavoriteRoutesFragment.AdapterCallback listener)
     {
         mFavoriteRoutesList = favoriteRoutes;
         mListener = listener;
@@ -136,12 +136,10 @@ public class FavoriteRoutesAdapter extends
     }
 
     private View.OnClickListener getUnfavoriteClickListener(final FavoriteRoutesViewHolder holder) {
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                final int position = holder.getAdapterPosition();
+        return view -> {
+            final int position = holder.getAdapterPosition();
 
-                if(position < getItemCount()) {
+            if(position < getItemCount()) {
 					FavoriteRouteDataObject route = mFavoriteRoutesList.get(position);
 
 					// remove from list
@@ -149,7 +147,6 @@ public class FavoriteRoutesAdapter extends
 
 					// alert listener
 					mListener.onUnfavorited(position, route);
-                }
             }
         };
     }

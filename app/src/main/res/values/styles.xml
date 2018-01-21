@@ -1,5 +1,6 @@
 <resources>
     <!-- Base application theme. -->
+    <!--suppress AndroidDomInspection -->
     <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
@@ -12,10 +13,18 @@
         <item name="android:textColorSecondary">@color/md_white_1000</item>
     </style>
 
+    <!--suppress AndroidDomInspection -->
     <style name="ToolbarPopupTheme" parent="ThemeOverlay.AppCompat.Light">
     </style>
 
+    <!--suppress AndroidDomInspection -->
+    <style name="LowElevationStyle">
+        <item name="android:elevation">4dp</item>
+    </style>
+
+    <!--suppress AndroidDomInspection -->
     <style name="WebProgressBarStyle" parent="Widget.AppCompat.ProgressBar.Horizontal">
+        <item name="android:progressTint">@color/primary_orange</item>
     </style>
 
     <style name="BaseTextViewStyle">

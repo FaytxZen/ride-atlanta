@@ -33,7 +33,6 @@ import dagger.android.AndroidInjection;
 import io.reactivex.Completable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.functions.Action;
 import io.reactivex.observers.DisposableCompletableObserver;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
@@ -64,24 +63,14 @@ public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesCo
     @Inject @Named(DataModule.FAVS_SOURCE)
 	FavoriteRoutesDataSource favRoutesRepo;
 
-    private AdapterCallback adapterCallback = new AdapterCallback() {
-        @Override
-        public void onUnfavorited(int position, @NonNull FavoriteRouteDataObject obj) {
-			onRouteUnfavorited(position, obj);
-        }
-    };
+    private AdapterCallback adapterCallback = this::onRouteUnfavorited;
 
     public static FavoriteRoutesFragment newInstance() {
         return new FavoriteRoutesFragment();
     }
 
     private void onRouteUnfavorited(final int position, @NonNull final FavoriteRouteDataObject obj) {
-		disposables.add(Completable.fromAction(new Action() {
-			@Override
-			public void run() throws Exception {
-				updateRouteInDatabase(obj);
-			}
-		})
+		disposables.add(Completable.fromAction(() -> updateRouteInDatabase(obj))
 		.subscribeOn(Schedulers.io())
 		.observeOn(AndroidSchedulers.mainThread())
 		.subscribeWith(new DisposableCompletableObserver() {

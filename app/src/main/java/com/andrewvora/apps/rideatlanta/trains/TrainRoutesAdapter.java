@@ -71,20 +71,14 @@ public class TrainRoutesAdapter extends
         holder.favoriteButton.setSelected(mFavoritedRouteIds.contains(key));
         train.setFavorited(mFavoritedRouteIds.contains(key));
 
-        holder.favoriteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mItemListener != null) {
-                    mItemListener.onFavoriteItem(holder.getAdapterPosition());
-                }
-            }
-        });
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				if (mItemListener != null) {
-					mItemListener.onItemClicked(holder.getAdapterPosition());
-				}
+        holder.favoriteButton.setOnClickListener(view -> {
+			if (mItemListener != null) {
+				mItemListener.onFavoriteItem(holder.getAdapterPosition());
+			}
+		});
+        holder.itemView.setOnClickListener(view -> {
+			if (mItemListener != null) {
+				mItemListener.onItemClicked(holder.getAdapterPosition());
 			}
 		});
     }

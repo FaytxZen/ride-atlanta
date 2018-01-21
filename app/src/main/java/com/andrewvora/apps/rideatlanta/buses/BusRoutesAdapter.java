@@ -37,7 +37,7 @@ public class BusRoutesAdapter extends RecyclerView.Adapter<BusRoutesAdapter.BusR
     BusRoutesAdapter(@Nullable List<Bus> buses,
 					 @Nullable BusRoutesFragment.BusItemListener listener)
     {
-        this.busList = buses == null ? new ArrayList<Bus>() : buses;
+        this.busList = buses == null ? new ArrayList<>() : buses;
         this.listener = listener;
         this.favoriteRouteIds = new HashSet<>();
     }
@@ -72,22 +72,16 @@ public class BusRoutesAdapter extends RecyclerView.Adapter<BusRoutesAdapter.BusR
         holder.favoriteButton.setSelected(isFavorited);
         bus.setFavorited(isFavorited);
 
-        holder.favoriteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (listener != null) {
-                    listener.onFavoriteBus(holder.getAdapterPosition());
-                }
+        holder.favoriteButton.setOnClickListener(view -> {
+            if (listener != null) {
+                listener.onFavoriteBus(holder.getAdapterPosition());
             }
         });
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (listener != null) {
-                	final Bus clickedBus = busList.get(holder.getAdapterPosition());
-                	listener.onItemClicked(clickedBus);
+        holder.itemView.setOnClickListener(view -> {
+            if (listener != null) {
+	            final Bus clickedBus = busList.get(holder.getAdapterPosition());
+	            listener.onItemClicked(clickedBus);
 				}
-            }
         });
     }
 
@@ -110,7 +104,7 @@ public class BusRoutesAdapter extends RecyclerView.Adapter<BusRoutesAdapter.BusR
     }
 
     public void setBuses(@Nullable List<Bus> buses) {
-        busList = buses == null ? new ArrayList<Bus>() : buses;
+        busList = buses == null ? new ArrayList<>() : buses;
     }
 
     static class BusRoutesViewHolder extends RecyclerView.ViewHolder {

@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 public final class DateHelper {
 
     public static final String TWITTER_TIME_STAMP_FORMAT = "EEE MMM d H:mm:ss Z yyyy";
-    public static final String TIME_STAMP_FORMAT = "MMM d, yyyy, h:mm a";
+    private static final String TIME_STAMP_FORMAT = "MMM d, yyyy, h:mm a";
 
     private boolean mUseGmtTimeZone;
 
