@@ -76,6 +76,7 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
 	@Inject
 	RoutePollingHelper pollingHelper;
 
+	private MenuItem sortMenuItem;
     private FavoriteRoutesLoadingCache favRouteDataManager;
     private SharedPrefsManager prefManager;
 
@@ -98,15 +99,14 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
         }
 
         prefManager = new SharedPrefsManager(getApplication());
-        applySelectedTab(prefManager.getSelectedTab());
+
+        final int tabId = prefManager.getSelectedTab() == 0 ? R.id.tab_home : prefManager.getSelectedTab();
+        applySelectedTab(tabId);
 
         bottomBar.setSelectedItemId(prefManager.getSelectedTab());
-        bottomBar.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                applySelectedTab(item.getItemId());
-                return true;
-            }
+        bottomBar.setOnNavigationItemSelectedListener(item -> {
+            applySelectedTab(item.getItemId());
+            return true;
         });
     }
 
@@ -134,11 +134,16 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
         }
 
         prefManager.setSelectedTab(tabId);
+        updateMenu();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_home, menu);
+
+        sortMenuItem = menu.findItem(R.id.menu_sort);
+        updateMenu();
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -312,6 +317,16 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
         }
 
         ft.commit();
+    }
+
+    private void updateMenu() {
+        if (sortMenuItem != null && bottomBar != null) {
+			// TODO: enable this logic after sort is completed
+            //final boolean showSortOption =
+            //        bottomBar.getSelectedItemId() == R.id.tab_trains ||
+            //        bottomBar.getSelectedItemId() == R.id.tab_buses;
+            //sortMenuItem.setVisible(showSortOption);
+        }
     }
 
 	@Override

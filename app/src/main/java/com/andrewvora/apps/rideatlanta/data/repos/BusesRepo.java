@@ -1,6 +1,5 @@
 package com.andrewvora.apps.rideatlanta.data.repos;
 
-import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
@@ -14,6 +13,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 import io.reactivex.functions.Function;
 
 /**
@@ -46,16 +46,16 @@ public class BusesRepo implements BusesDataSource {
     @Override
     public Observable<List<Bus>> getBuses() {
         if(cacheIsDirty) {
-            return getBusRoutesFromRemote();
+            return getBusRoutesFromRemote().map(buses -> {
+            	Collections.sort(buses, new BusComparator());
+            	return buses;
+            });
         }
         else {
             List<Bus> buses = new ArrayList<>(cachedBuses.values());
-            return Observable.just(buses).map(new Function<List<Bus>, List<Bus>>() {
-				@Override
-				public List<Bus> apply(@io.reactivex.annotations.NonNull List<Bus> buses) throws Exception {
-					Collections.sort(buses, new BusComparator());
-					return buses;
-				}
+            return Observable.just(buses).map(buses1 -> {
+            	Collections.sort(buses1, new BusComparator());
+            	return buses1;
 			});
         }
     }
@@ -67,7 +67,19 @@ public class BusesRepo implements BusesDataSource {
 
 	@Override
 	public Observable<List<Bus>> getBuses(@NonNull String... routeIds) {
-		return Observable.empty();
+		return getBuses()
+				.flatMap((Function<List<Bus>, ObservableSource<Bus>>) Observable::fromIterable)
+				.filter(bus -> {
+					for (String id : routeIds) {
+						if (id.equals(bus.getRouteId())) {
+							return true;
+						}
+					}
+
+					return false;
+				})
+				.toSortedList(new BusComparator())
+				.toObservable();
 	}
 
 	@Override
@@ -78,12 +90,9 @@ public class BusesRepo implements BusesDataSource {
 			return Observable.just(cachedRoute);
 		}
 		else {
-			return remoteSource.getBus(bus).map(new Function<Bus, Bus>() {
-				@Override
-				public Bus apply(@io.reactivex.annotations.NonNull Bus bus) throws Exception {
-					cacheBusRoute(bus);
-					return bus;
-				}
+			return remoteSource.getBus(bus).map(bus1 -> {
+				cacheBusRoute(bus1);
+				return bus1;
 			});
 		}
 	}
@@ -120,12 +129,9 @@ public class BusesRepo implements BusesDataSource {
     }
 
     private Observable<List<Bus>> getBusRoutesFromRemote() {
-        return remoteSource.getBuses().map(new Function<List<Bus>, List<Bus>>() {
-			@Override
-			public List<Bus> apply(@io.reactivex.annotations.NonNull List<Bus> buses) throws Exception {
-				reloadCachedBusRoutes(buses);
-				return buses;
-			}
+        return remoteSource.getBuses().map(buses -> {
+			reloadCachedBusRoutes(buses);
+			return buses;
 		});
     }
 
@@ -144,13 +150,19 @@ public class BusesRepo implements BusesDataSource {
     }
 
     private String getKeyFor(@NonNull Bus bus) {
-        return bus.getRouteId();
+        return bus.getRouteId() + " " + bus.getDestination();
     }
 
     private static class BusComparator implements Comparator<Bus> {
         @Override
         public int compare(Bus o1, Bus o2) {
-            return o1.getRouteId().compareTo(o2.getRouteId());
+        	try {
+        		final Long o1Id = Long.parseLong(o1.getRouteId());
+        		final Long o2Id = Long.parseLong(o2.getRouteId());
+        		return o1Id.compareTo(o2Id);
+			} catch (NumberFormatException nfe) {
+        		return o1.getName().compareTo(o2.getName());
+			}
         }
     }
 }

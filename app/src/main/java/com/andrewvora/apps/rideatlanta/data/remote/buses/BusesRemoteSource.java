@@ -18,7 +18,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import io.reactivex.Observable;
-import io.reactivex.functions.Function;
 
 /**
  * Created by faytx on 10/22/2016.
@@ -44,18 +43,17 @@ public class BusesRemoteSource implements BusesDataSource {
 	@Override
 	public Observable<List<Bus>> getBuses() {
     	if (RideAtlantaApplication.USE_LOCAL) {
-    		final InputStream busesFileStream = app.getResources().openRawResource(R.raw.buses);
-    		final String busesJsonStr = converter.getString(busesFileStream);
-    		final List<Bus> buses = gson.fromJson(busesJsonStr, new TypeToken<List<Bus>>(){}.getType());
+    		return Observable.defer(() -> {
+				final InputStream busesFileStream = app.getResources().openRawResource(R.raw.buses);
+				final String busesJsonStr = converter.getString(busesFileStream);
+				final List<Bus> buses = gson.fromJson(busesJsonStr, new TypeToken<List<Bus>>(){}.getType());
+				Collections.sort(buses, new BusComparator());
+				return Observable.just(buses);
+			});
+		} else return Observable.defer(() -> service.getBuses().map(buses -> {
 			Collections.sort(buses, new BusComparator());
-    		return Observable.just(buses);
-		} else return service.getBuses().map(new Function<List<Bus>, List<Bus>>() {
-					@Override
-					public List<Bus> apply(@io.reactivex.annotations.NonNull List<Bus> buses) throws Exception {
-						Collections.sort(buses, new BusComparator());
-						return buses;
-					}
-				});
+			return buses;
+		}));
 	}
 
 	@Override

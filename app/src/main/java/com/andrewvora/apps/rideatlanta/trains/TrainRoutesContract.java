@@ -1,6 +1,5 @@
 package com.andrewvora.apps.rideatlanta.trains;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.support.annotation.NonNull;
 

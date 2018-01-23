@@ -43,14 +43,9 @@ public class FavoriteRoutesRepo implements FavoriteRoutesDataSource {
             return Observable.just(routes);
         }
         else {
-			return localSource.getFavoriteRoutes().map(new Function<List<FavoriteRoute>, List<FavoriteRoute>>() {
-				@Override
-				public List<FavoriteRoute> apply(@io.reactivex.annotations.NonNull List<FavoriteRoute> routes)
-						throws Exception
-				{
-					reloadCachedRoutes(routes);
-					return routes;
-				}
+			return localSource.getFavoriteRoutes().map(routes -> {
+				reloadCachedRoutes(routes);
+				return routes;
 			});
         }
     }
@@ -64,12 +59,9 @@ public class FavoriteRoutesRepo implements FavoriteRoutesDataSource {
 		}
 		else {
 			return localSource.getFavoriteRoute(routeId)
-					.map(new Function<FavoriteRoute, FavoriteRoute>() {
-						@Override
-						public FavoriteRoute apply(@io.reactivex.annotations.NonNull FavoriteRoute favoriteRoute) throws Exception {
-							cacheRoute(favoriteRoute);
-							return null;
-						}
+					.map(favoriteRoute -> {
+						cacheRoute(favoriteRoute);
+						return null;
 					});
 		}
 	}

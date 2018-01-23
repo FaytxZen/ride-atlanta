@@ -51,33 +51,36 @@ public class TrainRoutesAdapter extends
 
     @Override
     public void onBindViewHolder(final TrainRoutesViewHolder holder, int position) {
-        Train train = mTrainList.get(position);
+        final Train train = mTrainList.get(position);
 
         configureTrainLineView(holder.lineTextView, train);
 
         // determine train destination
-        String destinationText = WordUtils.capitalizeWords(train.getStation());
+        final String destinationText = WordUtils.capitalizeWords(train.getStation());
         holder.destinationTextView.setText(destinationText);
 
         // determine travel direction
-        holder.directionTextView.setText(train.getDirection());
+        final int directionResId = WordUtils.getFullDirectionString(train.getDirection());
+        holder.directionTextView.setText(directionResId);
 
         // determine train status
         holder.statusTextView.setText(train.getWaitingTime());
 
         // attach click listeners
-        String key = train.getFavoriteRouteKey();
+        final String key = train.getFavoriteRouteKey();
         holder.favoriteButton.setSelected(mFavoritedRouteIds.contains(key));
         train.setFavorited(mFavoritedRouteIds.contains(key));
 
-        holder.favoriteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(mItemListener != null) {
-                    mItemListener.onFavoriteItem(holder.getAdapterPosition());
-                }
-            }
-        });
+        holder.favoriteButton.setOnClickListener(view -> {
+			if (mItemListener != null) {
+				mItemListener.onFavoriteItem(holder.getAdapterPosition());
+			}
+		});
+        holder.itemView.setOnClickListener(view -> {
+			if (mItemListener != null) {
+				mItemListener.onItemClicked(holder.getAdapterPosition());
+			}
+		});
     }
 
     @Override

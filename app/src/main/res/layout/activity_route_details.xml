@@ -13,9 +13,9 @@
 
     <android.support.v7.widget.Toolbar
         style="@style/LowElevationStyle"
-        android:theme="@style/ToolbarTheme"
-        android:id="@+id/web_view_toolbar"
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="@dimen/toolbar_height"
+        android:theme="@style/ToolbarTheme"
         android:background="@color/colorPrimary"/>
 </FrameLayout>

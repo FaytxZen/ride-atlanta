@@ -33,12 +33,7 @@ public class NotificationsRemoteSource implements NotificationsDataSource {
 
     @Override
     public Observable<List<Notification>> getNotifications() {
-        return Observable.defer(new Callable<ObservableSource<? extends List<Notification>>>() {
-			@Override
-			public ObservableSource<List<Notification>> call() throws Exception {
-				return Observable.just(getNotificationsFromClient());
-			}
-		});
+        return Observable.defer(() -> Observable.just(getNotificationsFromClient()));
     }
 
     private List<Notification> getNotificationsFromClient() {

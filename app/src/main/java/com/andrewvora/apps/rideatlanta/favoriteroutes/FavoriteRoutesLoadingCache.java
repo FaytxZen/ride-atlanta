@@ -1,7 +1,6 @@
 package com.andrewvora.apps.rideatlanta.favoriteroutes;
 
 import android.app.Fragment;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -48,14 +47,9 @@ public class FavoriteRoutesLoadingCache extends Fragment implements FavoriteRout
     }
 
 	@Override
-	public void onAttach(Context context) {
-		super.onAttach(context);
-		AndroidInjection.inject(this);
-	}
-
-	@Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+		AndroidInjection.inject(this);
         setRetainInstance(true);
     }
 
@@ -88,8 +82,7 @@ public class FavoriteRoutesLoadingCache extends Fragment implements FavoriteRout
 						@Override
 						public void onNext(@io.reactivex.annotations.NonNull List<FavoriteRoute> routes) {
 							if(getListener() != null) {
-								List<FavoriteRouteDataObject> result = new ArrayList<>();
-								result.addAll(routes);
+								List<FavoriteRouteDataObject> result = new ArrayList<>(routes);
 								setFavoritedRoutes(result);
 
 								getListener().onFavoriteRoutesLoaded(getFavoriteRoutes());

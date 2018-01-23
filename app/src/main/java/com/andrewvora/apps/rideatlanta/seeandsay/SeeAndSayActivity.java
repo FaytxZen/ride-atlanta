@@ -72,15 +72,6 @@ public class SeeAndSayActivity extends AppCompatActivity {
     }
 
     private void configureExternalIntent(@NonNull Intent intent) {
-        if(deviceUsesLollipop()) {
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
-        }
-        else {
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-        }
-    }
-
-    private boolean deviceUsesLollipop() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
     }
 }

@@ -60,17 +60,16 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        if(viewType == HomeItemModel.VIEW_TYPE_ALERT_ITEM) {
-            View alertView = getLayoutFor(parent, R.layout.element_home_alert_item);
-            return new AlertViewHolder(alertView);
-        }
-        else if(viewType == HomeItemModel.VIEW_TYPE_INFO_ITEM) {
-            View infoView = getLayoutFor(parent, R.layout.element_home_info_item);
-            return new InfoViewHolder(infoView);
-        }
-        else if(viewType == HomeItemModel.VIEW_TYPE_ROUTE_ITEM) {
-            View homeView = getLayoutFor(parent, R.layout.element_home_route_item);
-            return new RouteViewHolder(homeView);
+        switch (viewType) {
+            case HomeItemModel.VIEW_TYPE_ALERT_ITEM:
+                View alertView = getLayoutFor(parent, R.layout.element_home_alert_item);
+                return new AlertViewHolder(alertView);
+            case HomeItemModel.VIEW_TYPE_INFO_ITEM:
+                View infoView = getLayoutFor(parent, R.layout.element_home_info_item);
+                return new InfoViewHolder(infoView);
+            case HomeItemModel.VIEW_TYPE_ROUTE_ITEM:
+                View homeView = getLayoutFor(parent, R.layout.element_home_route_item);
+                return new RouteViewHolder(homeView);
         }
 
         String exceptionMsgTemplate = "Invalid viewType. Implement an interface from %s. " +
@@ -135,25 +134,23 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     private int determineIndexToInsert(@NonNull HomeItemModel model) {
-        if(model.getViewType() == HomeItemModel.VIEW_TYPE_ALERT_ITEM) {
+        switch (model.getViewType()) {
+            case HomeItemModel.VIEW_TYPE_ALERT_ITEM:
+                for (int i = 0; i < itemList.size(); i++) {
+                    HomeItemModel homeItem = itemList.get(i);
+                    final boolean isNotRoute = homeItem.getViewType() !=
+                            HomeItemModel.VIEW_TYPE_ROUTE_ITEM;
 
-            for(int i = 0; i < itemList.size(); i++) {
-                HomeItemModel homeItem = itemList.get(i);
-                final boolean isNotRoute = homeItem.getViewType() !=
-                        HomeItemModel.VIEW_TYPE_ROUTE_ITEM;
-
-                if(isNotRoute) {
-                    return i;
+                    if (isNotRoute) {
+                        return i;
+                    }
                 }
-            }
 
-            return 0;
-        }
-        else if(model.getViewType() == HomeItemModel.VIEW_TYPE_INFO_ITEM) {
-            return getItemCount();
-        }
-        else {
-            return 0;
+                return 0;
+            case HomeItemModel.VIEW_TYPE_INFO_ITEM:
+                return getItemCount();
+            default:
+                return 0;
         }
     }
 
@@ -192,15 +189,12 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         String destination = WordUtils.capitalizeWords(routeItemModel.getDestination());
         holder.destinationTextView.setText(destination);
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				final HomeItemModel model = itemList.get(holder.getAdapterPosition());
-				if (model instanceof FavoriteRoute) {
-					listener.openRouteInfo((FavoriteRoute) model);
-				}
-			}
-		});
+        holder.itemView.setOnClickListener(view -> {
+	        final HomeItemModel model = itemList.get(holder.getAdapterPosition());
+	        if (model instanceof FavoriteRoute) {
+		        listener.openRouteInfo((FavoriteRoute) model);
+	        }
+        });
 
         if(routeItemModel.isBus()) {
             int adherence = Bus.parseAdherence(routeItemModel.getTimeUntilArrival());
@@ -227,19 +221,16 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     private View.OnClickListener getClickListenerFor(final int actionType) {
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                switch(actionType) {
-                    case InfoItemModel.SEE_AND_SAY:
-                        Context context = view.getContext();
-                        Intent startSeeAndSayIntent = new Intent(context, SeeAndSayActivity.class);
-                        context.startActivity(startSeeAndSayIntent);
-                        break;
+        return view -> {
+            switch(actionType) {
+                case InfoItemModel.SEE_AND_SAY:
+                    Context context = view.getContext();
+                    Intent startSeeAndSayIntent = new Intent(context, SeeAndSayActivity.class);
+                    context.startActivity(startSeeAndSayIntent);
+                    break;
 
-                    case InfoItemModel.TIP_ABOUT_FAVORITES:
-                        break;
-                }
+                case InfoItemModel.TIP_ABOUT_FAVORITES:
+                    break;
             }
         };
     }

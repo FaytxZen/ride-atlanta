@@ -42,12 +42,7 @@ public class NotificationsLocalSource implements NotificationsDataSource {
 
     @Override
     public Observable<List<Notification>> getNotifications() {
-        return Observable.defer(new Callable<ObservableSource<? extends List<Notification>>>() {
-			@Override
-			public ObservableSource<List<Notification>> call() throws Exception {
-				return Observable.just(getNotificationsFromDatabase());
-			}
-		});
+        return Observable.defer(() -> Observable.just(getNotificationsFromDatabase()));
     }
 
     private List<Notification> getNotificationsFromDatabase() {
@@ -71,12 +66,7 @@ public class NotificationsLocalSource implements NotificationsDataSource {
 
     @Override
     public Observable<Long> deleteAllNotifications() {
-       return Observable.defer(new Callable<ObservableSource<? extends Long>>() {
-		   @Override
-		   public ObservableSource<Long> call() throws Exception {
-			   return Observable.just(deleteAllNotificationsFromDatabase());
-		   }
-	   });
+       return Observable.defer(() -> Observable.just(deleteAllNotificationsFromDatabase()));
     }
 
     private long deleteAllNotificationsFromDatabase() {

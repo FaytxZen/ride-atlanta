@@ -30,7 +30,7 @@ public class FavoriteRoutesAdapterTest extends BaseUnitTest {
     }
 
     @Test
-    public void setFavoriteRoutes() throws Exception {
+    public void setFavoriteRoutes() {
         List<FavoriteRouteDataObject> favRouteList = new ArrayList<>();
         mAdapter.setFavoriteRoutes(favRouteList);
 
@@ -38,7 +38,7 @@ public class FavoriteRoutesAdapterTest extends BaseUnitTest {
     }
 
     @Test
-    public void setFavoriteRoute() throws Exception {
+    public void setFavoriteRoute() {
         FavoriteRoute favoriteRoute = new FavoriteRoute();
         favoriteRoute.setType(FavoriteRouteDataObject.TYPE_BUS);
         favoriteRoute.setRouteId("1234");
@@ -47,7 +47,7 @@ public class FavoriteRoutesAdapterTest extends BaseUnitTest {
     }
 
     @Test
-    public void getPosition() throws Exception {
+    public void getPosition() {
         FavoriteRoute favoriteRoute = new FavoriteRoute();
         favoriteRoute.setType(FavoriteRouteDataObject.TYPE_BUS);
         favoriteRoute.setRouteId("1234");
@@ -64,20 +64,20 @@ public class FavoriteRoutesAdapterTest extends BaseUnitTest {
     }
 
     @Test
-    public void getPosition_itemNotYetAdded() throws Exception {
+    public void getPosition_itemNotYetAdded() {
         FavoriteRoute favoriteRoute = new FavoriteRoute();
         favoriteRoute.setType(FavoriteRouteDataObject.TYPE_BUS);
         favoriteRoute.setRouteId("1234");
         favoriteRoute.setName("Bus12");
         favoriteRoute.setDestination("Ohio City St & Lol Rd");
 
-        mAdapter.setFavoriteRoutes(new ArrayList<FavoriteRouteDataObject>());
+        mAdapter.setFavoriteRoutes(new ArrayList<>());
         int routeAdapterPosition = mAdapter.getPosition(favoriteRoute);
         assertEquals(FavoriteRoutesAdapter.NEW_INDEX, routeAdapterPosition);
     }
 
     @Test
-    public void getItemCount() throws Exception {
+    public void getItemCount() {
         // non-empty list
         List<FavoriteRouteDataObject> routes = new ArrayList<>();
         routes.add(new FavoriteRoute());
@@ -88,7 +88,7 @@ public class FavoriteRoutesAdapterTest extends BaseUnitTest {
     }
 
     @Test
-    public void getItemCount_empty() throws Exception {
+    public void getItemCount_empty() {
         assertEquals(0, mAdapter.getItemCount());
     }
 

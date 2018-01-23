@@ -27,6 +27,7 @@ public interface BusRoutesContract {
         void onBusRoutesLoaded(List<Bus> routesList);
         void applyFavorites(@NonNull List<FavoriteRouteDataObject> favRoutes);
         void updateFavoriteStatusOf(@NonNull Bus bus);
+        void refreshError(Throwable e);
 
         Context getViewContext();
     }

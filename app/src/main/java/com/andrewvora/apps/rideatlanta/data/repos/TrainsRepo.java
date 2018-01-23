@@ -1,6 +1,5 @@
 package com.andrewvora.apps.rideatlanta.data.repos;
 
-import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
@@ -14,7 +13,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.reactivex.Observable;
-import io.reactivex.functions.Function;
 
 /**
  * Repo class that handles the syncing and fetching of data between the local and remote data
@@ -61,13 +59,10 @@ public class TrainsRepo implements TrainsDataSource {
         if(!cachedTrains.isEmpty() && !cacheIsDirty) {
             List<Train> cachedTrainList = new ArrayList<>(cachedTrains.values());
 
-            return Observable.just(cachedTrainList).map(new Function<List<Train>, List<Train>>() {
-                @Override
-                public List<Train> apply(@io.reactivex.annotations.NonNull List<Train> trains) throws Exception {
-                    Collections.sort(trains, new TrainsComparator());
-                    return trains;
-                }
-            });
+            return Observable.just(cachedTrainList).map(trains -> {
+				Collections.sort(trains, new TrainsComparator());
+				return trains;
+			});
         }
         else {
             return getTrainsFromRemote();
@@ -87,7 +82,7 @@ public class TrainsRepo implements TrainsDataSource {
     @Override
     public Observable<List<Train>> getTrains(@NonNull String station, @NonNull String line) {
         if(cachedTrains.isEmpty()) {
-            return Observable.empty();
+            return remoteSource.getTrains(station, line);
         }
         else {
             List<Train> matchingTrains = new ArrayList<>();
@@ -107,6 +102,18 @@ public class TrainsRepo implements TrainsDataSource {
     }
 
 	@Override
+	public Observable<List<Train>> getTrains(@NonNull final String station) {
+		if (cachedTrains.isEmpty()) {
+			return remoteSource.getTrains(station);
+		} else {
+			return Observable.defer(() -> Observable.fromIterable(cachedTrains.values())
+					.filter(train -> station.equals(train.getStation()))
+					.toSortedList(new TrainsComparator())
+					.toObservable());
+		}
+	}
+
+	@Override
 	public Observable<Train> getTrain(@NonNull Train train) {
 		final Train cachedTrain = cachedTrains.get(getKeyFor(train));
 
@@ -114,12 +121,9 @@ public class TrainsRepo implements TrainsDataSource {
 			return Observable.just(cachedTrain);
 		}
 		else {
-			return remoteSource.getTrain(train).map(new Function<Train, Train>() {
-				@Override
-				public Train apply(@io.reactivex.annotations.NonNull Train train) throws Exception {
-					cacheTrain(train);
-					return train;
-				}
+			return remoteSource.getTrain(train).map(train1 -> {
+				cacheTrain(train1);
+				return train1;
 			});
 		}
 	}
@@ -144,13 +148,10 @@ public class TrainsRepo implements TrainsDataSource {
     }
 
     private Observable<List<Train>> getTrainsFromRemote() {
-        return remoteSource.getTrains().map(new Function<List<Train>, List<Train>>() {
-            @Override
-            public List<Train> apply(@io.reactivex.annotations.NonNull List<Train> trains) throws Exception {
-                reloadCachedTrains(trains);
-                return trains;
-            }
-        });
+        return remoteSource.getTrains().map(trains -> {
+			reloadCachedTrains(trains);
+			return trains;
+		});
     }
 
     private void reloadCachedTrains(final List<Train> trainList) {

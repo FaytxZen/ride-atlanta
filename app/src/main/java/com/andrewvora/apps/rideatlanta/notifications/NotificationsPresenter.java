@@ -1,6 +1,5 @@
 package com.andrewvora.apps.rideatlanta.notifications;
 
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.data.contracts.NotificationsDataSource;
@@ -30,12 +29,6 @@ public class NotificationsPresenter implements NotificationsContract.Presenter {
         this.notificationRepo = notificationsRepo;
 		this.disposables = new CompositeDisposable();
     }
-
-    @Override
-    public void onSaveState(Bundle outState) { }
-
-    @Override
-    public void onRestoreState(Bundle savedState) { }
 
     @Override
     public void start() {
