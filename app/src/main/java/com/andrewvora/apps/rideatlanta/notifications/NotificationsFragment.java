@@ -20,6 +20,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 
 /**
  * Created by faytx on 10/22/2016.
@@ -35,6 +36,7 @@ public class NotificationsFragment extends Fragment implements NotificationsCont
 
     private NotificationsContract.Presenter presenter;
     private NotificationsAdapter notificationsAdapter;
+    private Unbinder unbinder;
 
     public static NotificationsFragment newInstance() {
         return new NotificationsFragment();
@@ -52,7 +54,7 @@ public class NotificationsFragment extends Fragment implements NotificationsCont
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_notifications, container, false);
-        ButterKnife.bind(this, view);
+        unbinder = ButterKnife.bind(this, view);
 
         notificationsRefreshLayout.setOnRefreshListener(() -> {
 			if(presenter != null) {
@@ -84,13 +86,23 @@ public class NotificationsFragment extends Fragment implements NotificationsCont
         }
     }
 
-    @Override
+	@Override
+	public void onDestroyView() {
+		super.onDestroyView();
+		unbinder.unbind();
+	}
+
+	@Override
     public void setPresenter(NotificationsContract.Presenter presenter) {
         this.presenter = presenter;
     }
 
     @Override
     public void onNotificationsLoaded(List<Notification> notificationList) {
+    	if (loadingView == null) {
+    		return;
+	    }
+
         loadingView.setVisibility(View.GONE);
         notificationsRefreshLayout.setRefreshing(false);
 

@@ -5,7 +5,6 @@ import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.common.BasePresenter;
 import com.andrewvora.apps.rideatlanta.common.BaseView;
-import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 import com.andrewvora.apps.rideatlanta.data.models.Bus;
 
 import java.util.List;
@@ -19,14 +18,13 @@ public interface BusRoutesContract {
     interface Presenter extends BasePresenter {
         void loadBusRoutes();
         void refreshBusRoutes();
-        void favoriteRoute(@NonNull Bus bus);
+        void favoriteRoute(int position, @NonNull Bus bus);
         void startPolling();
     }
 
     interface View extends BaseView<BusRoutesContract.Presenter> {
+    	void onRouteUpdated(int position, @NonNull Bus bus);
         void onBusRoutesLoaded(List<Bus> routesList);
-        void applyFavorites(@NonNull List<FavoriteRouteDataObject> favRoutes);
-        void updateFavoriteStatusOf(@NonNull Bus bus);
         void refreshError(Throwable e);
 
         Context getViewContext();

@@ -21,7 +21,6 @@ import io.reactivex.Observable;
  * Created by faytx on 10/24/2016.
  * @author Andrew Vorakrajangthiti
  */
-
 public class FavoriteRoutesLocalSource implements FavoriteRoutesDataSource {
     private RideAtlantaDbHelper dbHelper;
 
@@ -97,6 +96,7 @@ public class FavoriteRoutesLocalSource implements FavoriteRoutesDataSource {
 		contentValues.put(FavoriteRoutesTable.COLUMN_NAME, route.getName());
 		contentValues.put(FavoriteRoutesTable.COLUMN_DESTINATION, route.getDestination());
 		contentValues.put(FavoriteRoutesTable.COLUMN_TIME_TIL_ARRIVAL, String.valueOf(Integer.MIN_VALUE));
+		contentValues.put(FavoriteRoutesTable.COLUMN_DIRECTION, route.getTravelDirection());
 
 		if(isNewRecord) {
 			final long id = db.insertWithOnConflict(FavoriteRoutesTable.TABLE_NAME,
@@ -170,6 +170,7 @@ public class FavoriteRoutesLocalSource implements FavoriteRoutesDataSource {
         int destinationIndex = cursor.getColumnIndex(FavoriteRoutesTable.COLUMN_DESTINATION);
         int nameIndex = cursor.getColumnIndex(FavoriteRoutesTable.COLUMN_NAME);
         int timeTilArrival = cursor.getColumnIndex(FavoriteRoutesTable.COLUMN_TIME_TIL_ARRIVAL);
+        int direction = cursor.getColumnIndex(FavoriteRoutesTable.COLUMN_DIRECTION);
 
         route.setId(cursor.getLong(idIndex));
         route.setRouteId(cursor.getString(routeIdIndex));
@@ -177,6 +178,7 @@ public class FavoriteRoutesLocalSource implements FavoriteRoutesDataSource {
         route.setDestination(cursor.getString(destinationIndex));
         route.setTimeUntilArrival(cursor.getString(timeTilArrival));
         route.setName(cursor.getString(nameIndex));
+        route.setDirection(cursor.getString(direction));
 
         return route;
     }

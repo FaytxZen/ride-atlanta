@@ -25,19 +25,14 @@ public class TrainsRepo implements TrainsDataSource {
 
     private static final String KEY_DELIMITER = "\\$";
 
-    // Note: currently not leveraging the local source
-    private TrainsDataSource localSource;
-    private TrainsDataSource remoteSource;
+	private TrainsDataSource remoteSource;
 
     @NonNull
     private Map<String, Train> cachedTrains;
     private boolean cacheIsDirty;
 
-    public TrainsRepo(@NonNull TrainsDataSource remoteSource,
-                      @NonNull TrainsDataSource localSource)
-    {
-        this.localSource = localSource;
-        this.remoteSource = remoteSource;
+    public TrainsRepo(@NonNull TrainsDataSource remoteSource) {
+	    this.remoteSource = remoteSource;
 
         cachedTrains = new ConcurrentHashMap<>();
     }
@@ -56,16 +51,16 @@ public class TrainsRepo implements TrainsDataSource {
 
     @Override
     public Observable<List<Train>> getTrains() {
-        if(!cachedTrains.isEmpty() && !cacheIsDirty) {
-            List<Train> cachedTrainList = new ArrayList<>(cachedTrains.values());
-
-            return Observable.just(cachedTrainList).map(trains -> {
-				Collections.sort(trains, new TrainsComparator());
-				return trains;
-			});
+        if(cachedTrains.isEmpty() || cacheIsDirty) {
+	        return getTrainsFromRemote();
         }
         else {
-            return getTrainsFromRemote();
+	        List<Train> cachedTrainList = new ArrayList<>(cachedTrains.values());
+
+	        return Observable.just(cachedTrainList).map(trains -> {
+		        Collections.sort(trains, new TrainsComparator());
+		        return trains;
+	        });
         }
     }
 
@@ -73,11 +68,6 @@ public class TrainsRepo implements TrainsDataSource {
 	public Observable<List<Train>> getFreshTrains() {
 		return getTrainsFromRemote();
 	}
-
-	@Override
-    public Observable<List<Train>> getTrains(@NonNull Long... trainIds) {
-        return remoteSource.getTrains(trainIds);
-    }
 
     @Override
     public Observable<List<Train>> getTrains(@NonNull String station, @NonNull String line) {

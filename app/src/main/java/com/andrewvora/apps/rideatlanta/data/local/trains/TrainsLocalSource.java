@@ -65,52 +65,6 @@ public class TrainsLocalSource implements TrainsDataSource {
     }
 
 	@Override
-	public Observable<List<Train>> getTrains(@NonNull final Long... trainIds) {
-		return Observable.defer(() -> Observable.just(getTrainsFromDatabase(trainIds)));
-	}
-
-    private List<Train> getTrainsFromDatabase(@NonNull Long... trainIds) {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-		List<Train> trainList = new ArrayList<>();
-
-        try {
-            String[] columns = TrainsTable.getColumns();
-            String[] selectionArgs = new String[trainIds.length];
-            String selection = String.format("%s IN (%s)",
-                    TrainsTable.COLUMN_TRAIN_ID,
-                    getIdsAsSqlString(selectionArgs));
-
-            for(int i = 0; i < selectionArgs.length; i++) {
-                selectionArgs[i] = trainIds[i].toString();
-            }
-
-            Cursor trainsCursor = db.query(TrainsTable.TABLE_NAME,
-                    columns, selection, selectionArgs, null, null, null);
-            trainList = getTrainsFrom(trainsCursor);
-            trainsCursor.close();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return trainList;
-    }
-
-    private String getIdsAsSqlString(@NonNull String... trainIds) {
-        StringBuilder sb = new StringBuilder();
-
-        for(int i = 0; i < trainIds.length; i++) {
-            String toAppend = i != trainIds.length - 1 ?
-                    trainIds[i] + "," :
-                    trainIds[i];
-
-            sb.append(toAppend);
-        }
-
-        return sb.toString();
-    }
-
-	@Override
 	public Observable<List<Train>> getTrains(@NonNull String station, @NonNull String line) {
 		return Observable.empty();
 	}

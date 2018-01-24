@@ -15,18 +15,16 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.andrewvora.apps.rideatlanta.R;
-import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 import com.andrewvora.apps.rideatlanta.data.models.Train;
 import com.andrewvora.apps.rideatlanta.routedetails.RouteDetailsActivity;
 import com.andrewvora.apps.rideatlanta.views.SimpleDividerItemDecoration;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 
 /**
  * Created by faytx on 10/22/2016.
@@ -41,6 +39,7 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
     @BindView(R.id.swipe_to_refresh_layout) SwipeRefreshLayout swipeRefreshLayout;
     @BindView(R.id.no_trains_running_view) View emptyStateView;
 
+    private Unbinder unbinder;
     private TrainRoutesContract.Presenter presenter;
     private TrainRoutesAdapter trainAdapter;
     private TrainItemListener trainItemListener = new TrainItemListener() {
@@ -53,12 +52,7 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
 
         @Override
         public void onFavoriteItem(int position) {
-            presenter.favoriteRoute(trainAdapter.getTrain(position));
-
-            // must be called after presenter method
-            updateFavoriteStatusOf(trainAdapter.getTrain(position));
-
-            trainAdapter.notifyItemChanged(position);
+            presenter.favoriteRoute(position, trainAdapter.getTrain(position));
         }
     };
 
@@ -78,7 +72,7 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_train_routes, container, false);
-        ButterKnife.bind(this, view);
+        unbinder = ButterKnife.bind(this, view);
 
         swipeRefreshLayout.setOnRefreshListener(() -> {
 			presenter.refreshTrainRoutes();
@@ -108,37 +102,23 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
 		}
     }
 
-    @Override
+	@Override
+	public void onDestroyView() {
+		super.onDestroyView();
+		unbinder.unbind();
+	}
+
+	@Override
     public void setPresenter(TrainRoutesContract.Presenter presenter) {
         this.presenter = presenter;
     }
 
     @Override
-    public void updateFavoriteStatusOf(@NonNull Train train) {
-        String key = train.getFavoriteRouteKey();
-
-        if(train.isFavorited()) {
-            trainAdapter.getFavoriteRouteIds().add(key);
-        }
-        else {
-            trainAdapter.getFavoriteRouteIds().remove(key);
-        }
-    }
-
-    @Override
-    public void applyFavorites(List<FavoriteRouteDataObject> favRoutes) {
-        Set<String> favRouteIds = new HashSet<>();
-
-        for(FavoriteRouteDataObject route : favRoutes) {
-            favRouteIds.add(route.getFavoriteRouteKey());
-        }
-
-        trainAdapter.setFavoritedRouteIds(favRouteIds);
-        trainAdapter.notifyDataSetChanged();
-    }
-
-    @Override
     public void onTrainRoutesLoaded(List<Train> trainList) {
+    	if (swipeRefreshLayout == null) {
+    		return;
+	    }
+
         swipeRefreshLayout.setRefreshing(false);
         progressBar.setVisibility(View.GONE);
 
@@ -158,7 +138,13 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
         return getActivity().getApplication();
     }
 
-    interface TrainItemListener {
+	@Override
+	public void onRouteUpdated(int position, @NonNull Train train) {
+    	trainAdapter.getTrains().set(position, train);
+		trainAdapter.notifyItemChanged(position);
+	}
+
+	interface TrainItemListener {
         void onItemClicked(int position);
         void onFavoriteItem(int position);
     }

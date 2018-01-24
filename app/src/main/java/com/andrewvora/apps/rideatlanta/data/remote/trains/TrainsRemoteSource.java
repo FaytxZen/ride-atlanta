@@ -66,23 +66,6 @@ public class TrainsRemoteSource implements TrainsDataSource {
     }
 
     @Override
-    public Observable<List<Train>> getTrains(@NonNull final Long... trainIds) {
-        return Observable.defer(() -> martaService.getTrains(apiKey)
-				.flatMap((Function<List<Train>, ObservableSource<Train>>) Observable::fromIterable)
-				.filter(train -> {
-					for (Long trainId : trainIds) {
-						if (trainId.equals(train.getTrainId())) {
-							return true;
-						}
-					}
-
-					return false;
-				})
-				.toSortedList(new TrainsComparator())
-				.toObservable());
-    }
-
-    @Override
     public Observable<List<Train>> getTrains(@NonNull final String station) {
     	return Observable.defer(() -> {
 			final Observable<List<Train>> trainsObservable = RideAtlantaApplication.USE_LOCAL ?

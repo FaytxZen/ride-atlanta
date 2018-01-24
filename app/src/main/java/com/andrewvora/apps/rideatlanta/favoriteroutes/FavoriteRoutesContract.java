@@ -19,24 +19,14 @@ public interface FavoriteRoutesContract {
         void loadFavoriteRoutes();
         void refreshRouteInformation();
         void startPolling();
+        void removeRouteFromFavorites(int position, @NonNull FavoriteRouteDataObject route);
+        void routeClicked(int position, @NonNull FavoriteRouteDataObject route);
     }
 
     interface View extends BaseView<FavoriteRoutesContract.Presenter> {
         void onFavoriteRoutesLoaded(List<FavoriteRouteDataObject> favRoutes);
-        void onRouteInformationLoaded(FavoriteRouteDataObject favRoute);
-
+        void onRouteUpdated(int position, @NonNull FavoriteRouteDataObject route);
+        void openRouteDetails(@NonNull FavoriteRouteDataObject route);
         Context getViewContext();
-    }
-
-    interface LoadingCache {
-        void setListener(DataLoadedListener listener);
-        DataLoadedListener getListener();
-
-        void loadFavoriteRoutes();
-        void setFavoritedRoutes(@NonNull List<FavoriteRouteDataObject> favRoutes);
-    }
-
-    interface DataLoadedListener {
-        void onFavoriteRoutesLoaded(@NonNull List<FavoriteRouteDataObject> favRoutes);
     }
 }

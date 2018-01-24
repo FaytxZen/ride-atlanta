@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.reactivex.Observable;
-import io.reactivex.functions.Function;
 
 /**
  * Created by faytx on 10/23/2016.
@@ -22,7 +21,6 @@ public class FavoriteRoutesRepo implements FavoriteRoutesDataSource {
 
     @NonNull private FavoriteRoutesDataSource remoteSource;
     @NonNull private FavoriteRoutesDataSource localSource;
-
     @NonNull private Map<String, FavoriteRoute> cachedRoutes;
 
     private boolean cacheIsDirty;
@@ -121,6 +119,6 @@ public class FavoriteRoutesRepo implements FavoriteRoutesDataSource {
     }
 
     private String getMapKeyFor(@NonNull FavoriteRouteDataObject route) {
-        return route.getRouteId();
+        return route.getRouteId() + " " + route.getDestination() + " " + route.getTravelDirection();
     }
 }

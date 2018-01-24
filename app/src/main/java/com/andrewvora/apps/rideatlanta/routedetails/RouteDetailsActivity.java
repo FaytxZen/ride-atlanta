@@ -80,7 +80,7 @@ public class RouteDetailsActivity extends AppCompatActivity implements HasFragme
 		return intent;
 	}
 
-	public static Intent start(@NonNull Context context, @NonNull FavoriteRoute route) {
+	public static Intent start(@NonNull Context context, @NonNull FavoriteRouteDataObject route) {
 		final Bundle extras = new Bundle();
 		extras.putString(EXTRA_TYPE, route.getType());
 		extras.putString(EXTRA_ROUTE_ID, route.getRouteId());

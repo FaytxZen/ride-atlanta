@@ -18,23 +18,23 @@ import static org.junit.Assert.assertEquals;
  */
 public class FavoriteRoutesAdapterTest extends BaseUnitTest {
 
-    @Mock private List<FavoriteRouteDataObject> mRoutesList;
-    @Mock private FavoriteRoutesFragment.AdapterCallback mAdapterCallback;
-    private FavoriteRoutesAdapter mAdapter;
+    @Mock private List<FavoriteRouteDataObject> routesList;
+    @Mock private FavoriteRoutesFragment.AdapterCallback adapterCallback;
+    private FavoriteRoutesAdapter adapter;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
 
-        mAdapter = new FavoriteRoutesAdapter(mRoutesList, mAdapterCallback);
+        adapter = new FavoriteRoutesAdapter(routesList, adapterCallback);
     }
 
     @Test
     public void setFavoriteRoutes() {
         List<FavoriteRouteDataObject> favRouteList = new ArrayList<>();
-        mAdapter.setFavoriteRoutes(favRouteList);
+        adapter.setFavoriteRoutes(favRouteList);
 
-        assertEquals(favRouteList, mAdapter.getFavoriteRoutes());
+        assertEquals(favRouteList, adapter.getFavoriteRoutes());
     }
 
     @Test
@@ -43,37 +43,7 @@ public class FavoriteRoutesAdapterTest extends BaseUnitTest {
         favoriteRoute.setType(FavoriteRouteDataObject.TYPE_BUS);
         favoriteRoute.setRouteId("1234");
 
-        mAdapter.setFavoriteRoute(0, favoriteRoute);
-    }
-
-    @Test
-    public void getPosition() {
-        FavoriteRoute favoriteRoute = new FavoriteRoute();
-        favoriteRoute.setType(FavoriteRouteDataObject.TYPE_BUS);
-        favoriteRoute.setRouteId("1234");
-        favoriteRoute.setName("Bus12");
-        favoriteRoute.setDestination("Ohio City St & Lol Rd");
-
-        List<FavoriteRouteDataObject> routes = new ArrayList<>();
-        routes.add(favoriteRoute);
-
-        mAdapter.setFavoriteRoutes(routes);
-
-        int routeAdapterPosition = mAdapter.getPosition(favoriteRoute);
-        assertEquals(0, routeAdapterPosition);
-    }
-
-    @Test
-    public void getPosition_itemNotYetAdded() {
-        FavoriteRoute favoriteRoute = new FavoriteRoute();
-        favoriteRoute.setType(FavoriteRouteDataObject.TYPE_BUS);
-        favoriteRoute.setRouteId("1234");
-        favoriteRoute.setName("Bus12");
-        favoriteRoute.setDestination("Ohio City St & Lol Rd");
-
-        mAdapter.setFavoriteRoutes(new ArrayList<>());
-        int routeAdapterPosition = mAdapter.getPosition(favoriteRoute);
-        assertEquals(FavoriteRoutesAdapter.NEW_INDEX, routeAdapterPosition);
+        adapter.setFavoriteRoute(0, favoriteRoute);
     }
 
     @Test
@@ -82,14 +52,14 @@ public class FavoriteRoutesAdapterTest extends BaseUnitTest {
         List<FavoriteRouteDataObject> routes = new ArrayList<>();
         routes.add(new FavoriteRoute());
 
-        mAdapter.setFavoriteRoutes(routes);
+        adapter.setFavoriteRoutes(routes);
 
-        assertEquals(1, mAdapter.getItemCount());
+        assertEquals(1, adapter.getItemCount());
     }
 
     @Test
     public void getItemCount_empty() {
-        assertEquals(0, mAdapter.getItemCount());
+        assertEquals(0, adapter.getItemCount());
     }
 
 }

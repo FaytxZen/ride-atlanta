@@ -18,17 +18,15 @@ import android.widget.Toast;
 
 import com.andrewvora.apps.rideatlanta.BuildConfig;
 import com.andrewvora.apps.rideatlanta.R;
-import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 import com.andrewvora.apps.rideatlanta.data.models.Bus;
 import com.andrewvora.apps.rideatlanta.routedetails.RouteDetailsActivity;
 import com.andrewvora.apps.rideatlanta.views.SimpleDividerItemDecoration;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 
 /**
  * Created by faytx on 10/22/2016.
@@ -49,6 +47,7 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
     @BindView(R.id.loading_bus_routes_view) ProgressBar progressBar;
     @BindView(R.id.no_bus_routes_view) View emptyStateView;
 
+    private Unbinder unbinder;
     private BusRoutesContract.Presenter presenter;
     private BusRoutesAdapter busAdapter;
     private BusItemListener busItemListener = new BusItemListener() {
@@ -60,11 +59,7 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
 
         @Override
         public void onFavoriteBus(int position) {
-            presenter.favoriteRoute(busAdapter.getItemAtPosition(position));
-
-            // must be called after presenter method
-            updateFavoriteStatusOf(busAdapter.getItemAtPosition(position));
-
+            presenter.favoriteRoute(position, busAdapter.getItemAtPosition(position));
             busAdapter.notifyItemChanged(position);
         }
     };
@@ -84,7 +79,7 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_bus_routes, container, false);
-        ButterKnife.bind(this, view);
+        unbinder = ButterKnife.bind(this, view);
 
         swipeRefreshLayout.setOnRefreshListener(() -> {
 			if(presenter != null) {
@@ -115,8 +110,17 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
         }
     }
 
-    @Override
+	@Override
+	public void onDestroyView() {
+		super.onDestroyView();
+		unbinder.unbind();
+	}
+
+	@Override
     public void onBusRoutesLoaded(List<Bus> routesList) {
+    	if (swipeRefreshLayout == null) {
+    		return;
+	    }
         swipeRefreshLayout.setRefreshing(false);
         progressBar.setVisibility(View.GONE);
         busAdapter.setBuses(routesList);
@@ -127,30 +131,6 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
         } else {
             emptyStateView.setVisibility(View.GONE);
         }
-    }
-
-    @Override
-    public void updateFavoriteStatusOf(@NonNull Bus bus) {
-        String key = bus.getFavoriteRouteKey();
-
-        if(bus.isFavorited()) {
-            busAdapter.getFavoriteRouteIds().add(key);
-        }
-        else {
-            busAdapter.getFavoriteRouteIds().remove(key);
-        }
-    }
-
-    @Override
-    public void applyFavorites(@NonNull List<FavoriteRouteDataObject> favRoutes) {
-        Set<String> favRouteIds = new HashSet<>();
-
-        for(FavoriteRouteDataObject route : favRoutes) {
-            favRouteIds.add(route.getName());
-        }
-
-        busAdapter.setFavoriteRouteIds(favRouteIds);
-        busAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -170,4 +150,10 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
         }
         Toast.makeText(getViewContext(), R.string.error_refresh_buses, Toast.LENGTH_SHORT).show();
     }
+
+	@Override
+	public void onRouteUpdated(int position, @NonNull Bus bus) {
+		busAdapter.getItemAtPosition(position).setFavorited(bus.isFavorited());
+		busAdapter.notifyItemChanged(position);
+	}
 }

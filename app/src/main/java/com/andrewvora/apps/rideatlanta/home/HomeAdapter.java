@@ -84,11 +84,9 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if(holder instanceof InfoViewHolder) {
             onBindInfoViewHolder((InfoViewHolder) holder, position);
-        }
-        else if(holder instanceof AlertViewHolder) {
+        } else if(holder instanceof AlertViewHolder) {
             onBindAlertViewHolder((AlertViewHolder) holder, position);
-        }
-        else if(holder instanceof RouteViewHolder) {
+        } else if(holder instanceof RouteViewHolder) {
             onBindRouteViewHolder((RouteViewHolder) holder, position);
         }
     }
@@ -101,6 +99,15 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public int getItemCount() {
         return itemList.size();
+    }
+
+    void setItems(List<HomeItemModel> items) {
+        this.itemList = items;
+
+        itemMap.clear();
+        for (HomeItemModel item : items) {
+        	itemMap.put(item.getIdentifier(), item);
+        }
     }
 
     int addListItem(@NonNull HomeItemModel model) {
@@ -122,35 +129,11 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             // if negative, it means we're updating
             // MIN_VALUE means the item was not found
             return (position + 1) * -1;
-        }
-        else {
-            // determine where to insert
-            int indexToInsertAt = determineIndexToInsert(model);
+        } else {
             itemMap.put(model.getIdentifier(), model);
-            itemList.add(indexToInsertAt, model);
+            itemList.add(model);
 
-            return indexToInsertAt;
-        }
-    }
-
-    private int determineIndexToInsert(@NonNull HomeItemModel model) {
-        switch (model.getViewType()) {
-            case HomeItemModel.VIEW_TYPE_ALERT_ITEM:
-                for (int i = 0; i < itemList.size(); i++) {
-                    HomeItemModel homeItem = itemList.get(i);
-                    final boolean isNotRoute = homeItem.getViewType() !=
-                            HomeItemModel.VIEW_TYPE_ROUTE_ITEM;
-
-                    if (isNotRoute) {
-                        return i;
-                    }
-                }
-
-                return 0;
-            case HomeItemModel.VIEW_TYPE_INFO_ITEM:
-                return getItemCount();
-            default:
-                return 0;
+            return getItemCount();
         }
     }
 
@@ -216,6 +199,7 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             holder.timeTilArrivalTextView.setText(arrivalTime);
         }
     }
+
     private View getLayoutFor(@NonNull ViewGroup parent, @LayoutRes int layoutResId) {
         return LayoutInflater.from(parent.getContext()).inflate(layoutResId, parent, false);
     }
@@ -236,7 +220,6 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     static class AlertViewHolder extends RecyclerView.ViewHolder {
-
         @BindView(R.id.alert_time_stamp) TextView timeStampTextView;
         @BindView(R.id.alert_message) TextView messageTextView;
 
@@ -247,7 +230,6 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     static class InfoViewHolder extends RecyclerView.ViewHolder {
-
         @BindView(R.id.info_message) TextView infoTextView;
         @BindView(R.id.info_action_button) Button infoButton;
 
@@ -258,7 +240,6 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     static class RouteViewHolder extends RecyclerView.ViewHolder {
-
         @BindView(R.id.route_name) TextView nameTextView;
         @BindView(R.id.route_destination) TextView destinationTextView;
         @BindView(R.id.route_time_until_arrival) TextView timeTilArrivalTextView;

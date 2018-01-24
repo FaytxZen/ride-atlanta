@@ -15,9 +15,7 @@ import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.models.Train;
 import com.andrewvora.apps.rideatlanta.utils.WordUtils;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -30,7 +28,6 @@ public class TrainRoutesAdapter extends
         RecyclerView.Adapter<TrainRoutesAdapter.TrainRoutesViewHolder>
 {
     @NonNull private List<Train> mTrainList;
-    @NonNull private Set<String> mFavoritedRouteIds;
     @Nullable private TrainRoutesFragment.TrainItemListener mItemListener;
 
     TrainRoutesAdapter(@NonNull List<Train> trainList,
@@ -38,7 +35,6 @@ public class TrainRoutesAdapter extends
     {
         mTrainList = trainList;
         mItemListener  = listener;
-        mFavoritedRouteIds = new HashSet<>();
     }
 
     @Override
@@ -67,9 +63,7 @@ public class TrainRoutesAdapter extends
         holder.statusTextView.setText(train.getWaitingTime());
 
         // attach click listeners
-        final String key = train.getFavoriteRouteKey();
-        holder.favoriteButton.setSelected(mFavoritedRouteIds.contains(key));
-        train.setFavorited(mFavoritedRouteIds.contains(key));
+        holder.favoriteButton.setSelected(train.isFavorited());
 
         holder.favoriteButton.setOnClickListener(view -> {
 			if (mItemListener != null) {
@@ -86,14 +80,6 @@ public class TrainRoutesAdapter extends
     @Override
     public int getItemCount() {
         return mTrainList.size();
-    }
-
-    void setFavoritedRouteIds(@NonNull Set<String> favRouteIds) {
-        mFavoritedRouteIds = favRouteIds;
-    }
-
-    Set<String> getFavoriteRouteIds() {
-        return mFavoritedRouteIds;
     }
 
     public void setTrains(@NonNull List<Train> trains) {

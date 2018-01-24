@@ -3,6 +3,10 @@ package com.andrewvora.apps.rideatlanta;
 import android.app.Activity;
 import android.app.Application;
 
+import com.andrewvora.apps.rideatlanta.data.repos.BusesRepo;
+import com.andrewvora.apps.rideatlanta.data.repos.FavoriteRoutesRepo;
+import com.andrewvora.apps.rideatlanta.data.repos.NotificationsRepo;
+import com.andrewvora.apps.rideatlanta.data.repos.TrainsRepo;
 import com.andrewvora.apps.rideatlanta.di.components.DaggerAppComponent;
 import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.TwitterAuthConfig;
@@ -21,6 +25,11 @@ import io.fabric.sdk.android.Fabric;
 public class RideAtlantaApplication extends Application implements HasActivityInjector {
 
 	public static final boolean USE_LOCAL = true;
+
+	private BusesRepo busesRepo;
+	private TrainsRepo trainsRepo;
+	private FavoriteRoutesRepo favsRepo;
+	private NotificationsRepo notificationsRepo;
 
 	@Inject
 	DispatchingAndroidInjector<Activity> dispatchingActivityInjector;

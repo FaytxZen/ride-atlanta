@@ -2,7 +2,6 @@ package com.andrewvora.apps.rideatlanta.di.builders;
 
 import com.andrewvora.apps.rideatlanta.buses.BusRoutesFragment;
 import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesFragment;
-import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesLoadingCache;
 import com.andrewvora.apps.rideatlanta.home.HomeFragment;
 import com.andrewvora.apps.rideatlanta.routedetails.bus.BusRouteDetailsFragment;
 import com.andrewvora.apps.rideatlanta.routedetails.train.TrainRouteDetailsFragment;
@@ -17,9 +16,6 @@ import dagger.android.ContributesAndroidInjector;
  */
 @Module
 abstract class FragmentBuilderModule {
-
-	@ContributesAndroidInjector
-	abstract FavoriteRoutesLoadingCache contributesFavoriteCacheFragmentInjector();
 
 	@ContributesAndroidInjector
 	abstract FavoriteRoutesFragment contributesFavoriteRoutesFragmentInjector();

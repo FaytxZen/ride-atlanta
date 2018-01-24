@@ -23,6 +23,7 @@ import com.andrewvora.apps.rideatlanta.breezebalance.BreezeBalanceActivity;
 import com.andrewvora.apps.rideatlanta.buses.BusRoutesContract;
 import com.andrewvora.apps.rideatlanta.buses.BusRoutesFragment;
 import com.andrewvora.apps.rideatlanta.buses.BusRoutesPresenter;
+import com.andrewvora.apps.rideatlanta.data.FavoritesHelper;
 import com.andrewvora.apps.rideatlanta.data.RoutePollingHelper;
 import com.andrewvora.apps.rideatlanta.data.SharedPrefsManager;
 import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
@@ -32,7 +33,6 @@ import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
 import com.andrewvora.apps.rideatlanta.di.DataModule;
 import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesContract;
 import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesFragment;
-import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesLoadingCache;
 import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesPresenter;
 import com.andrewvora.apps.rideatlanta.home.HomeContract;
 import com.andrewvora.apps.rideatlanta.home.HomeFragment;
@@ -73,11 +73,10 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
     @Inject @Named(DataModule.NOTIFICATION_SOURCE)
     NotificationsDataSource notificationRepo;
 
-	@Inject
-	RoutePollingHelper pollingHelper;
+	@Inject RoutePollingHelper pollingHelper;
+	@Inject FavoritesHelper favoritesHelper;
 
 	private MenuItem sortMenuItem;
-    private FavoriteRoutesLoadingCache favRouteDataManager;
     private SharedPrefsManager prefManager;
 
     @Override
@@ -90,13 +89,6 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
         ButterKnife.bind(this);
 
         setSupportActionBar(toolbar);
-
-        favRouteDataManager = (FavoriteRoutesLoadingCache)
-                getFragmentManager().findFragmentByTag(FavoriteRoutesLoadingCache.TAG);
-
-        if(favRouteDataManager == null) {
-            favRouteDataManager = FavoriteRoutesLoadingCache.createInstance();
-        }
 
         prefManager = new SharedPrefsManager(getApplication());
 
@@ -185,8 +177,8 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
                 fragment,
                 busRepo,
                 favsRepo,
-                favRouteDataManager,
-				pollingHelper);
+				pollingHelper,
+		        favoritesHelper);
         fragment.setPresenter(presenter);
 
         startFragment(R.id.fragment_container, fragment, BusRoutesFragment.TAG, false);
@@ -207,8 +199,8 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
                 fragment,
                 trainRepo,
                 favsRepo,
-                favRouteDataManager,
-				pollingHelper);
+				pollingHelper,
+		        favoritesHelper);
 
         fragment.setPresenter(presenter);
 
@@ -233,7 +225,8 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
                 notificationRepo,
                 busRepo,
                 trainRepo,
-				pollingHelper);
+				pollingHelper,
+		        favoritesHelper);
         fragment.setPresenter(presenter);
 
         startFragment(R.id.fragment_container, fragment, HomeFragment.TAG, false);
@@ -254,7 +247,8 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
                 favsRepo,
                 busRepo,
                 trainRepo,
-				pollingHelper);
+				pollingHelper,
+		        favoritesHelper);
         fragment.setPresenter(presenter);
 
         startFragment(R.id.fragment_container, fragment, FavoriteRoutesFragment.TAG, false);
@@ -311,10 +305,6 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
             ft.addToBackStack(tag);
         }
         ft.replace(parentId, fragment, tag);
-
-        if(getFragmentManager().findFragmentByTag(FavoriteRoutesLoadingCache.TAG) == null) {
-            ft.add(favRouteDataManager, FavoriteRoutesLoadingCache.TAG);
-        }
 
         ft.commit();
     }

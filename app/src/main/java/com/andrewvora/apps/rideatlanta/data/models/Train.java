@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
+import com.andrewvora.apps.rideatlanta.data.repos.TrainsRepo;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
@@ -133,11 +134,6 @@ public class Train extends BaseModel implements FavoriteRouteDataObject, Cloneab
     }
 
     @Override
-    public String getFavoriteRouteKey() {
-        return getName() + " " + getDestination();
-    }
-
-    @Override
     public String getType() {
         return FavoriteRouteDataObject.TYPE_TRAIN;
     }
@@ -162,7 +158,7 @@ public class Train extends BaseModel implements FavoriteRouteDataObject, Cloneab
         return getDirection();
     }
 
-    public static String getFormattedTimeTilArrival(@NonNull Context context, @NonNull String tta) {
+	public static String getFormattedTimeTilArrival(@NonNull Context context, @NonNull String tta) {
         final String unknownValue = String.valueOf(Integer.MIN_VALUE);
 
         if(tta.contains(unknownValue) || tta.isEmpty()) {
@@ -206,23 +202,7 @@ public class Train extends BaseModel implements FavoriteRouteDataObject, Cloneab
         return sb.toString();
     }
 
-    public Train getCopy() {
-        Train train = new Train();
-        train.setDestination(getDestination());
-        train.setDirection(getDirection());
-        train.setEventTime(getEventTime());
-        train.setLine(getLine());
-        train.setNextArrival(getNextArrival());
-        train.setStation(getStation());
-        train.setTrainId(getTrainId());
-        train.setWaitingSeconds(getWaitingSeconds());
-        train.setWaitingTime(getWaitingTime());
-        train.setFavorited(isFavorited());
-
-        return train;
-    }
-
-    /*------------------------------------*
+	/*------------------------------------*
      * Generated Parcelable Code
      *------------------------------------*/
 	@Override

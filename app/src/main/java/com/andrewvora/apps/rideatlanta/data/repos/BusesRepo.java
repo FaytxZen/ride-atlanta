@@ -23,39 +23,32 @@ import io.reactivex.functions.Function;
  * Created by faytx on 10/22/2016.
  * @author Andrew Vorakrajangthiti
  */
-
 public class BusesRepo implements BusesDataSource {
 
     @NonNull private Map<String, Bus> cachedBuses;
     @NonNull private BusesDataSource remoteSource;
 
-    // NOTE: currently not leveraging local source
-    @NonNull private BusesDataSource localSource;
+	private boolean cacheIsDirty;
 
-    private boolean cacheIsDirty;
-
-    public BusesRepo(@NonNull BusesDataSource remoteSource,
-                     @NonNull BusesDataSource localSource)
-    {
+    public BusesRepo(@NonNull BusesDataSource remoteSource) {
         this.remoteSource = remoteSource;
-        this.localSource = localSource;
 
-        cachedBuses = new ConcurrentHashMap<>();
+	    cachedBuses = new ConcurrentHashMap<>();
     }
 
     @Override
     public Observable<List<Bus>> getBuses() {
-        if(cacheIsDirty) {
+        if(cachedBuses.isEmpty() || cacheIsDirty) {
             return getBusRoutesFromRemote().map(buses -> {
             	Collections.sort(buses, new BusComparator());
             	return buses;
             });
         }
         else {
-            List<Bus> buses = new ArrayList<>(cachedBuses.values());
-            return Observable.just(buses).map(buses1 -> {
-            	Collections.sort(buses1, new BusComparator());
-            	return buses1;
+            final List<Bus> busList = new ArrayList<>(cachedBuses.values());
+            return Observable.just(busList).map(buses -> {
+            	Collections.sort(buses, new BusComparator());
+            	return buses;
 			});
         }
     }
