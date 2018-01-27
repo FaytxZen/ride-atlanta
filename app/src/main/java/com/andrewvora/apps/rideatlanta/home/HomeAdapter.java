@@ -179,16 +179,18 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 	        }
         });
 
+        setTimeTilArrivalLabel(holder.timeLabelView, routeItemModel.getTimeUntilArrival(), routeItemModel.isBus());
+
         if(routeItemModel.isBus()) {
             int adherence = Bus.parseAdherence(routeItemModel.getTimeUntilArrival());
             String arrivalTime = Bus.getFormattedAdherence(context, adherence);
 
             holder.timeTilArrivalTextView.setText(arrivalTime);
+	        holder.directionTextView.setText(routeItemModel.getTravelDirection());
 
             holder.nameTextView.setText(routeItemModel.getName());
             holder.nameTextView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_bus_white_24dp, 0, 0, 0);
-        }
-        else {
+        } else {
             holder.nameTextView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_train_white_24dp, 0, 0, 0);
 
             int color = ContextCompat.getColor(context, Train.getColorRes(routeItemModel.getName()));
@@ -197,7 +199,22 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             final String arrivalTime = Train.getFormattedTimeTilArrival(context, routeItemModel.getTimeUntilArrival());
 
             holder.timeTilArrivalTextView.setText(arrivalTime);
+            final int directionResId = WordUtils.getFullDirectionString(routeItemModel.getTravelDirection());
+	        holder.directionTextView.setText(directionResId);
         }
+    }
+
+    private void setTimeTilArrivalLabel(@NonNull TextView label, String labelText, boolean isBus) {
+    	final boolean useArrivalLabel =
+			    !isBus &&
+			    labelText.matches(".*[1-9].*") &&
+			    labelText.compareTo(String.valueOf(Integer.MIN_VALUE)) != 0;
+
+	    if (useArrivalLabel) {
+		    label.setText(R.string.label_arrival_in);
+	    } else {
+		    label.setText(R.string.label_status);
+	    }
     }
 
     private View getLayoutFor(@NonNull ViewGroup parent, @LayoutRes int layoutResId) {
@@ -243,6 +260,8 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         @BindView(R.id.route_name) TextView nameTextView;
         @BindView(R.id.route_destination) TextView destinationTextView;
         @BindView(R.id.route_time_until_arrival) TextView timeTilArrivalTextView;
+        @BindView(R.id.route_travel_direction) TextView directionTextView;
+        @BindView(R.id.route_time_label) TextView timeLabelView;
 
         RouteViewHolder(@NonNull View view) {
             super(view);

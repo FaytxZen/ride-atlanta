@@ -297,8 +297,10 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
         toolbarIconView.setImageDrawable(ContextCompat.getDrawable(this, resId));
     }
 
-    private void startFragment(@IdRes int parentId, @NonNull Fragment fragment,
-                               @Nullable String tag, boolean addToBackStack)
+    private void startFragment(@IdRes int parentId,
+                               @NonNull Fragment fragment,
+                               @Nullable String tag,
+                               boolean addToBackStack)
     {
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         if(addToBackStack) {

@@ -24,7 +24,7 @@ public class NotificationsRepo implements NotificationsDataSource {
     @NonNull private Map<String, Notification> cachedNotifications;
     @NonNull private NotificationsDataSource remoteSource;
 
-    private boolean mCacheIsDirty;
+    private boolean cacheIsDirty;
 
     public NotificationsRepo(@NonNull NotificationsDataSource remoteSource) {
         this.remoteSource = remoteSource;
@@ -39,12 +39,13 @@ public class NotificationsRepo implements NotificationsDataSource {
 
 	@Override
 	public Observable<List<Notification>> getNotifications() {
-		if(!cachedNotifications.isEmpty() && !mCacheIsDirty) {
-			return Observable.defer(() -> Observable.just(getCachedNotifications()));
-		}
-		else {
-			return getNotificationsFromRemote();
-		}
+    	return Observable.defer(() -> {
+		    if(cachedNotifications.isEmpty() || cacheIsDirty) {
+			    return getNotificationsFromRemote();
+		    } else {
+			    return Observable.just(getCachedNotifications());
+		    }
+	    });
 	}
 
     private List<Notification> getCachedNotifications() {
@@ -56,7 +57,7 @@ public class NotificationsRepo implements NotificationsDataSource {
 
 	@Override
 	public Observable<List<Notification>> getFreshNotifications() {
-		return getNotificationsFromRemote();
+		return Observable.defer(this::getNotificationsFromRemote);
 	}
 
 	@Override
@@ -74,15 +75,15 @@ public class NotificationsRepo implements NotificationsDataSource {
 
     @Override
     public void reloadNotifications() {
-        mCacheIsDirty = true;
+        cacheIsDirty = true;
     }
 
     private Observable<List<Notification>> getNotificationsFromRemote() {
-        return Observable.defer(() -> remoteSource.getNotifications()
-				.map(notifications -> {
-					reloadCachedNotifications(notifications);
-					return notifications;
-				}));
+        return remoteSource.getNotifications()
+		        .map(notifications -> {
+			        reloadCachedNotifications(notifications);
+			        return notifications;
+		        });
     }
 
     private void reloadCachedNotifications(@NonNull List<Notification> notifications) {
@@ -93,7 +94,7 @@ public class NotificationsRepo implements NotificationsDataSource {
             cacheNotification(notification);
         }
 
-        mCacheIsDirty = false;
+        cacheIsDirty = false;
     }
 
     private void cacheNotification(Notification notification) {

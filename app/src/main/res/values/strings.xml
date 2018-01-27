@@ -76,4 +76,9 @@
     <string name="direction_unknown">Unknown</string>
 
     <string name="error_refresh_buses">Could not fetch bus info. Try again.</string>
+    <string name="error_load_notifications">Could not load notifications.</string>
+
+    <string name="label_destination">Next destination</string>
+    <string name="label_arrival_in">Arrives in</string>
+    <string name="label_status">Status</string>
 </resources>

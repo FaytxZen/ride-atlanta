@@ -62,7 +62,9 @@ public class NotificationsPresenter implements NotificationsContract.Presenter {
                 }
 
                 @Override
-                public void onError(@io.reactivex.annotations.NonNull Throwable e) { }
+                public void onError(@io.reactivex.annotations.NonNull Throwable e) {
+                	view.showLoadingError();
+                }
 
                 @Override
                 public void onComplete() { }

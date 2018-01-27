@@ -29,8 +29,6 @@ import butterknife.ButterKnife;
 public class FavoriteRoutesAdapter extends
         RecyclerView.Adapter<FavoriteRoutesAdapter.FavoriteRoutesViewHolder>
 {
-    public static final int NEW_INDEX = -1;
-
     @NonNull private List<FavoriteRouteDataObject> favoriteRoutes;
     @NonNull private FavoriteRoutesFragment.AdapterCallback listener;
 
@@ -57,8 +55,6 @@ public class FavoriteRoutesAdapter extends
 
         String destination = WordUtils.capitalizeWords(favoriteRoute.getDestination());
         holder.destinationTextView.setText(destination);
-
-        holder.nameTextView.setText(favoriteRoute.getName());
 
         holder.favoriteButton.setSelected(true);
         holder.favoriteButton.setOnClickListener(getUnfavoriteClickListener(holder));
@@ -98,6 +94,9 @@ public class FavoriteRoutesAdapter extends
         final String arrivalTime = Bus.getFormattedAdherence(context, adherence);
         holder.arrivalTimeTextView.setText(arrivalTime);
 
+        holder.directionTextView.setText(favBusRoute.getTravelDirection());
+	    holder.nameTextView.setText(favBusRoute.getName());
+
         holder.nameTextView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_bus_white_24dp, 0, 0, 0);
     }
 
@@ -112,6 +111,9 @@ public class FavoriteRoutesAdapter extends
 
         final int color = ContextCompat.getColor(context, Train.getColorRes(favTrainRoute.getName()));
         holder.nameTextView.setBackgroundColor(color);
+
+        final int direction = WordUtils.getFullDirectionString(favTrainRoute.getTravelDirection());
+        holder.directionTextView.setText(direction);
     }
 
     @Override
@@ -137,6 +139,7 @@ public class FavoriteRoutesAdapter extends
         @BindView(R.id.route_destination) TextView destinationTextView;
         @BindView(R.id.route_time_until_arrival) TextView arrivalTimeTextView;
         @BindView(R.id.favorite_button) View favoriteButton;
+        @BindView(R.id.route_direction) TextView directionTextView;
 
         FavoriteRoutesViewHolder(@NonNull View view) {
             super(view);

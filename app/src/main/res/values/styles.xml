@@ -28,18 +28,17 @@
     </style>
 
     <style name="BaseTextViewStyle">
-        <item name="android:textColor">@color/md_grey_800</item>
+        <item name="android:textColor">@color/md_grey_900</item>
     </style>
 
     <style name="RouteTitleTextStyle" parent="BaseTextViewStyle">
         <item name="android:textSize">@dimen/train_title_text_size</item>
-        <item name="android:maxLines">1</item>
         <item name="android:ellipsize">end</item>
     </style>
 
     <style name="RouteSubtitleTextStyle" parent="BaseTextViewStyle">
         <item name="android:textSize">@dimen/train_subtitle_text_size</item>
-        <item name="android:textColor">@color/md_grey_700</item>
+        <item name="android:textColor">@color/md_grey_800</item>
     </style>
 
     <style name="RouteLabelTextStyle" parent="BaseTextViewStyle">

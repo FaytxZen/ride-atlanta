@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.models.Notification;
@@ -64,7 +65,6 @@ public class NotificationsFragment extends Fragment implements NotificationsCont
 
         notificationsRecyclerView.setAdapter(notificationsAdapter);
         notificationsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-
         notificationsRecyclerView.addItemDecoration(new SimpleDividerItemDecoration(getActivity()));
 
         return view;
@@ -109,4 +109,9 @@ public class NotificationsFragment extends Fragment implements NotificationsCont
         notificationsAdapter.setNotifications(notificationList);
         notificationsAdapter.notifyDataSetChanged();
     }
+
+	@Override
+	public void showLoadingError() {
+		Toast.makeText(getActivity(), R.string.error_load_notifications, Toast.LENGTH_SHORT).show();
+	}
 }
