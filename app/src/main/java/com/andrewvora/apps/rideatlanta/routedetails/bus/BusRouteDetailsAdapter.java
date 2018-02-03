@@ -48,6 +48,9 @@ public class BusRouteDetailsAdapter extends RecyclerView.Adapter<BusRouteDetails
 		final Context context = holder.itemView.getContext();
 		final String status = Bus.getFormattedAdherence(context, bus.getAdherence());
 		holder.timeTilArrivalTextView.setText(status);
+
+		final String vehicleId = context.getString(R.string.bus_vehicle_id_template, bus.getVehicleNumber());
+		holder.vehicleIdTextView.setText(vehicleId);
 	}
 
 	@Override
@@ -64,6 +67,7 @@ public class BusRouteDetailsAdapter extends RecyclerView.Adapter<BusRouteDetails
 		@BindView(R.id.route_destination) TextView destinationTextView;
 		@BindView(R.id.route_direction) TextView directionTextView;
 		@BindView(R.id.route_time_until_arrival) TextView timeTilArrivalTextView;
+		@BindView(R.id.route_vehicle_id) TextView vehicleIdTextView;
 
 		BusViewHolder(View view) {
 			super(view);

@@ -7,16 +7,22 @@ import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
-import com.andrewvora.apps.rideatlanta.data.repos.TrainsRepo;
 import com.google.gson.annotations.SerializedName;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by faytx on 10/23/2016.
  * @author Andrew Vorakrajangthiti
  */
 public class Train extends BaseModel implements FavoriteRouteDataObject, Cloneable, Parcelable {
+
+	private static final String TRAIN_ARRIVAL_DATE_FORMAT = "M/dd/yyyy H:mm:ss a"; // 12/10/2017 12:58:44 AM
+	private static final String DISPLAYABLE_EVENT_TIME_12H = "H:mm a";
 
     private static final String RED_LINE = "RED";
     private static final String BLUE_LINE = "BLUE";
@@ -200,6 +206,16 @@ public class Train extends BaseModel implements FavoriteRouteDataObject, Cloneab
         }
 
         return sb.toString();
+    }
+
+    public String getDisplayableEventTime() {
+    	final DateFormat df = new SimpleDateFormat(TRAIN_ARRIVAL_DATE_FORMAT, Locale.getDefault());
+    	try {
+    		final Date date = df.parse(eventTime);
+    		return new SimpleDateFormat(DISPLAYABLE_EVENT_TIME_12H, Locale.getDefault()).format(date);
+	    } catch (Exception e) {
+    		return "";
+	    }
     }
 
 	/*------------------------------------*

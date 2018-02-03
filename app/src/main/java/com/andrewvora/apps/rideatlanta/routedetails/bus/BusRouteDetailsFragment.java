@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 
 import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.models.Bus;
+import com.andrewvora.apps.rideatlanta.views.SimpleDividerItemDecoration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,6 +62,7 @@ public class BusRouteDetailsFragment extends Fragment implements BusRouteDetails
 		ButterKnife.bind(this, view);
 
 		busRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+		busRecyclerView.addItemDecoration(new SimpleDividerItemDecoration(getActivity()));
 		busRecyclerView.setAdapter(recyclerViewAdapter);
 	}
 

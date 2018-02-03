@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 
 import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.models.Train;
+import com.andrewvora.apps.rideatlanta.views.SimpleDividerItemDecoration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,6 +64,7 @@ public class TrainRouteDetailsFragment extends Fragment implements TrainRouteDet
 		super.onViewCreated(view, savedInstanceState);
 		ButterKnife.bind(this, view);
 
+		trainRecyclerView.addItemDecoration(new SimpleDividerItemDecoration(getActivity()));
 		trainRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 		trainRecyclerView.setAdapter(recyclerViewAdapter);
 	}

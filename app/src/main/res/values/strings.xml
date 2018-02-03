@@ -81,4 +81,7 @@
     <string name="label_destination">Next destination</string>
     <string name="label_arrival_in">Arrives in</string>
     <string name="label_status">Status</string>
+
+    <string name="bus_vehicle_id_template">Vehicle ID: %1$d</string>
+    <string name="train_arrival_time_template">\@ %1$s</string>
 </resources>
