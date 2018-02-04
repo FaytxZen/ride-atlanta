@@ -25,6 +25,12 @@ public interface TrainRoutesContract {
     interface View extends BaseView<TrainRoutesContract.Presenter> {
         void onTrainRoutesLoaded(List<Train> trainList);
         void onRouteUpdated(int position, @NonNull Train train);
+        void showLoadingError();
+        void showFavoriteError();
+
+	    void hideLoadingView();
+        void showEmptyState();
+        void hideEmptyState();
         Context getViewContext();
     }
 }

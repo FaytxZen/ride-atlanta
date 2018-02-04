@@ -121,16 +121,8 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
     	if (swipeRefreshLayout == null) {
     		return;
 	    }
-        swipeRefreshLayout.setRefreshing(false);
-        progressBar.setVisibility(View.GONE);
         busAdapter.setBuses(routesList);
         busAdapter.notifyDataSetChanged();
-
-        if(routesList.isEmpty()) {
-            emptyStateView.setVisibility(View.VISIBLE);
-        } else {
-            emptyStateView.setVisibility(View.GONE);
-        }
     }
 
     @Override
@@ -155,5 +147,28 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
 	public void onRouteUpdated(int position, @NonNull Bus bus) {
 		busAdapter.getItemAtPosition(position).setFavorited(bus.isFavorited());
 		busAdapter.notifyItemChanged(position);
+	}
+
+	@Override
+	public void favoriteError() {
+		Toast.makeText(getViewContext(), R.string.error_could_not_favorite_bus, Toast.LENGTH_SHORT).show();
+	}
+
+	@Override
+	public void hideLoadingView() {
+		swipeRefreshLayout.setRefreshing(false);
+		progressBar.setVisibility(View.GONE);
+	}
+
+	@Override
+	public void showEmptyState() {
+		emptyStateView.setVisibility(View.VISIBLE);
+		busesRecyclerView.setVisibility(View.GONE);
+	}
+
+	@Override
+	public void hideEmptyState() {
+		emptyStateView.setVisibility(View.GONE);
+		busesRecyclerView.setVisibility(View.VISIBLE);
 	}
 }

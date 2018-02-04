@@ -27,6 +27,8 @@ public interface FavoriteRoutesContract {
         void onFavoriteRoutesLoaded(List<FavoriteRouteDataObject> favRoutes);
         void onRouteUpdated(int position, @NonNull FavoriteRouteDataObject route);
         void openRouteDetails(@NonNull FavoriteRouteDataObject route);
+        void showLoadingError();
+        void showUnfavoriteError();
         Context getViewContext();
     }
 }

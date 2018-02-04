@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.models.Train;
@@ -142,6 +143,34 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
 	public void onRouteUpdated(int position, @NonNull Train train) {
     	trainAdapter.getTrains().set(position, train);
 		trainAdapter.notifyItemChanged(position);
+	}
+
+	@Override
+	public void showLoadingError() {
+		Toast.makeText(getViewContext(), R.string.error_loading_trains, Toast.LENGTH_SHORT).show();
+	}
+
+	@Override
+	public void showFavoriteError() {
+		Toast.makeText(getViewContext(), R.string.error_could_not_favorite_train, Toast.LENGTH_SHORT).show();
+	}
+
+	@Override
+	public void hideLoadingView() {
+		swipeRefreshLayout.setRefreshing(false);
+		progressBar.setVisibility(View.GONE);
+	}
+
+	@Override
+	public void showEmptyState() {
+    	trainsRecyclerView.setVisibility(View.GONE);
+		emptyStateView.setVisibility(View.VISIBLE);
+	}
+
+	@Override
+	public void hideEmptyState() {
+    	trainsRecyclerView.setVisibility(View.VISIBLE);
+		emptyStateView.setVisibility(View.GONE);
 	}
 
 	interface TrainItemListener {

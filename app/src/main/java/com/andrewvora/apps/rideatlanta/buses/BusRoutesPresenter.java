@@ -32,6 +32,8 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter
     @NonNull private CompositeDisposable disposables;
     @NonNull private FavoritesHelper favoritesHelper;
 
+    private boolean isRefreshing;
+
     public BusRoutesPresenter(@NonNull BusRoutesContract.View view,
                               @NonNull BusesDataSource busRepo,
                               @NonNull FavoriteRoutesDataSource routesRepo,
@@ -67,8 +69,8 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter
 
     @Override
     public void refreshBusRoutes() {
+    	isRefreshing = true;
         busRepo.reloadBuses();
-
         disposables.add(getBuses());
     }
 
@@ -88,10 +90,17 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter
 
 				    @Override
 				    public void onError(@io.reactivex.annotations.NonNull Throwable e) {
+				    	busView.hideLoadingView();
 					    busView.refreshError(e);
+
+					    if (!isRefreshing) {
+					    	busView.showEmptyState();
+					    }
 				    }
 
-				    @Override public void onComplete() {}
+				    @Override public void onComplete() {
+				    	isRefreshing = false;
+				    }
 			    });
     }
 
@@ -120,7 +129,9 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter
 				}
 
 				@Override
-				public void onError(@io.reactivex.annotations.NonNull Throwable e) { }
+				public void onError(@io.reactivex.annotations.NonNull Throwable e) {
+					busView.favoriteError();
+				}
 
 				@Override
 				public void onComplete() { }
@@ -130,7 +141,14 @@ public class BusRoutesPresenter implements BusRoutesContract.Presenter
     }
 
     private void updateView(List<Bus> buses) {
+    	busView.hideLoadingView();
         busView.onBusRoutesLoaded(buses);
+
+        if (buses.isEmpty()) {
+        	busView.showEmptyState();
+        } else {
+        	busView.hideEmptyState();
+        }
     }
 
     private boolean hasNoCachedData() {

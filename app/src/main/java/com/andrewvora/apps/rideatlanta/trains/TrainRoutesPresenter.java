@@ -32,6 +32,8 @@ public class TrainRoutesPresenter implements TrainRoutesContract.Presenter
 	@NonNull private FavoritesHelper favoritesHelper;
 	@NonNull private RoutePollingHelper pollingHelper;
 
+	private boolean isRefreshing;
+
     public TrainRoutesPresenter(@NonNull TrainRoutesContract.View view,
                                 @NonNull TrainsDataSource trainRepo,
                                 @NonNull FavoriteRoutesDataSource favRouteRepo,
@@ -67,6 +69,7 @@ public class TrainRoutesPresenter implements TrainRoutesContract.Presenter
 
     @Override
     public void refreshTrainRoutes() {
+    	isRefreshing = true;
         trainRepo.reloadTrains();
 		disposables.add(getTrains());
     }
@@ -82,11 +85,27 @@ public class TrainRoutesPresenter implements TrainRoutesContract.Presenter
 			    .subscribeWith(new DisposableObserver<List<Train>>() {
 				    @Override
 				    public void onNext(@io.reactivex.annotations.NonNull List<Train> trains) {
+				    	view.hideLoadingView();
 					    view.onTrainRoutesLoaded(trains);
+
+					    if (trains.isEmpty()) {
+					    	view.showEmptyState();
+					    } else {
+					    	view.hideEmptyState();
+					    }
 				    }
 
-				    @Override public void onError(@io.reactivex.annotations.NonNull Throwable e) { }
-				    @Override public void onComplete() { }
+				    @Override public void onError(@io.reactivex.annotations.NonNull Throwable e) {
+				    	view.hideLoadingView();
+				    	view.showLoadingError();
+
+				    	if (!isRefreshing) {
+				    		view.showEmptyState();
+					    }
+				    }
+				    @Override public void onComplete() {
+				    	isRefreshing = false;
+				    }
 			    });
     }
 
@@ -111,7 +130,9 @@ public class TrainRoutesPresenter implements TrainRoutesContract.Presenter
 					view.onRouteUpdated(position, route);
 				}
 
-				@Override public void onError(@io.reactivex.annotations.NonNull Throwable e) { }
+				@Override public void onError(@io.reactivex.annotations.NonNull Throwable e) {
+					view.showFavoriteError();
+				}
 				@Override public void onComplete() { }
 			});
 

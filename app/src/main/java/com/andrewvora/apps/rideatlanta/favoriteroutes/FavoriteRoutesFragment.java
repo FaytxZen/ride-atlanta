@@ -11,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
@@ -176,5 +177,15 @@ public class FavoriteRoutesFragment extends Fragment implements FavoriteRoutesCo
 	public void openRouteDetails(@NonNull FavoriteRouteDataObject route) {
 		final Intent intent = RouteDetailsActivity.start(getViewContext(), route);
 		getViewContext().startActivity(intent);
+	}
+
+	@Override
+	public void showLoadingError() {
+		Toast.makeText(getViewContext(), R.string.error_load_favorites, Toast.LENGTH_SHORT).show();
+	}
+
+	@Override
+	public void showUnfavoriteError() {
+		Toast.makeText(getViewContext(), R.string.error_unfavorite, Toast.LENGTH_SHORT).show();
 	}
 }

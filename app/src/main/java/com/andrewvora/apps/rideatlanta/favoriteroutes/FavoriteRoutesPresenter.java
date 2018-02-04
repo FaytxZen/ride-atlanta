@@ -82,7 +82,9 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
 				}
 
 				@Override
-				public void onError(@io.reactivex.annotations.NonNull Throwable e) { }
+				public void onError(@io.reactivex.annotations.NonNull Throwable e) {
+					view.showLoadingError();
+				}
 
 				@Override
 				public void onComplete() { }
@@ -143,7 +145,9 @@ public class FavoriteRoutesPresenter implements FavoriteRoutesContract.Presenter
 					}
 
 					@Override
-					public void onError(Throwable e) { }
+					public void onError(Throwable e) {
+						view.showUnfavoriteError();
+					}
 
 					@Override
 					public void onComplete() { }

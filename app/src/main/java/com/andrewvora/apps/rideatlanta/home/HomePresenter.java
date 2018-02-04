@@ -43,6 +43,8 @@ public class HomePresenter implements HomeContract.Presenter {
 	@NonNull private CompositeDisposable disposables;
 	@NonNull private FavoritesHelper favoritesHelper;
 
+	private boolean initialized;
+
     public HomePresenter(@NonNull HomeContract.View view,
 						 @NonNull FavoriteRoutesDataSource favRoutesRepo,
 						 @NonNull NotificationsDataSource notificationRepo,
@@ -63,7 +65,10 @@ public class HomePresenter implements HomeContract.Presenter {
 
     @Override
     public void start() {
-    	view.showLoadingIndicator();
+    	if (!initialized) {
+    		view.showLoadingIndicator();
+	    }
+
 		loadHomeItems();
     }
 
@@ -95,6 +100,8 @@ public class HomePresenter implements HomeContract.Presenter {
 
 		disposables.add(Observable.zip(notificationStream, routesStream, infoAlertStream,
 				(notifications, favoriteRoutes, infoItems) -> {
+					initialized = true;
+
 					final List<HomeItemModel> itemModels = new ArrayList<>();
 					itemModels.addAll(notifications.subList(0, MAX_NOTIFICATIONS));
 					itemModels.addAll(favoriteRoutes);
@@ -112,8 +119,12 @@ public class HomePresenter implements HomeContract.Presenter {
 				refreshRouteInformationIfCached();
 			}
 
-			@Override public void onError(Throwable e) { }
-			@Override public void onComplete() { }
+			@Override public void onError(Throwable e) {
+				view.hideLoadingIndicator();
+			}
+			@Override public void onComplete() {
+				view.hideLoadingIndicator();
+			}
 		}));
 	}
 
@@ -252,5 +263,6 @@ public class HomePresenter implements HomeContract.Presenter {
         itemModels.add(favoriteRoute);
 
         view.updateItems(itemModels);
+        view.hideLoadingIndicator();
     }
 }

@@ -26,6 +26,11 @@ public interface BusRoutesContract {
     	void onRouteUpdated(int position, @NonNull Bus bus);
         void onBusRoutesLoaded(List<Bus> routesList);
         void refreshError(Throwable e);
+        void hideLoadingView();
+
+	    void showEmptyState();
+        void hideEmptyState();
+        void favoriteError();
 
         Context getViewContext();
     }
