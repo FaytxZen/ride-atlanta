@@ -2,7 +2,6 @@ package com.andrewvora.apps.rideatlanta.seeandsay;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -24,7 +23,7 @@ import butterknife.OnClick;
  */
 public class SeeAndSayActivity extends AppCompatActivity {
 
-    @BindView(R.id.toolbar) Toolbar mToolbar;
+    @BindView(R.id.toolbar) Toolbar toolbar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -32,7 +31,7 @@ public class SeeAndSayActivity extends AppCompatActivity {
         setContentView(R.layout.activity_see_and_say);
         ButterKnife.bind(this);
 
-        setSupportActionBar(mToolbar);
+        setSupportActionBar(toolbar);
         if(getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle(R.string.title_see_and_say);

@@ -1,5 +1,6 @@
 package com.andrewvora.apps.rideatlanta.breezebalance;
 
+import android.annotation.SuppressLint;
 import android.net.http.SslError;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -27,9 +28,9 @@ import butterknife.ButterKnife;
  */
 public class BreezeBalanceActivity extends AppCompatActivity {
 
-    @BindView(R.id.web_view_toolbar) Toolbar mToolbar;
-    @BindView(R.id.web_view) WebView mWebView;
-    @BindView(R.id.web_view_progress_bar) ProgressBar mPageProgressBar;
+    @BindView(R.id.web_view_toolbar) Toolbar toolbar;
+    @BindView(R.id.web_view) WebView webView;
+    @BindView(R.id.web_view_progress_bar) ProgressBar pageProgressBar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -40,7 +41,7 @@ public class BreezeBalanceActivity extends AppCompatActivity {
         configureToolbar();
         configureWebView();
 
-        mWebView.loadUrl(getString(R.string.breeze_balance_url));
+        webView.loadUrl(getString(R.string.breeze_balance_url));
     }
 
     @Override
@@ -58,15 +59,16 @@ public class BreezeBalanceActivity extends AppCompatActivity {
                 break;
 
             case R.id.menu_refresh:
-                mWebView.reload();
+                webView.reload();
                 break;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     private void configureWebView() {
-        mWebView.setWebViewClient(new WebViewClient() {
+        webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
@@ -87,8 +89,9 @@ public class BreezeBalanceActivity extends AppCompatActivity {
             }
         });
 
-        mWebView.getSettings().setSupportZoom(true);
-        mWebView.setWebChromeClient(new WebChromeClient() {
+        webView.getSettings().setSupportZoom(true);
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onProgressChanged(WebView view, int newProgress) {
                 super.onProgressChanged(view, newProgress);
@@ -97,20 +100,20 @@ public class BreezeBalanceActivity extends AppCompatActivity {
                         View.INVISIBLE :
                         View.VISIBLE;
 
-                mPageProgressBar.setProgress(newProgress);
-                mPageProgressBar.setVisibility(progressBarVisibility);
+                pageProgressBar.setProgress(newProgress);
+                pageProgressBar.setVisibility(progressBarVisibility);
             }
 
             @Override
             public void onReceivedTitle(WebView view, String title) {
                 super.onReceivedTitle(view, title);
-                mToolbar.setTitle(title);
+                toolbar.setTitle(title);
             }
         });
     }
 
     private void configureToolbar() {
-        setSupportActionBar(mToolbar);
+        setSupportActionBar(toolbar);
         if(getSupportActionBar() != null) {
             getSupportActionBar().setTitle(R.string.breeze_balance_url);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);

@@ -2,6 +2,7 @@ package com.andrewvora.apps.rideatlanta;
 
 import android.app.Activity;
 import android.app.Application;
+import android.support.annotation.VisibleForTesting;
 
 import com.andrewvora.apps.rideatlanta.di.components.DaggerAppComponent;
 import com.twitter.sdk.android.Twitter;
@@ -20,7 +21,8 @@ import io.fabric.sdk.android.Fabric;
  */
 public class RideAtlantaApplication extends Application implements HasActivityInjector {
 
-	public static final boolean USE_LOCAL = false;
+	@VisibleForTesting
+	public static boolean USE_LOCAL = true;
 
 	@Inject
 	DispatchingAndroidInjector<Activity> dispatchingActivityInjector;

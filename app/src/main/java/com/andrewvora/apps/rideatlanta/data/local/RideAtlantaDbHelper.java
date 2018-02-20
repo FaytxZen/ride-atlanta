@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.annotation.VisibleForTesting;
 
 import com.andrewvora.apps.rideatlanta.data.local.buses.BusesDbContract;
 import com.andrewvora.apps.rideatlanta.data.local.routes.FavoriteRoutesDbContract;
@@ -47,6 +48,27 @@ public class RideAtlantaDbHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
 	    // TODO: eventually move to proper SQL migrations
 		deleteAllTables(sqLiteDatabase);
+    }
+
+    @VisibleForTesting
+    public void clearAllRecords() {
+    	final SQLiteDatabase db = getWritableDatabase();
+	    // query to obtain the names of all tables in your database
+	    Cursor c = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null);
+	    List<String> tables = new ArrayList<>();
+
+	    // iterate over the result set, adding every table name to a list
+	    while (c.moveToNext()) {
+		    tables.add(c.getString(0));
+	    }
+
+	    // call DROP TABLE on every table name
+	    for (String table : tables) {
+		    String dropQuery = "DELETE FROM " + table + " WHERE 1=1";
+		    db.execSQL(dropQuery);
+	    }
+
+	    c.close();
     }
 
     private void deleteAllTables(SQLiteDatabase db) {
