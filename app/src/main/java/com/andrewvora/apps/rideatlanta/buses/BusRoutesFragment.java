@@ -156,8 +156,10 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
 
 	@Override
 	public void hideLoadingView() {
-		swipeRefreshLayout.setRefreshing(false);
-		progressBar.setVisibility(View.GONE);
+    	if (isAdded()) {
+		    swipeRefreshLayout.setRefreshing(false);
+		    progressBar.setVisibility(View.GONE);
+	    }
 	}
 
 	@Override
@@ -168,7 +170,9 @@ public class BusRoutesFragment extends Fragment implements BusRoutesContract.Vie
 
 	@Override
 	public void hideEmptyState() {
-		emptyStateView.setVisibility(View.GONE);
-		busesRecyclerView.setVisibility(View.VISIBLE);
+    	if (isAdded()) {
+		    emptyStateView.setVisibility(View.GONE);
+		    busesRecyclerView.setVisibility(View.VISIBLE);
+	    }
 	}
 }

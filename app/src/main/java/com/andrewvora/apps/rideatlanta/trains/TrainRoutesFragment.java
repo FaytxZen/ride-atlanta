@@ -157,8 +157,10 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
 
 	@Override
 	public void hideLoadingView() {
-		swipeRefreshLayout.setRefreshing(false);
-		progressBar.setVisibility(View.GONE);
+    	if (isAdded()) {
+		    swipeRefreshLayout.setRefreshing(false);
+		    progressBar.setVisibility(View.GONE);
+	    }
 	}
 
 	@Override
@@ -169,8 +171,10 @@ public class TrainRoutesFragment extends Fragment implements TrainRoutesContract
 
 	@Override
 	public void hideEmptyState() {
-    	trainsRecyclerView.setVisibility(View.VISIBLE);
-		emptyStateView.setVisibility(View.GONE);
+    	if (isAdded()) {
+		    trainsRecyclerView.setVisibility(View.VISIBLE);
+		    emptyStateView.setVisibility(View.GONE);
+	    }
 	}
 
 	interface TrainItemListener {
