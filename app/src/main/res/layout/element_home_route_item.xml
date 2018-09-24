@@ -9,11 +9,14 @@
     android:layout_marginEnd="16dp"
     android:layout_marginTop="8dp"
     android:layout_marginBottom="8dp"
+    android:background="@color/md_white_1000"
     app:contentPadding="12dp">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp">
 
         <TextView
             android:id="@+id/route_name"
@@ -22,13 +25,12 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
             android:layout_centerVertical="true"
             android:background="@drawable/shape_round_rect_orange"
-            android:drawableLeft="@drawable/ic_bus_white_24dp"
             android:drawableStart="@drawable/ic_bus_white_24dp"
             android:gravity="center"
             android:padding="4dp"
+            android:maxLines="2"
             android:textColor="@color/md_white_1000"
             tools:text="6" />
 
@@ -38,27 +40,43 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toEndOf="@id/route_name"
-            android:layout_toRightOf="@id/route_name"
-            android:layout_toLeftOf="@+id/route_time_until_arrival"
             android:layout_toStartOf="@+id/route_time_until_arrival"
             android:layout_alignBaseline="@+id/route_name"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:padding="4dp"
+            android:layout_marginEnd="16dp"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:ellipsize="end"
             tools:text="Magnolia Drive" />
+
+        <TextView
+            android:id="@+id/route_travel_direction"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/route_destination"
+            android:layout_toEndOf="@id/route_name"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            tools:text="Northbound"/>
+
+        <TextView
+            android:id="@+id/route_time_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignTop="@id/route_destination"
+            android:textSize="12sp"
+            android:textColor="@color/md_grey_500"
+            tools:text="@string/label_arrival_in"/>
 
         <TextView
             android:id="@+id/route_time_until_arrival"
             style="@style/RouteSubtitleTextStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
+            android:layout_below="@+id/route_time_label"
             android:gravity="end"
-            android:padding="4dp"
             tools:text="17 minutes" />
+
     </RelativeLayout>
 </android.support.v7.widget.CardView>

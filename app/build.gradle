@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'io.fabric'
 apply plugin: 'jacoco'
+apply plugin: 'kotlin-kapt'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
@@ -10,20 +11,22 @@ repositories {
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "25.0.3"
+    buildToolsVersion "26.0.3"
     defaultConfig {
         applicationId "com.andrewvora.apps.rideatlanta"
-        minSdkVersion 16
+        minSdkVersion 21
         targetSdkVersion 26
-        versionCode 2
-        versionName "1.1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        versionCode 3
+        versionName "1.2.0"
+        testInstrumentationRunner "com.andrewvora.apps.rideatlanta.testing.RideAtlantaTestRunner"
     }
 
     buildTypes {
         debug {
             minifyEnabled false
             shrinkResources false
+            useProguard false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 
             buildConfigField "String", "MARTA_API_KEY", "\"$System.env.RIDEATLANTA_MARTA_API_KEY\""
             buildConfigField "String", "FABRIC_API_KEY", "\"$System.env.RIDEATLANTA_FABRIC_API_KEY\""
@@ -43,78 +46,81 @@ android {
         }
     }
 
-    testOptions {
-        unitTests.all {
-            jacoco {
-                includeNoLocationClasses = true
-            }
-        }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
+
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    def app_compat_version = '26.0.0'
-    def dagger_version = '2.11'
-    def butter_knife_version = '8.4.0'
+    def app_compat_version = '26.1.0'
+    def dagger_version = '2.15'
+    def butter_knife_version = '8.5.1'
     def retrofit_version = '2.3.0'
+    def leak_canary_version = '1.5.4'
 
     // System Dependencies
-    compile "com.android.support:appcompat-v7:$app_compat_version"
-    compile "com.android.support:design:$app_compat_version"
-    compile "com.android.support:cardview-v7:$app_compat_version"
-    compile "com.android.support:recyclerview-v7:$app_compat_version"
-    compile('com.twitter.sdk.android:twitter:2.2.0@aar') {
-        transitive = true;
+    implementation "com.android.support:appcompat-v7:$app_compat_version"
+    implementation "com.android.support:design:$app_compat_version"
+    implementation "com.android.support:cardview-v7:$app_compat_version"
+    implementation "com.android.support:recyclerview-v7:$app_compat_version"
+    implementation('com.twitter.sdk.android:twitter:2.2.0@aar') {
+        transitive = true
     }
 
-    compile 'io.reactivex.rxjava2:rxjava:2.1.0'
-    compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    implementation 'io.reactivex.rxjava2:rxjava:2.1.1'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
 
-    compile "com.jakewharton:butterknife:$butter_knife_version"
-    annotationProcessor "com.jakewharton:butterknife-compiler:$butter_knife_version"
+    implementation "com.jakewharton:butterknife:$butter_knife_version"
+    kapt "com.jakewharton:butterknife-compiler:$butter_knife_version"
 
-    compile "com.google.dagger:dagger:$dagger_version"
-    compile "com.google.dagger:dagger-android:$dagger_version"
-    compile "com.google.dagger:dagger-android-support:$dagger_version"
-    compile "com.google.code.findbugs:jsr305:3.0.2"
-    annotationProcessor "com.google.dagger:dagger-compiler:$dagger_version"
-    annotationProcessor "com.google.dagger:dagger-android-processor:$dagger_version"
-    compile "com.squareup.retrofit2:retrofit:$retrofit_version"
-    compile "com.squareup.retrofit2:adapter-rxjava2:$retrofit_version"
-    compile 'com.android.volley:volley:1.0.0'
-    compile 'com.google.code.gson:gson:2.7'
+    implementation "com.google.dagger:dagger:$dagger_version"
+    implementation "com.google.dagger:dagger-android:$dagger_version"
+    implementation "com.google.dagger:dagger-android-support:$dagger_version"
+    implementation "com.google.code.findbugs:jsr305:3.0.2"
+    kapt "com.google.dagger:dagger-compiler:$dagger_version"
+    kapt "com.google.dagger:dagger-android-processor:$dagger_version"
+    implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
+    implementation "com.squareup.retrofit2:adapter-rxjava2:$retrofit_version"
+    implementation 'com.google.code.gson:gson:2.8.0'
 
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+    // dev
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+//    debugCompile "com.squareup.leakcanary:leakcanary-android:$leak_canary_version"
+    debugImplementation "com.squareup.leakcanary:leakcanary-android-no-op:$leak_canary_version"
+    releaseImplementation "com.squareup.leakcanary:leakcanary-android-no-op:$leak_canary_version"
+
+    // test
+    def espresso_version = "2.2.2"
+    androidTestImplementation("com.android.support.test.espresso:espresso-core:$espresso_version", {
         exclude group: 'com.android.support', module: 'support-annotations'
         exclude group: 'com.google.code.findbugs', module: 'jsr305'
     })
+    androidTestImplementation("com.android.support.test.espresso:espresso-contrib:$espresso_version", {
+        exclude group: 'com.android.support', module: 'support-annotations'
+        exclude group: 'com.google.code.findbugs', module: 'jsr305'
+    })
+    androidTestImplementation("com.android.support.test.espresso:espresso-web:$espresso_version", {
+        exclude group: 'com.android.support', module: 'support-annotations'
+        exclude group: 'com.google.code.findbugs', module: 'jsr305'
+    })
+    androidTestImplementation 'com.squareup.rx.idler:rx2-idler:0.9.0'
 
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:1.10.19'
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.mockito:mockito-core:2.8.47'
+    testImplementation "com.nhaarman:mockito-kotlin:1.5.0"
 }
 
-jacoco {
-    toolVersion '0.7.9'
-    reportsDir = file("$buildDir/jacocoReports")
-}
-
-task jacocoTestReport(type: JacocoReport, dependsOn: ['test']) {
-
-    reports {
-        xml.enabled = true
-        html.enabled = true
+// LeakCanary - ensure the no-op dependency is always used in JVM tests.
+configurations.all { config ->
+    if (config.name.contains('UnitTest')) {
+        config.resolutionStrategy.eachDependency { details ->
+            if (details.requested.group == 'com.squareup.leakcanary' && details.requested.name == 'leakcanary-android') {
+                details.useTarget(group: details.requested.group, name: 'leakcanary-android-no-op', version: details.requested.version)
+            }
+        }
     }
-
-    def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*', '**/*Test*.*', 'android/**/*.*']
-    def debugTree = fileTree(dir: "${buildDir}/intermediates/classes/debug", excludes: fileFilter)
-    def mainSrc = "${project.projectDir}/src/main/java"
-
-    sourceDirectories = files([mainSrc])
-    classDirectories = files([debugTree])
-    executionData = fileTree(dir: "$buildDir", includes: [
-            "jacoco/testDebugUnitTest.exec"
-    ])
 }

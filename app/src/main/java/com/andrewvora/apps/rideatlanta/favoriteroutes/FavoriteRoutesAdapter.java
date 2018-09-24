@@ -15,7 +15,6 @@ import com.andrewvora.apps.rideatlanta.data.models.Bus;
 import com.andrewvora.apps.rideatlanta.data.models.Train;
 import com.andrewvora.apps.rideatlanta.utils.WordUtils;
 
-import java.util.Iterator;
 import java.util.List;
 
 import butterknife.BindView;
@@ -30,16 +29,14 @@ import butterknife.ButterKnife;
 public class FavoriteRoutesAdapter extends
         RecyclerView.Adapter<FavoriteRoutesAdapter.FavoriteRoutesViewHolder>
 {
-    public static final int NEW_INDEX = -1;
+    @NonNull private List<FavoriteRouteDataObject> favoriteRoutes;
+    @NonNull private FavoriteRoutesFragment.AdapterCallback listener;
 
-    @NonNull private List<FavoriteRouteDataObject> mFavoriteRoutesList;
-    @NonNull private FavoriteRoutesFragment.AdapterCallback mListener;
-
-    public FavoriteRoutesAdapter(@NonNull List<FavoriteRouteDataObject> favoriteRoutes,
-                                 @NonNull FavoriteRoutesFragment.AdapterCallback listener)
+    FavoriteRoutesAdapter(@NonNull List<FavoriteRouteDataObject> favoriteRoutes,
+                          @NonNull FavoriteRoutesFragment.AdapterCallback listener)
     {
-        mFavoriteRoutesList = favoriteRoutes;
-        mListener = listener;
+        this.favoriteRoutes = favoriteRoutes;
+        this.listener = listener;
     }
 
     @Override
@@ -52,12 +49,12 @@ public class FavoriteRoutesAdapter extends
 
     @Override
     public void onBindViewHolder(FavoriteRoutesViewHolder holder, int position) {
-        final FavoriteRouteDataObject favoriteRoute = mFavoriteRoutesList.get(position);
+        final FavoriteRouteDataObject favoriteRoute = favoriteRoutes.get(position);
+
+        holder.itemView.setOnClickListener(v -> listener.onItemClicked(holder.getAdapterPosition(), favoriteRoute));
 
         String destination = WordUtils.capitalizeWords(favoriteRoute.getDestination());
         holder.destinationTextView.setText(destination);
-
-        holder.nameTextView.setText(favoriteRoute.getName());
 
         holder.favoriteButton.setSelected(true);
         holder.favoriteButton.setOnClickListener(getUnfavoriteClickListener(holder));
@@ -77,48 +74,34 @@ public class FavoriteRoutesAdapter extends
     }
 
     public void setFavoriteRoutes(@NonNull List<FavoriteRouteDataObject> routes) {
-        mFavoriteRoutesList = routes;
+        favoriteRoutes = routes;
     }
 
+    @NonNull
     public List<FavoriteRouteDataObject> getFavoriteRoutes() {
-        return mFavoriteRoutesList;
+        return favoriteRoutes;
     }
 
     public void setFavoriteRoute(int position, @NonNull FavoriteRouteDataObject route) {
-        mFavoriteRoutesList.set(position, route);
-    }
-
-    public int getPosition(@NonNull FavoriteRouteDataObject route) {
-        Iterator<FavoriteRouteDataObject> it = mFavoriteRoutesList.iterator();
-        int index = 0, result = NEW_INDEX;
-
-        while(it.hasNext()) {
-            FavoriteRouteDataObject curRoute = it.next();
-
-            if(curRoute.getFavoriteRouteKey().equals(route.getFavoriteRouteKey())) {
-                result = index;
-                break;
-            }
-
-            index++;
-        }
-
-        return result;
+        favoriteRoutes.set(position, route);
     }
 
     private void onBindFavoriteBusRouteHolder(FavoriteRoutesViewHolder holder, int position) {
-        final FavoriteRouteDataObject favBusRoute = mFavoriteRoutesList.get(position);
+        final FavoriteRouteDataObject favBusRoute = favoriteRoutes.get(position);
         final Context context = holder.itemView.getContext();
 
         final int adherence = Bus.parseAdherence(favBusRoute.getTimeTilArrival());
         final String arrivalTime = Bus.getFormattedAdherence(context, adherence);
         holder.arrivalTimeTextView.setText(arrivalTime);
 
+        holder.directionTextView.setText(favBusRoute.getTravelDirection());
+	    holder.nameTextView.setText(favBusRoute.getName());
+
         holder.nameTextView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_bus_white_24dp, 0, 0, 0);
     }
 
-    private void onBindFavoriteTrainRouteHolder(FavoriteRoutesViewHolder holder, int position) {
-        final FavoriteRouteDataObject favTrainRoute = mFavoriteRoutesList.get(position);
+    private void onBindFavoriteTrainRouteHolder(final FavoriteRoutesViewHolder holder, int position) {
+        final FavoriteRouteDataObject favTrainRoute = favoriteRoutes.get(position);
         final Context context = holder.itemView.getContext();
 
         final String timeTilArrival = favTrainRoute.getTimeTilArrival();
@@ -128,38 +111,35 @@ public class FavoriteRoutesAdapter extends
 
         final int color = ContextCompat.getColor(context, Train.getColorRes(favTrainRoute.getName()));
         holder.nameTextView.setBackgroundColor(color);
+
+        final int direction = WordUtils.getFullDirectionString(favTrainRoute.getTravelDirection());
+        holder.directionTextView.setText(direction);
     }
 
     @Override
     public int getItemCount() {
-        return mFavoriteRoutesList.size();
+        return favoriteRoutes.size();
     }
 
     private View.OnClickListener getUnfavoriteClickListener(final FavoriteRoutesViewHolder holder) {
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                final int position = holder.getAdapterPosition();
+        return view -> {
+            final int position = holder.getAdapterPosition();
 
-                if(position < getItemCount()) {
-					FavoriteRouteDataObject route = mFavoriteRoutesList.get(position);
-
-					// remove from list
-					mFavoriteRoutesList.remove(position);
+            if(position < getItemCount()) {
+					FavoriteRouteDataObject route = favoriteRoutes.get(position);
 
 					// alert listener
-					mListener.onUnfavorited(position, route);
-                }
+					listener.onFavoriteClicked(position, route);
             }
         };
     }
 
     static class FavoriteRoutesViewHolder extends RecyclerView.ViewHolder {
-
         @BindView(R.id.route_name) TextView nameTextView;
         @BindView(R.id.route_destination) TextView destinationTextView;
         @BindView(R.id.route_time_until_arrival) TextView arrivalTimeTextView;
         @BindView(R.id.favorite_button) View favoriteButton;
+        @BindView(R.id.route_direction) TextView directionTextView;
 
         FavoriteRoutesViewHolder(@NonNull View view) {
             super(view);

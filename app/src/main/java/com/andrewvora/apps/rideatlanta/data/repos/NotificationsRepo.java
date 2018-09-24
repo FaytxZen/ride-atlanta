@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.reactivex.Observable;
-import io.reactivex.functions.Function;
 
 /**
  * Created by faytx on 10/22/2016.
@@ -25,7 +24,7 @@ public class NotificationsRepo implements NotificationsDataSource {
     @NonNull private Map<String, Notification> cachedNotifications;
     @NonNull private NotificationsDataSource remoteSource;
 
-    private boolean mCacheIsDirty;
+    private boolean cacheIsDirty;
 
     public NotificationsRepo(@NonNull NotificationsDataSource remoteSource) {
         this.remoteSource = remoteSource;
@@ -40,12 +39,13 @@ public class NotificationsRepo implements NotificationsDataSource {
 
 	@Override
 	public Observable<List<Notification>> getNotifications() {
-		if(!cachedNotifications.isEmpty() && !mCacheIsDirty) {
-			return Observable.just(getCachedNotifications());
-		}
-		else {
-			return getNotificationsFromRemote();
-		}
+    	return Observable.defer(() -> {
+		    if(cachedNotifications.isEmpty() || cacheIsDirty) {
+			    return getNotificationsFromRemote();
+		    } else {
+			    return Observable.just(getCachedNotifications());
+		    }
+	    });
 	}
 
     private List<Notification> getCachedNotifications() {
@@ -57,7 +57,7 @@ public class NotificationsRepo implements NotificationsDataSource {
 
 	@Override
 	public Observable<List<Notification>> getFreshNotifications() {
-		return getNotificationsFromRemote();
+		return Observable.defer(this::getNotificationsFromRemote);
 	}
 
 	@Override
@@ -75,18 +75,15 @@ public class NotificationsRepo implements NotificationsDataSource {
 
     @Override
     public void reloadNotifications() {
-        mCacheIsDirty = true;
+        cacheIsDirty = true;
     }
 
     private Observable<List<Notification>> getNotificationsFromRemote() {
         return remoteSource.getNotifications()
-				.map(new Function<List<Notification>, List<Notification>>() {
-					@Override
-					public List<Notification> apply(@io.reactivex.annotations.NonNull List<Notification> notifications) throws Exception {
-						reloadCachedNotifications(notifications);
-						return notifications;
-					}
-				});
+		        .map(notifications -> {
+			        reloadCachedNotifications(notifications);
+			        return notifications;
+		        });
     }
 
     private void reloadCachedNotifications(@NonNull List<Notification> notifications) {
@@ -97,7 +94,7 @@ public class NotificationsRepo implements NotificationsDataSource {
             cacheNotification(notification);
         }
 
-        mCacheIsDirty = false;
+        cacheIsDirty = false;
     }
 
     private void cacheNotification(Notification notification) {
@@ -112,15 +109,7 @@ public class NotificationsRepo implements NotificationsDataSource {
 			long n2Time = DateHelper.getInstance()
 					.getTimeAsMilliseconds(n2.getTimeStamp(), DateHelper.TWITTER_TIME_STAMP_FORMAT);
 
-			if(n1Time < n2Time) {
-				return 1;
-			}
-			else if(n1Time > n2Time) {
-				return -1;
-			}
-			else {
-				return 0;
-			}
+			return Long.compare(n2Time, n1Time);
 		}
 	}
 }

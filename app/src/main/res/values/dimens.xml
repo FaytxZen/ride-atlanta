@@ -11,7 +11,7 @@
     <dimen name="notification_text_size">16sp</dimen>
     <dimen name="notification_subtitle_text_size">14sp</dimen>
 
-    <dimen name="train_title_text_size">16sp</dimen>
+    <dimen name="train_title_text_size">18sp</dimen>
     <dimen name="train_label_text_size">16sp</dimen>
     <dimen name="train_subtitle_text_size">14sp</dimen>
 </resources>

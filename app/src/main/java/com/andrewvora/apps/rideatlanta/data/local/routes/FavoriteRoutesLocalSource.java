@@ -7,23 +7,20 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
-import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
 import com.andrewvora.apps.rideatlanta.data.local.RideAtlantaDbHelper;
 import com.andrewvora.apps.rideatlanta.data.local.routes.FavoriteRoutesDbContract.FavoriteRoutesTable;
+import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
 
 /**
  * Created by faytx on 10/24/2016.
  * @author Andrew Vorakrajangthiti
  */
-
 public class FavoriteRoutesLocalSource implements FavoriteRoutesDataSource {
     private RideAtlantaDbHelper dbHelper;
 
@@ -33,12 +30,7 @@ public class FavoriteRoutesLocalSource implements FavoriteRoutesDataSource {
 
 	@Override
 	public Observable<List<FavoriteRoute>> getFavoriteRoutes() {
-		return Observable.defer(new Callable<ObservableSource<? extends List<FavoriteRoute>>>() {
-			@Override
-			public ObservableSource<? extends List<FavoriteRoute>> call() throws Exception {
-				return Observable.just(getFavoriteRoutesFromDatabase());
-			}
-		});
+		return Observable.defer(() -> Observable.just(getFavoriteRoutesFromDatabase()));
 	}
 
     private List<FavoriteRoute> getFavoriteRoutesFromDatabase() {
@@ -67,7 +59,7 @@ public class FavoriteRoutesLocalSource implements FavoriteRoutesDataSource {
 
 		return route != null ?
 				Observable.just(route) :
-				Observable.<FavoriteRoute>empty();
+				Observable.empty();
 	}
 
 	private FavoriteRoute getFavoriteRouteFromDatabase(@NonNull String routeId) {
@@ -104,6 +96,7 @@ public class FavoriteRoutesLocalSource implements FavoriteRoutesDataSource {
 		contentValues.put(FavoriteRoutesTable.COLUMN_NAME, route.getName());
 		contentValues.put(FavoriteRoutesTable.COLUMN_DESTINATION, route.getDestination());
 		contentValues.put(FavoriteRoutesTable.COLUMN_TIME_TIL_ARRIVAL, String.valueOf(Integer.MIN_VALUE));
+		contentValues.put(FavoriteRoutesTable.COLUMN_DIRECTION, route.getTravelDirection());
 
 		if(isNewRecord) {
 			final long id = db.insertWithOnConflict(FavoriteRoutesTable.TABLE_NAME,
@@ -177,6 +170,7 @@ public class FavoriteRoutesLocalSource implements FavoriteRoutesDataSource {
         int destinationIndex = cursor.getColumnIndex(FavoriteRoutesTable.COLUMN_DESTINATION);
         int nameIndex = cursor.getColumnIndex(FavoriteRoutesTable.COLUMN_NAME);
         int timeTilArrival = cursor.getColumnIndex(FavoriteRoutesTable.COLUMN_TIME_TIL_ARRIVAL);
+        int direction = cursor.getColumnIndex(FavoriteRoutesTable.COLUMN_DIRECTION);
 
         route.setId(cursor.getLong(idIndex));
         route.setRouteId(cursor.getString(routeIdIndex));
@@ -184,6 +178,7 @@ public class FavoriteRoutesLocalSource implements FavoriteRoutesDataSource {
         route.setDestination(cursor.getString(destinationIndex));
         route.setTimeUntilArrival(cursor.getString(timeTilArrival));
         route.setName(cursor.getString(nameIndex));
+        route.setDirection(cursor.getString(direction));
 
         return route;
     }

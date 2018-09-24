@@ -4,25 +4,23 @@ import com.andrewvora.apps.rideatlanta.BaseUnitTest;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 /**
  * Created by faytx on 4/2/2017.
  * @author Andrew Vorakrajangthiti
  */
 public class HomeAdapterTest extends BaseUnitTest {
     @Test
-    public void getItemViewType() throws Exception {
+    public void getItemViewType() {
 
     }
 
     @Test
-    public void getItemCount() throws Exception {
+    public void getItemCount() {
 
     }
 
     @Test
-    public void addListItem() throws Exception {
+    public void addListItem() {
 
     }
 

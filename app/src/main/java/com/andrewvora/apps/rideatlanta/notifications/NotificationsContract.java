@@ -20,5 +20,6 @@ public interface NotificationsContract {
 
     interface View extends BaseView<NotificationsContract.Presenter> {
         void onNotificationsLoaded(List<Notification> notificationList);
+        void showLoadingError();
     }
 }

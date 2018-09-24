@@ -67,4 +67,26 @@
         You haven\'t favorited any routes, yet
     </string>
     <string name="menu_feedback">Send App Feedback</string>
+    <string name="menu_sort">Sort</string>
+
+    <string name="direction_west">West</string>
+    <string name="direction_east">East</string>
+    <string name="direction_north">North</string>
+    <string name="direction_south">South</string>
+    <string name="direction_unknown">Unknown</string>
+
+    <string name="error_refresh_buses">Could not fetch bus info. Try again.</string>
+    <string name="error_load_notifications">Could not load notifications.</string>
+    <string name="error_could_not_favorite_bus">Could not update favorites.</string>
+    <string name="error_load_favorites">Could not load favorites.</string>
+    <string name="error_unfavorite">Could not remove from favorites.</string>
+    <string name="error_loading_trains">Could not fetch train info. Try again.</string>
+    <string name="error_could_not_favorite_train">Could not update favorites.</string>
+
+    <string name="label_destination">Next destination</string>
+    <string name="label_arrival_in">Arrives in</string>
+    <string name="label_status">Status</string>
+
+    <string name="bus_vehicle_id_template">Vehicle ID: %1$d</string>
+    <string name="train_arrival_time_template">\@ %1$s</string>
 </resources>

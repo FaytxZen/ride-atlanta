@@ -16,7 +16,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="8dp"
-        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:contentDescription="@null"/>
 
@@ -26,10 +25,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
         android:padding="4dp"
         tools:background="@color/md_red_600"
@@ -41,13 +38,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toEndOf="@+id/train_line_text_view"
-        android:layout_toRightOf="@+id/train_line_text_view"
         android:layout_toStartOf="@+id/train_favorite_button"
-        android:layout_toLeftOf="@id/train_favorite_button"
         android:layout_alignParentTop="true"
         android:layout_alignBaseline="@+id/train_line_text_view"
         android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
         android:gravity="start"
         tools:text="Hamilton E Holmes of Geeky Band Nerds Station"/>
 
@@ -67,8 +61,6 @@
         android:layout_below="@id/train_line_text_view"
         android:layout_alignBaseline="@+id/train_direction"
         android:layout_toEndOf="@+id/train_direction"
-        android:layout_toRightOf="@id/train_status_text_view"
         android:layout_marginStart="12dp"
-        android:layout_marginLeft="12dp"
         tools:text="5 minutes"/>
 </RelativeLayout>

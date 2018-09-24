@@ -11,10 +11,8 @@ import com.twitter.sdk.android.core.services.StatusesService;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
 
 /**
  * Created by faytx on 10/22/2016.
@@ -33,12 +31,7 @@ public class NotificationsRemoteSource implements NotificationsDataSource {
 
     @Override
     public Observable<List<Notification>> getNotifications() {
-        return Observable.defer(new Callable<ObservableSource<? extends List<Notification>>>() {
-			@Override
-			public ObservableSource<List<Notification>> call() throws Exception {
-				return Observable.just(getNotificationsFromClient());
-			}
-		});
+        return Observable.just(getNotificationsFromClient());
     }
 
     private List<Notification> getNotificationsFromClient() {

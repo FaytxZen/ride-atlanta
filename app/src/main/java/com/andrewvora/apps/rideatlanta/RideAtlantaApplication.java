@@ -2,9 +2,8 @@ package com.andrewvora.apps.rideatlanta;
 
 import android.app.Activity;
 import android.app.Application;
-import android.os.Bundle;
+import android.support.annotation.VisibleForTesting;
 
-import com.andrewvora.apps.rideatlanta.data.RoutePollingHelper;
 import com.andrewvora.apps.rideatlanta.di.components.DaggerAppComponent;
 import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.TwitterAuthConfig;
@@ -22,12 +21,13 @@ import io.fabric.sdk.android.Fabric;
  */
 public class RideAtlantaApplication extends Application implements HasActivityInjector {
 
-	public static final boolean USE_LOCAL = true;
+	@VisibleForTesting
+	public static boolean USE_LOCAL = false;
 
 	@Inject
 	DispatchingAndroidInjector<Activity> dispatchingActivityInjector;
 
-    @Override
+	@Override
     public void onCreate() {
         super.onCreate();
 

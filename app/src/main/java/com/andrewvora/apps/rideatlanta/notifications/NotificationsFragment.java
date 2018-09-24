@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.models.Notification;
@@ -20,6 +21,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 
 /**
  * Created by faytx on 10/22/2016.
@@ -35,6 +37,7 @@ public class NotificationsFragment extends Fragment implements NotificationsCont
 
     private NotificationsContract.Presenter presenter;
     private NotificationsAdapter notificationsAdapter;
+    private Unbinder unbinder;
 
     public static NotificationsFragment newInstance() {
         return new NotificationsFragment();
@@ -52,45 +55,63 @@ public class NotificationsFragment extends Fragment implements NotificationsCont
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_notifications, container, false);
-        ButterKnife.bind(this, view);
+        unbinder = ButterKnife.bind(this, view);
 
-        notificationsRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                if(presenter != null) {
-                    presenter.refreshNotifications();
-                }
-            }
-        });
+        notificationsRefreshLayout.setOnRefreshListener(() -> {
+			if(presenter != null) {
+				presenter.refreshNotifications();
+			}
+		});
 
         notificationsRecyclerView.setAdapter(notificationsAdapter);
         notificationsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-
         notificationsRecyclerView.addItemDecoration(new SimpleDividerItemDecoration(getActivity()));
 
         return view;
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-
+    public void onStart() {
+        super.onStart();
         if(presenter != null) {
             presenter.start();
         }
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        if(presenter != null) {
+            presenter.stop();
+        }
+    }
+
+	@Override
+	public void onDestroyView() {
+		super.onDestroyView();
+		unbinder.unbind();
+	}
+
+	@Override
     public void setPresenter(NotificationsContract.Presenter presenter) {
         this.presenter = presenter;
     }
 
     @Override
     public void onNotificationsLoaded(List<Notification> notificationList) {
+    	if (loadingView == null) {
+    		return;
+	    }
+
         loadingView.setVisibility(View.GONE);
         notificationsRefreshLayout.setRefreshing(false);
 
         notificationsAdapter.setNotifications(notificationList);
         notificationsAdapter.notifyDataSetChanged();
     }
+
+	@Override
+	public void showLoadingError() {
+		Toast.makeText(getActivity(), R.string.error_load_notifications, Toast.LENGTH_SHORT).show();
+	}
 }

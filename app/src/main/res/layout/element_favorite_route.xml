@@ -2,6 +2,7 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/favorite_route_row_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingStart="16dp"
@@ -15,7 +16,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
         android:padding="4dp"
         android:background="@drawable/shape_round_rect_orange"
@@ -24,13 +24,13 @@
 
     <TextView
         style="@style/RouteSubtitleTextStyle"
-        android:id="@+id/route_time_until_arrival"
-        android:layout_width="match_parent"
+        android:id="@+id/route_direction"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/route_name"
-        android:layout_toLeftOf="@+id/favorite_button"
-        android:layout_toStartOf="@+id/favorite_button"
-        tools:text="5 minutes"/>
+        android:layout_alignParentStart="true"
+        android:layout_marginEnd="8dp"
+        tools:text="Southwest"/>
 
     <TextView
         style="@style/RouteTitleTextStyle"
@@ -40,10 +40,18 @@
         android:padding="4dp"
         tools:text="Buckhead and Duckface"
         android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/route_name"
         android:layout_toEndOf="@+id/route_name"
-        android:layout_toStartOf="@+id/favorite_button"
-        android:layout_toLeftOf="@id/favorite_button"/>
+        android:layout_toStartOf="@+id/favorite_button"/>
+
+    <TextView
+        style="@style/RouteLabelTextStyle"
+        android:id="@+id/route_time_until_arrival"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/route_destination"
+        android:layout_toEndOf="@id/route_direction"
+        android:layout_alignBaseline="@id/route_direction"
+        tools:text="3 minutes early"/>
 
     <ImageView
         style="@style/FavoriteButtonStyle"
@@ -52,9 +60,8 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
         android:padding="8dp"
-        android:contentDescription=""
+        android:contentDescription="@null"
         android:ellipsize="end"/>
 
 </RelativeLayout>

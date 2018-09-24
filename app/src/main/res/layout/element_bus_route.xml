@@ -15,7 +15,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
         android:layout_marginBottom="8dp"
         android:gravity="center"
         tools:text="154"/>
@@ -26,9 +25,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/bus_route_text_view"
-        android:layout_toRightOf="@+id/bus_route_text_view"
         android:layout_toEndOf="@+id/bus_route_text_view"
-        android:layout_toLeftOf="@+id/bus_favorite_button"
         android:layout_toStartOf="@+id/bus_favorite_button"
         android:gravity="start"
         tools:text="Midtown Station" />
@@ -40,7 +37,6 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/bus_route_text_view"
         android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
         android:padding="4dp"
         tools:text="Southwest"/>
 
@@ -51,7 +47,6 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/bus_route_text_view"
         android:layout_toEndOf="@id/bus_direction_text_view"
-        android:layout_toRightOf="@id/bus_direction_text_view"
         tools:text="3 minutes early"/>
 
     <ImageView
@@ -60,7 +55,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="8dp"
-        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:contentDescription="@null"/>
 

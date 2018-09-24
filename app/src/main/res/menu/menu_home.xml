@@ -4,6 +4,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/menu_sort"
+        android:title="@string/menu_sort"
+        android:visible="false"
+        android:icon="@drawable/ic_sort_24dp"
+        app:showAsAction="ifRoom"/>
+
+    <item
         android:id="@+id/menu_breeze_balance"
         android:title="@string/menu_breeze_balance"
         app:showAsAction="never"/>

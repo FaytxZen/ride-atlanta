@@ -12,7 +12,6 @@ import com.andrewvora.apps.rideatlanta.data.contracts.RouteItemModel;
  * Created by faytx on 10/24/2016.
  * @author Andrew Vorakrajangthiti
  */
-
 public class FavoriteRoute extends BaseModel implements FavoriteRouteDataObject, RouteItemModel, Parcelable {
 
     private String routeId;
@@ -32,6 +31,7 @@ public class FavoriteRoute extends BaseModel implements FavoriteRouteDataObject,
         name = train.getLine();
         destination = train.getStation();
         timeTilArrival = train.getTimeTilArrival();
+        direction = train.getTravelDirection();
     }
 
     public FavoriteRoute(@NonNull Bus bus) {
@@ -40,6 +40,7 @@ public class FavoriteRoute extends BaseModel implements FavoriteRouteDataObject,
         name = bus.getName();
         destination = bus.getDestination();
         timeTilArrival = bus.getTimeTilArrival();
+        direction = bus.getTravelDirection();
     }
 
     @Override
@@ -109,11 +110,6 @@ public class FavoriteRoute extends BaseModel implements FavoriteRouteDataObject,
 
     public void setDirection(String direction) {
         this.direction = direction;
-    }
-
-    @Override
-    public String getFavoriteRouteKey() {
-        return isBus() ? getName() : getName() + " " + getDestination() + " " + getTravelDirection();
     }
 
     @Override

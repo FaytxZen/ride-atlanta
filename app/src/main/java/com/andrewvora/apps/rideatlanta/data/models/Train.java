@@ -9,13 +9,20 @@ import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRouteDataObject;
 import com.google.gson.annotations.SerializedName;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by faytx on 10/23/2016.
  * @author Andrew Vorakrajangthiti
  */
 public class Train extends BaseModel implements FavoriteRouteDataObject, Cloneable, Parcelable {
+
+	private static final String TRAIN_ARRIVAL_DATE_FORMAT = "M/dd/yyyy H:mm:ss a"; // 12/10/2017 12:58:44 AM
+	private static final String DISPLAYABLE_EVENT_TIME_12H = "H:mm a";
 
     private static final String RED_LINE = "RED";
     private static final String BLUE_LINE = "BLUE";
@@ -56,11 +63,7 @@ public class Train extends BaseModel implements FavoriteRouteDataObject, Cloneab
         return getStation();
     }
 
-    public String getEndDestination() {
-        return destination;
-    }
-
-    public void setDestination(String destination) {
+	public void setDestination(String destination) {
         this.destination = destination;
     }
 
@@ -137,11 +140,6 @@ public class Train extends BaseModel implements FavoriteRouteDataObject, Cloneab
     }
 
     @Override
-    public String getFavoriteRouteKey() {
-        return getName() + " " + getDestination();
-    }
-
-    @Override
     public String getType() {
         return FavoriteRouteDataObject.TYPE_TRAIN;
     }
@@ -166,7 +164,7 @@ public class Train extends BaseModel implements FavoriteRouteDataObject, Cloneab
         return getDirection();
     }
 
-    public static String getFormattedTimeTilArrival(@NonNull Context context, @NonNull String tta) {
+	public static String getFormattedTimeTilArrival(@NonNull Context context, @NonNull String tta) {
         final String unknownValue = String.valueOf(Integer.MIN_VALUE);
 
         if(tta.contains(unknownValue) || tta.isEmpty()) {
@@ -210,23 +208,17 @@ public class Train extends BaseModel implements FavoriteRouteDataObject, Cloneab
         return sb.toString();
     }
 
-    public Train getCopy() {
-        Train train = new Train();
-        train.setDestination(getDestination());
-        train.setDirection(getDirection());
-        train.setEventTime(getEventTime());
-        train.setLine(getLine());
-        train.setNextArrival(getNextArrival());
-        train.setStation(getStation());
-        train.setTrainId(getTrainId());
-        train.setWaitingSeconds(getWaitingSeconds());
-        train.setWaitingTime(getWaitingTime());
-        train.setFavorited(isFavorited());
-
-        return train;
+    public String getDisplayableEventTime() {
+    	final DateFormat df = new SimpleDateFormat(TRAIN_ARRIVAL_DATE_FORMAT, Locale.getDefault());
+    	try {
+    		final Date date = df.parse(eventTime);
+    		return new SimpleDateFormat(DISPLAYABLE_EVENT_TIME_12H, Locale.getDefault()).format(date);
+	    } catch (Exception e) {
+    		return "";
+	    }
     }
 
-    /*------------------------------------*
+	/*------------------------------------*
      * Generated Parcelable Code
      *------------------------------------*/
 	@Override

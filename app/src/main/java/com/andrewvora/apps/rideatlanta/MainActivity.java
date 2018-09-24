@@ -23,6 +23,7 @@ import com.andrewvora.apps.rideatlanta.breezebalance.BreezeBalanceActivity;
 import com.andrewvora.apps.rideatlanta.buses.BusRoutesContract;
 import com.andrewvora.apps.rideatlanta.buses.BusRoutesFragment;
 import com.andrewvora.apps.rideatlanta.buses.BusRoutesPresenter;
+import com.andrewvora.apps.rideatlanta.data.FavoritesHelper;
 import com.andrewvora.apps.rideatlanta.data.RoutePollingHelper;
 import com.andrewvora.apps.rideatlanta.data.SharedPrefsManager;
 import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
@@ -32,7 +33,6 @@ import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
 import com.andrewvora.apps.rideatlanta.di.DataModule;
 import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesContract;
 import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesFragment;
-import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesLoadingCache;
 import com.andrewvora.apps.rideatlanta.favoriteroutes.FavoriteRoutesPresenter;
 import com.andrewvora.apps.rideatlanta.home.HomeContract;
 import com.andrewvora.apps.rideatlanta.home.HomeFragment;
@@ -73,10 +73,10 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
     @Inject @Named(DataModule.NOTIFICATION_SOURCE)
     NotificationsDataSource notificationRepo;
 
-	@Inject
-	RoutePollingHelper pollingHelper;
+	@Inject RoutePollingHelper pollingHelper;
+	@Inject FavoritesHelper favoritesHelper;
 
-    private FavoriteRoutesLoadingCache favRouteDataManager;
+	private MenuItem sortMenuItem;
     private SharedPrefsManager prefManager;
 
     @Override
@@ -90,23 +90,15 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
 
         setSupportActionBar(toolbar);
 
-        favRouteDataManager = (FavoriteRoutesLoadingCache)
-                getFragmentManager().findFragmentByTag(FavoriteRoutesLoadingCache.TAG);
-
-        if(favRouteDataManager == null) {
-            favRouteDataManager = FavoriteRoutesLoadingCache.createInstance();
-        }
-
         prefManager = new SharedPrefsManager(getApplication());
-        applySelectedTab(prefManager.getSelectedTab());
+
+        final int tabId = prefManager.getSelectedTab() == 0 ? R.id.tab_home : prefManager.getSelectedTab();
+        applySelectedTab(tabId);
 
         bottomBar.setSelectedItemId(prefManager.getSelectedTab());
-        bottomBar.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                applySelectedTab(item.getItemId());
-                return true;
-            }
+        bottomBar.setOnNavigationItemSelectedListener(item -> {
+            applySelectedTab(item.getItemId());
+            return true;
         });
     }
 
@@ -134,11 +126,16 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
         }
 
         prefManager.setSelectedTab(tabId);
+        updateMenu();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_home, menu);
+
+        sortMenuItem = menu.findItem(R.id.menu_sort);
+        updateMenu();
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -180,8 +177,8 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
                 fragment,
                 busRepo,
                 favsRepo,
-                favRouteDataManager,
-				pollingHelper);
+				pollingHelper,
+		        favoritesHelper);
         fragment.setPresenter(presenter);
 
         startFragment(R.id.fragment_container, fragment, BusRoutesFragment.TAG, false);
@@ -202,8 +199,8 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
                 fragment,
                 trainRepo,
                 favsRepo,
-                favRouteDataManager,
-				pollingHelper);
+				pollingHelper,
+		        favoritesHelper);
 
         fragment.setPresenter(presenter);
 
@@ -228,7 +225,8 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
                 notificationRepo,
                 busRepo,
                 trainRepo,
-				pollingHelper);
+				pollingHelper,
+		        favoritesHelper);
         fragment.setPresenter(presenter);
 
         startFragment(R.id.fragment_container, fragment, HomeFragment.TAG, false);
@@ -249,7 +247,8 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
                 favsRepo,
                 busRepo,
                 trainRepo,
-				pollingHelper);
+				pollingHelper,
+		        favoritesHelper);
         fragment.setPresenter(presenter);
 
         startFragment(R.id.fragment_container, fragment, FavoriteRoutesFragment.TAG, false);
@@ -298,8 +297,10 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
         toolbarIconView.setImageDrawable(ContextCompat.getDrawable(this, resId));
     }
 
-    private void startFragment(@IdRes int parentId, @NonNull Fragment fragment,
-                               @Nullable String tag, boolean addToBackStack)
+    private void startFragment(@IdRes int parentId,
+                               @NonNull Fragment fragment,
+                               @Nullable String tag,
+                               boolean addToBackStack)
     {
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         if(addToBackStack) {
@@ -307,11 +308,17 @@ public class MainActivity extends AppCompatActivity implements HasFragmentInject
         }
         ft.replace(parentId, fragment, tag);
 
-        if(getFragmentManager().findFragmentByTag(FavoriteRoutesLoadingCache.TAG) == null) {
-            ft.add(favRouteDataManager, FavoriteRoutesLoadingCache.TAG);
-        }
-
         ft.commit();
+    }
+
+    private void updateMenu() {
+        if (sortMenuItem != null && bottomBar != null) {
+			// TODO: enable this logic after sort is completed
+            //final boolean showSortOption =
+            //        bottomBar.getSelectedItemId() == R.id.tab_trains ||
+            //        bottomBar.getSelectedItemId() == R.id.tab_buses;
+            //sortMenuItem.setVisible(showSortOption);
+        }
     }
 
 	@Override

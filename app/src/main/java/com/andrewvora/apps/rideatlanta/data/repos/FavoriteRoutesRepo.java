@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.reactivex.Observable;
-import io.reactivex.functions.Function;
 
 /**
  * Created by faytx on 10/23/2016.
@@ -22,7 +21,6 @@ public class FavoriteRoutesRepo implements FavoriteRoutesDataSource {
 
     @NonNull private FavoriteRoutesDataSource remoteSource;
     @NonNull private FavoriteRoutesDataSource localSource;
-
     @NonNull private Map<String, FavoriteRoute> cachedRoutes;
 
     private boolean cacheIsDirty;
@@ -43,14 +41,9 @@ public class FavoriteRoutesRepo implements FavoriteRoutesDataSource {
             return Observable.just(routes);
         }
         else {
-			return localSource.getFavoriteRoutes().map(new Function<List<FavoriteRoute>, List<FavoriteRoute>>() {
-				@Override
-				public List<FavoriteRoute> apply(@io.reactivex.annotations.NonNull List<FavoriteRoute> routes)
-						throws Exception
-				{
-					reloadCachedRoutes(routes);
-					return routes;
-				}
+			return localSource.getFavoriteRoutes().map(routes -> {
+				reloadCachedRoutes(routes);
+				return routes;
 			});
         }
     }
@@ -64,12 +57,9 @@ public class FavoriteRoutesRepo implements FavoriteRoutesDataSource {
 		}
 		else {
 			return localSource.getFavoriteRoute(routeId)
-					.map(new Function<FavoriteRoute, FavoriteRoute>() {
-						@Override
-						public FavoriteRoute apply(@io.reactivex.annotations.NonNull FavoriteRoute favoriteRoute) throws Exception {
-							cacheRoute(favoriteRoute);
-							return null;
-						}
+					.map(favoriteRoute -> {
+						cacheRoute(favoriteRoute);
+						return null;
 					});
 		}
 	}
@@ -129,6 +119,6 @@ public class FavoriteRoutesRepo implements FavoriteRoutesDataSource {
     }
 
     private String getMapKeyFor(@NonNull FavoriteRouteDataObject route) {
-        return route.getRouteId();
+        return route.getRouteId() + " " + route.getDestination() + " " + route.getTravelDirection();
     }
 }

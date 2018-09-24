@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
+import io.reactivex.functions.Function;
 
 /**
  * Created by faytx on 10/22/2016.
@@ -34,7 +36,7 @@ public class TrainsLocalSource implements TrainsDataSource {
 
     @Override
     public Observable<List<Train>> getTrains() {
-        return Observable.just(getTrainsFromDatabase());
+        return Observable.defer(() -> Observable.just(getTrainsFromDatabase()));
     }
 
     @Override
@@ -43,7 +45,7 @@ public class TrainsLocalSource implements TrainsDataSource {
     }
 
     private List<Train> getTrainsFromDatabase() {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        final SQLiteDatabase db = dbHelper.getReadableDatabase();
         List<Train> trainList = new ArrayList<>();
 
         try {
@@ -63,63 +65,26 @@ public class TrainsLocalSource implements TrainsDataSource {
     }
 
 	@Override
-	public Observable<List<Train>> getTrains(@NonNull Long... trainIds) {
-		return Observable.just(getTrainsFromDatabase(trainIds));
-	}
-
-    private List<Train> getTrainsFromDatabase(@NonNull Long... trainIds) {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-		List<Train> trainList = new ArrayList<>();
-
-        try {
-            String[] columns = TrainsTable.getColumns();
-            String[] selectionArgs = new String[trainIds.length];
-            String selection = String.format("%s IN (%s)",
-                    TrainsTable.COLUMN_TRAIN_ID,
-                    getIdsAsSqlString(selectionArgs));
-
-            for(int i = 0; i < selectionArgs.length; i++) {
-                selectionArgs[i] = trainIds[i].toString();
-            }
-
-            Cursor trainsCursor = db.query(TrainsTable.TABLE_NAME,
-                    columns, selection, selectionArgs, null, null, null);
-            trainList = getTrainsFrom(trainsCursor);
-            trainsCursor.close();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return trainList;
-    }
-
-    private String getIdsAsSqlString(@NonNull String... trainIds) {
-        StringBuilder sb = new StringBuilder();
-
-        for(int i = 0; i < trainIds.length; i++) {
-            String toAppend = i != trainIds.length - 1 ?
-                    trainIds[i] + "," :
-                    trainIds[i];
-
-            sb.append(toAppend);
-        }
-
-        return sb.toString();
-    }
-
-	@Override
 	public Observable<List<Train>> getTrains(@NonNull String station, @NonNull String line) {
 		return Observable.empty();
 	}
 
-	@Override
-	public Observable<Train> getTrain(@NonNull Train train) {
-		return Observable.just(getTrainFromDatabase(train));
+    @Override
+    public Observable<List<Train>> getTrains(@NonNull final String station) {
+        return Observable.defer(() -> Observable.just(getTrainsFromDatabase())
+                .flatMap((Function<List<Train>, ObservableSource<Train>>) Observable::fromIterable)
+                .filter(train -> station.equals(train.getStation()))
+                .toList()
+                .toObservable());
+    }
+
+    @Override
+	public Observable<Train> getTrain(@NonNull final Train train) {
+		return Observable.defer(() -> Observable.just(getTrainFromDatabase(train)));
 	}
 
     private Train getTrainFromDatabase(@NonNull Train train) {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        final SQLiteDatabase db = dbHelper.getReadableDatabase();
 
         try {
             String[] columns = TrainsTable.getColumns();
@@ -148,11 +113,11 @@ public class TrainsLocalSource implements TrainsDataSource {
 
 	@Override
 	public Observable<Long> deleteAllTrains() {
-		return Observable.just(deleteAllTrainsFromDatabase());
+		return Observable.defer(() -> Observable.just(deleteAllTrainsFromDatabase()));
 	}
 
     private long deleteAllTrainsFromDatabase() {
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        final SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         try {
             return db.delete(TrainsTable.TABLE_NAME, "1=1", null);
@@ -165,8 +130,8 @@ public class TrainsLocalSource implements TrainsDataSource {
     }
 
 	@Override
-	public Observable<Long> saveTrain(@NonNull Train route) {
-		return Observable.just(saveTrainInDatabase(route));
+	public Observable<Long> saveTrain(@NonNull final Train route) {
+		return Observable.defer(() -> Observable.just(saveTrainInDatabase(route)));
 	}
 
 	private long saveTrainInDatabase(@NonNull Train route) {

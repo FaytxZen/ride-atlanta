@@ -1,34 +1,28 @@
 package com.andrewvora.apps.rideatlanta.home;
 
-import android.os.AsyncTask;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 
 import com.andrewvora.apps.rideatlanta.R;
+import com.andrewvora.apps.rideatlanta.data.FavoritesHelper;
 import com.andrewvora.apps.rideatlanta.data.RoutePollingHelper;
-import com.andrewvora.apps.rideatlanta.data.contracts.AlertItemModel;
 import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
+import com.andrewvora.apps.rideatlanta.data.contracts.HomeItemModel;
 import com.andrewvora.apps.rideatlanta.data.contracts.InfoItemModel;
 import com.andrewvora.apps.rideatlanta.data.contracts.NotificationsDataSource;
-import com.andrewvora.apps.rideatlanta.data.contracts.RouteItemModel;
 import com.andrewvora.apps.rideatlanta.data.contracts.TrainsDataSource;
-import com.andrewvora.apps.rideatlanta.data.models.Bus;
 import com.andrewvora.apps.rideatlanta.data.models.FavoriteRoute;
 import com.andrewvora.apps.rideatlanta.data.models.InfoAlert;
 import com.andrewvora.apps.rideatlanta.data.models.Notification;
-import com.andrewvora.apps.rideatlanta.data.models.Train;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.BiFunction;
 import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 
@@ -47,13 +41,17 @@ public class HomePresenter implements HomeContract.Presenter {
     @NonNull private TrainsDataSource trainRepo;
 	@NonNull private RoutePollingHelper pollingHelper;
 	@NonNull private CompositeDisposable disposables;
+	@NonNull private FavoritesHelper favoritesHelper;
+
+	private boolean initialized;
 
     public HomePresenter(@NonNull HomeContract.View view,
 						 @NonNull FavoriteRoutesDataSource favRoutesRepo,
 						 @NonNull NotificationsDataSource notificationRepo,
 						 @NonNull BusesDataSource busRepo,
 						 @NonNull TrainsDataSource trainRepo,
-						 @NonNull RoutePollingHelper pollingHelper)
+						 @NonNull RoutePollingHelper pollingHelper,
+                         @NonNull FavoritesHelper favoritesHelper)
     {
         this.view = view;
         this.favsRepo = favRoutesRepo;
@@ -62,241 +60,73 @@ public class HomePresenter implements HomeContract.Presenter {
         this.trainRepo = trainRepo;
 		this.disposables = new CompositeDisposable();
 		this.pollingHelper = pollingHelper;
+		this.favoritesHelper = favoritesHelper;
     }
 
     @Override
-    public void onSaveState(Bundle outState) { }
-
-    @Override
-    public void onRestoreState(Bundle savedState) { }
-
-    @Override
     public void start() {
-        loadInfoItems();
-        loadAlerts();
-        loadFavoriteRoutes();
+    	if (!initialized) {
+    		view.showLoadingIndicator();
+	    }
 
-		startPolling();
+		loadHomeItems();
     }
 
     @Override
     public void stop() {
+    	view.hideLoadingIndicator();
 		disposables.dispose();
 		disposables.clear();
     }
 
-    @Override
-    public void loadAlerts() {
-        final boolean hasNoCachedData = !notificationRepo.hasCachedData();
+	@Override
+	public void loadHomeItems() {
+    	// load notifications
+		notificationRepo.reloadNotifications();
+		final Observable<List<Notification>> notificationStream = notificationRepo.getNotifications();
 
-        if(hasNoCachedData) {
-            notificationRepo.reloadNotifications();
-        }
+		// load routes
+		favsRepo.reloadRoutes();
+		final Observable<List<FavoriteRoute>> routesStream = favsRepo.getFavoriteRoutes();
 
-        disposables.add(notificationRepo.getNotifications()
-			.subscribeOn(Schedulers.io())
-			.observeOn(AndroidSchedulers.mainThread())
-			.subscribeWith(new DisposableObserver<List<Notification>>() {
-				@Override
-				public void onNext(@io.reactivex.annotations.NonNull List<Notification> notifications) {
-					List<AlertItemModel> alertItems = new ArrayList<>();
-					for(int i = 0; i < MAX_NOTIFICATIONS && i < notifications.size(); i++) {
-						alertItems.add(notifications.get(i));
-					}
+		// load info alerts
+		final InfoAlert seeAndSayInfoItem = new InfoAlert();
+		final String infoText = view.getViewContext().getString(R.string.text_see_and_say);
+		seeAndSayInfoItem.setInfoText(infoText);
 
-					view.displayAlerts(alertItems);
-				}
+		final List<InfoItemModel> infoItemModels = new ArrayList<>();
+		infoItemModels.add(seeAndSayInfoItem);
+		final Observable<List<InfoItemModel>> infoAlertStream = Observable.just(infoItemModels);
 
-				@Override
-				public void onError(@io.reactivex.annotations.NonNull Throwable e) { }
+		disposables.add(Observable.zip(notificationStream, routesStream, infoAlertStream,
+				(notifications, favoriteRoutes, infoItems) -> {
+					initialized = true;
 
-				@Override
-				public void onComplete() { }
-			}));
-    }
+					final List<HomeItemModel> itemModels = new ArrayList<>();
+					itemModels.addAll(notifications.subList(0, MAX_NOTIFICATIONS));
+					itemModels.addAll(favoriteRoutes);
+					itemModels.addAll(infoItems);
+					return itemModels;
+				})
+		.subscribeOn(Schedulers.io())
+		.observeOn(AndroidSchedulers.mainThread())
+		.subscribeWith(new DisposableObserver<List<HomeItemModel>>() {
+			@Override
+			public void onNext(List<HomeItemModel> homeItemModels) {
+				view.hideLoadingIndicator();
+				view.displayItems(homeItemModels);
+				startPolling();
+				refreshRouteInformationIfCached();
+			}
 
-    @Override
-    public void loadInfoItems() {
-        // create item for See & Say
-        InfoAlert seeAndSayInfoItem = new InfoAlert();
-        String infoText = view.getViewContext().getString(R.string.text_see_and_say);
-        seeAndSayInfoItem.setInfoText(infoText);
-
-        List<InfoItemModel> infoItemModels = new ArrayList<>();
-        infoItemModels.add(seeAndSayInfoItem);
-
-        view.displayInfoItems(infoItemModels);
-    }
-
-    @Override
-    public void loadFavoriteRoutes() {
-        favsRepo.reloadRoutes();
-        favsRepo.getFavoriteRoutes()
-			.subscribeOn(Schedulers.io())
-			.observeOn(AndroidSchedulers.mainThread())
-			.subscribeWith(new DisposableObserver<List<FavoriteRoute>>() {
-				@Override
-				public void onNext(@io.reactivex.annotations.NonNull List<FavoriteRoute> routes) {
-					List<RouteItemModel> listToPassOn = new ArrayList<>();
-					listToPassOn.addAll(routes);
-
-					view.displayRouteItems(listToPassOn);
-
-					refreshRouteInformationIfCached();
-				}
-
-				@Override
-				public void onError(@io.reactivex.annotations.NonNull Throwable e) { }
-
-				@Override
-				public void onComplete() { }
-			});
-    }
-
-	private void refreshRouteInformationIfCached() {
-		if(busRepo.hasCachedData() || trainRepo.hasCachedData()) {
-			refreshRouteInformation();
-		}
+			@Override public void onError(Throwable e) {
+				view.hideLoadingIndicator();
+			}
+			@Override public void onComplete() {
+				view.hideLoadingIndicator();
+			}
+		}));
 	}
-
-    @Override
-    public void refreshRouteInformation() {
-        favsRepo.getFavoriteRoutes()
-			.subscribeOn(Schedulers.io())
-			.observeOn(AndroidSchedulers.mainThread())
-			.subscribeWith(new DisposableObserver<List<FavoriteRoute>>() {
-				@Override
-				public void onNext(@io.reactivex.annotations.NonNull List<FavoriteRoute> routes) {
-					updateRouteInformation(routes);
-				}
-
-				@Override
-				public void onError(@io.reactivex.annotations.NonNull Throwable e) { }
-
-				@Override
-				public void onComplete() { }
-			});
-    }
-
-    private void updateRouteInformation(@NonNull final List<FavoriteRoute> routes) {
-        refreshBusInformation(routes);
-        refreshTrainInformation(routes);
-    }
-
-    private void refreshBusInformation(@NonNull final List<FavoriteRoute> routes) {
-        final Disposable disposable = busRepo.getBuses()
-			.subscribeOn(Schedulers.io())
-			.observeOn(AndroidSchedulers.mainThread())
-			.subscribeWith(new DisposableObserver<List<Bus>>() {
-				@Override
-				public void onNext(@io.reactivex.annotations.NonNull List<Bus> buses) {
-					Map<String, Bus> busMap = new HashMap<>();
-
-					for (Bus bus : buses) {
-						busMap.put(bus.getFavoriteRouteKey(), bus);
-					}
-
-					for(FavoriteRoute route : routes) {
-						if(route.isBus() && busMap.containsKey(route.getFavoriteRouteKey())) {
-							Bus bus = busMap.get(route.getFavoriteRouteKey());
-
-							route.setName(bus.getName());
-							route.setDestination(bus.getDestination());
-							route.setTimeUntilArrival(bus.getTimeTilArrival());
-
-							updateRouteOnView(route);
-						}
-					}
-				}
-
-				@Override
-				public void onError(@io.reactivex.annotations.NonNull Throwable e) {
-
-				}
-
-				@Override
-				public void onComplete() {
-
-				}
-			});
-
-		disposables.add(disposable);
-    }
-
-    private void refreshTrainInformation(@NonNull final List<FavoriteRoute> routes) {
-        final Disposable disposable = trainRepo.getTrains()
-			.subscribeOn(Schedulers.io())
-			.observeOn(AndroidSchedulers.mainThread())
-			.subscribeWith(new DisposableObserver<List<Train>>() {
-				@Override
-				public void onNext(@io.reactivex.annotations.NonNull List<Train> trains) {
-					Map<String, List<Train>> trainMap = new HashMap<>();
-
-					for(Train train : trains) {
-						String key = train.getFavoriteRouteKey();
-
-						if(trainMap.containsKey(key)) {
-							trainMap.get(key).add(train);
-						}
-						else {
-							List<Train> matching = new ArrayList<>();
-							matching.add(train);
-
-							trainMap.put(key, matching);
-						}
-					}
-
-					for(FavoriteRoute route : routes) {
-						if(!route.isBus() && trainMap.containsKey(route.getFavoriteRouteKey())) {
-							List<Train> list = trainMap.get(route.getFavoriteRouteKey());
-							String arrivalTime = Train.combineArrivalTimes(list);
-
-							route.setTimeUntilArrival(arrivalTime);
-
-							updateRouteOnView(route);
-						}
-					}
-				}
-
-				@Override
-				public void onError(@io.reactivex.annotations.NonNull Throwable e) {
-
-				}
-
-				@Override
-				public void onComplete() {
-
-				}
-			});
-
-		disposables.add(disposable);
-    }
-
-    private void updateRouteOnView(@NonNull FavoriteRoute favoriteRoute) {
-        List<RouteItemModel> routeItemModels = new ArrayList<>();
-        routeItemModels.add(favoriteRoute);
-
-        view.displayRouteItems(routeItemModels);
-
-        // only buses will change their names
-        if(favoriteRoute.isBus()) {
-            updateRouteOnDatabase(favoriteRoute);
-        }
-    }
-
-    private void updateRouteOnDatabase(@NonNull final FavoriteRoute favoriteRoute) {
-        // make sure this doesn't get marked as a new record
-        if(favoriteRoute.getId() == null) {
-            favoriteRoute.setId(1L);
-        }
-
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                favsRepo.saveRoute(favoriteRoute);
-            }
-        });
-    }
 
 	@Override
 	public void startPolling() {
@@ -307,14 +137,7 @@ public class HomePresenter implements HomeContract.Presenter {
 	private void startRoutePolling() {
 		disposables.add(pollingHelper.getBusStream()
 				.delay(15, TimeUnit.SECONDS)
-				.zipWith(pollingHelper.getTrainStream(), new BiFunction<Integer, Integer, Integer>() {
-					@Override
-					public Integer apply(@io.reactivex.annotations.NonNull Integer integer,
-										 @io.reactivex.annotations.NonNull Integer integer2) throws Exception
-					{
-						return integer + integer2;
-					}
-				})
+				.zipWith(pollingHelper.getTrainStream(), (integer, integer2) -> integer + integer2)
 				.subscribeOn(Schedulers.io())
 				.observeOn(AndroidSchedulers.mainThread())
 				.subscribeWith(new DisposableObserver<Integer>() {
@@ -324,7 +147,9 @@ public class HomePresenter implements HomeContract.Presenter {
 					}
 
 					@Override
-					public void onError(@io.reactivex.annotations.NonNull Throwable e) { }
+					public void onError(@io.reactivex.annotations.NonNull Throwable e) {
+						e.printStackTrace();
+					}
 
 					@Override
 					public void onComplete() {
@@ -341,7 +166,7 @@ public class HomePresenter implements HomeContract.Presenter {
 				.subscribeWith(new DisposableObserver<Integer>() {
 					@Override
 					public void onNext(@io.reactivex.annotations.NonNull Integer num) {
-
+						// TODO: update notifications
 					}
 
 					@Override
@@ -351,4 +176,93 @@ public class HomePresenter implements HomeContract.Presenter {
 					public void onComplete() { }
 				}));
 	}
+
+	private void refreshRouteInformationIfCached() {
+		refreshRouteInformation();
+	}
+
+    @Override
+    public void refreshRouteInformation() {
+        disposables.add(favsRepo.getFavoriteRoutes()
+			.subscribeOn(Schedulers.io())
+			.observeOn(AndroidSchedulers.mainThread())
+			.subscribeWith(new DisposableObserver<List<FavoriteRoute>>() {
+				@Override
+				public void onNext(@io.reactivex.annotations.NonNull List<FavoriteRoute> routes) {
+					updateRouteInformation(routes);
+				}
+
+				@Override
+				public void onError(@io.reactivex.annotations.NonNull Throwable e) { }
+
+				@Override
+				public void onComplete() { }
+			}));
+    }
+
+    private void updateRouteInformation(@NonNull final List<FavoriteRoute> routes) {
+        refreshBusInformation(routes);
+        refreshTrainInformation(routes);
+    }
+
+    private void refreshBusInformation(@NonNull final List<FavoriteRoute> routes) {
+        final Disposable disposable = Observable.zip(busRepo.getBuses(), favsRepo.getFavoriteRoutes(),
+	        (buses, favorites) -> {
+        	    favoritesHelper.applyBusesToFavorites(buses, favorites);
+                return favorites;
+	        })
+	        .flatMap((Observable::fromIterable))
+	        .toList()
+	        .toObservable()
+			.subscribeOn(Schedulers.io())
+			.observeOn(AndroidSchedulers.mainThread())
+			.subscribeWith(new DisposableObserver<List<FavoriteRoute>>() {
+				@Override
+				public void onNext(@io.reactivex.annotations.NonNull List<FavoriteRoute> buses) {
+					for(FavoriteRoute route : routes) {
+						if(route.isBus()) {
+							updateRouteOnView(route);
+						}
+					}
+				}
+
+				@Override public void onError(@io.reactivex.annotations.NonNull Throwable e) { }
+				@Override public void onComplete() { }
+			});
+
+		disposables.add(disposable);
+    }
+
+    private void refreshTrainInformation(@NonNull final List<FavoriteRoute> routes) {
+        final Disposable disposable = Observable.zip(trainRepo.getTrains(), favsRepo.getFavoriteRoutes(),
+	        (trains, favoriteRoutes) -> {
+        	    favoritesHelper.applyTrainsToFavorites(trains, favoriteRoutes);
+        	    return favoriteRoutes;
+	        })
+			.subscribeOn(Schedulers.io())
+			.observeOn(AndroidSchedulers.mainThread())
+			.subscribeWith(new DisposableObserver<List<FavoriteRoute>>() {
+				@Override
+				public void onNext(@io.reactivex.annotations.NonNull List<FavoriteRoute> trains) {
+					for(FavoriteRoute route : routes) {
+						if(!route.isBus()) {
+							updateRouteOnView(route);
+						}
+					}
+				}
+
+				@Override public void onError(@io.reactivex.annotations.NonNull Throwable e) { }
+				@Override public void onComplete() { }
+			});
+
+		disposables.add(disposable);
+    }
+
+    private void updateRouteOnView(@NonNull FavoriteRoute favoriteRoute) {
+        List<HomeItemModel> itemModels = new ArrayList<>();
+        itemModels.add(favoriteRoute);
+
+        view.updateItems(itemModels);
+        view.hideLoadingIndicator();
+    }
 }

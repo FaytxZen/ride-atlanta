@@ -2,7 +2,6 @@ package com.andrewvora.apps.rideatlanta.di;
 
 import android.app.Application;
 
-import com.andrewvora.apps.rideatlanta.R;
 import com.andrewvora.apps.rideatlanta.data.RoutePollingHelper;
 import com.andrewvora.apps.rideatlanta.data.contracts.BusesDataSource;
 import com.andrewvora.apps.rideatlanta.data.contracts.FavoriteRoutesDataSource;
@@ -54,8 +53,6 @@ public class DataModule {
 
 	private static final String NOTIFICATION_REMOTE_SOURCE = "notification_remote";
 
-	private static final boolean USE_LOCAL = true;
-
 	@Provides
 	@Singleton
 	RoutePollingHelper providesPollingHelper(@Named(TRAIN_SOURCE) TrainsDataSource trainSource,
@@ -68,19 +65,17 @@ public class DataModule {
     @Provides
     @Singleton
     @Named(TRAIN_SOURCE)
-    TrainsDataSource providesTrainSource(@Named(TRAIN_REMOTE_SOURCE) TrainsDataSource remote,
-                                         @Named(TRAIN_LOCAL_SOURCE) TrainsDataSource local)
+    TrainsDataSource providesTrainSource(@Named(TRAIN_REMOTE_SOURCE) TrainsDataSource remote)
     {
-        return new TrainsRepo(remote, local);
+        return new TrainsRepo(remote);
     }
 
     @Provides
     @Singleton
     @Named(BUS_SOURCE)
-    BusesDataSource providesBusSource(@Named(BUS_REMOTE_SOURCE) BusesDataSource remote,
-                                      @Named(BUS_LOCAL_SOURCE) BusesDataSource local)
+    BusesDataSource providesBusSource(@Named(BUS_REMOTE_SOURCE) BusesDataSource remote)
 	{
-        return new BusesRepo(remote, local);
+        return new BusesRepo(remote);
     }
 
     @Provides

@@ -60,17 +60,16 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        if(viewType == HomeItemModel.VIEW_TYPE_ALERT_ITEM) {
-            View alertView = getLayoutFor(parent, R.layout.element_home_alert_item);
-            return new AlertViewHolder(alertView);
-        }
-        else if(viewType == HomeItemModel.VIEW_TYPE_INFO_ITEM) {
-            View infoView = getLayoutFor(parent, R.layout.element_home_info_item);
-            return new InfoViewHolder(infoView);
-        }
-        else if(viewType == HomeItemModel.VIEW_TYPE_ROUTE_ITEM) {
-            View homeView = getLayoutFor(parent, R.layout.element_home_route_item);
-            return new RouteViewHolder(homeView);
+        switch (viewType) {
+            case HomeItemModel.VIEW_TYPE_ALERT_ITEM:
+                View alertView = getLayoutFor(parent, R.layout.element_home_alert_item);
+                return new AlertViewHolder(alertView);
+            case HomeItemModel.VIEW_TYPE_INFO_ITEM:
+                View infoView = getLayoutFor(parent, R.layout.element_home_info_item);
+                return new InfoViewHolder(infoView);
+            case HomeItemModel.VIEW_TYPE_ROUTE_ITEM:
+                View homeView = getLayoutFor(parent, R.layout.element_home_route_item);
+                return new RouteViewHolder(homeView);
         }
 
         String exceptionMsgTemplate = "Invalid viewType. Implement an interface from %s. " +
@@ -85,11 +84,9 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if(holder instanceof InfoViewHolder) {
             onBindInfoViewHolder((InfoViewHolder) holder, position);
-        }
-        else if(holder instanceof AlertViewHolder) {
+        } else if(holder instanceof AlertViewHolder) {
             onBindAlertViewHolder((AlertViewHolder) holder, position);
-        }
-        else if(holder instanceof RouteViewHolder) {
+        } else if(holder instanceof RouteViewHolder) {
             onBindRouteViewHolder((RouteViewHolder) holder, position);
         }
     }
@@ -102,6 +99,15 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public int getItemCount() {
         return itemList.size();
+    }
+
+    void setItems(List<HomeItemModel> items) {
+        this.itemList = items;
+
+        itemMap.clear();
+        for (HomeItemModel item : items) {
+        	itemMap.put(item.getIdentifier(), item);
+        }
     }
 
     int addListItem(@NonNull HomeItemModel model) {
@@ -123,37 +129,11 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             // if negative, it means we're updating
             // MIN_VALUE means the item was not found
             return (position + 1) * -1;
-        }
-        else {
-            // determine where to insert
-            int indexToInsertAt = determineIndexToInsert(model);
+        } else {
             itemMap.put(model.getIdentifier(), model);
-            itemList.add(indexToInsertAt, model);
+            itemList.add(model);
 
-            return indexToInsertAt;
-        }
-    }
-
-    private int determineIndexToInsert(@NonNull HomeItemModel model) {
-        if(model.getViewType() == HomeItemModel.VIEW_TYPE_ALERT_ITEM) {
-
-            for(int i = 0; i < itemList.size(); i++) {
-                HomeItemModel homeItem = itemList.get(i);
-                final boolean isNotRoute = homeItem.getViewType() !=
-                        HomeItemModel.VIEW_TYPE_ROUTE_ITEM;
-
-                if(isNotRoute) {
-                    return i;
-                }
-            }
-
-            return 0;
-        }
-        else if(model.getViewType() == HomeItemModel.VIEW_TYPE_INFO_ITEM) {
             return getItemCount();
-        }
-        else {
-            return 0;
         }
     }
 
@@ -192,26 +172,25 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         String destination = WordUtils.capitalizeWords(routeItemModel.getDestination());
         holder.destinationTextView.setText(destination);
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				final HomeItemModel model = itemList.get(holder.getAdapterPosition());
-				if (model instanceof FavoriteRoute) {
-					listener.openRouteInfo((FavoriteRoute) model);
-				}
-			}
-		});
+        holder.itemView.setOnClickListener(view -> {
+	        final HomeItemModel model = itemList.get(holder.getAdapterPosition());
+	        if (model instanceof FavoriteRoute) {
+		        listener.openRouteInfo((FavoriteRoute) model);
+	        }
+        });
+
+        setTimeTilArrivalLabel(holder.timeLabelView, routeItemModel.getTimeUntilArrival(), routeItemModel.isBus());
 
         if(routeItemModel.isBus()) {
             int adherence = Bus.parseAdherence(routeItemModel.getTimeUntilArrival());
             String arrivalTime = Bus.getFormattedAdherence(context, adherence);
 
             holder.timeTilArrivalTextView.setText(arrivalTime);
+	        holder.directionTextView.setText(routeItemModel.getTravelDirection());
 
             holder.nameTextView.setText(routeItemModel.getName());
             holder.nameTextView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_bus_white_24dp, 0, 0, 0);
-        }
-        else {
+        } else {
             holder.nameTextView.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_train_white_24dp, 0, 0, 0);
 
             int color = ContextCompat.getColor(context, Train.getColorRes(routeItemModel.getName()));
@@ -220,32 +199,44 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             final String arrivalTime = Train.getFormattedTimeTilArrival(context, routeItemModel.getTimeUntilArrival());
 
             holder.timeTilArrivalTextView.setText(arrivalTime);
+            final int directionResId = WordUtils.getFullDirectionString(routeItemModel.getTravelDirection());
+	        holder.directionTextView.setText(directionResId);
         }
     }
+
+    private void setTimeTilArrivalLabel(@NonNull TextView label, String labelText, boolean isBus) {
+    	final boolean useArrivalLabel =
+			    !isBus &&
+			    labelText.matches(".*[1-9].*") &&
+			    labelText.compareTo(String.valueOf(Integer.MIN_VALUE)) != 0;
+
+	    if (useArrivalLabel) {
+		    label.setText(R.string.label_arrival_in);
+	    } else {
+		    label.setText(R.string.label_status);
+	    }
+    }
+
     private View getLayoutFor(@NonNull ViewGroup parent, @LayoutRes int layoutResId) {
         return LayoutInflater.from(parent.getContext()).inflate(layoutResId, parent, false);
     }
 
     private View.OnClickListener getClickListenerFor(final int actionType) {
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                switch(actionType) {
-                    case InfoItemModel.SEE_AND_SAY:
-                        Context context = view.getContext();
-                        Intent startSeeAndSayIntent = new Intent(context, SeeAndSayActivity.class);
-                        context.startActivity(startSeeAndSayIntent);
-                        break;
+        return view -> {
+            switch(actionType) {
+                case InfoItemModel.SEE_AND_SAY:
+                    Context context = view.getContext();
+                    Intent startSeeAndSayIntent = new Intent(context, SeeAndSayActivity.class);
+                    context.startActivity(startSeeAndSayIntent);
+                    break;
 
-                    case InfoItemModel.TIP_ABOUT_FAVORITES:
-                        break;
-                }
+                case InfoItemModel.TIP_ABOUT_FAVORITES:
+                    break;
             }
         };
     }
 
     static class AlertViewHolder extends RecyclerView.ViewHolder {
-
         @BindView(R.id.alert_time_stamp) TextView timeStampTextView;
         @BindView(R.id.alert_message) TextView messageTextView;
 
@@ -256,7 +247,6 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     static class InfoViewHolder extends RecyclerView.ViewHolder {
-
         @BindView(R.id.info_message) TextView infoTextView;
         @BindView(R.id.info_action_button) Button infoButton;
 
@@ -267,10 +257,11 @@ public class HomeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     static class RouteViewHolder extends RecyclerView.ViewHolder {
-
         @BindView(R.id.route_name) TextView nameTextView;
         @BindView(R.id.route_destination) TextView destinationTextView;
         @BindView(R.id.route_time_until_arrival) TextView timeTilArrivalTextView;
+        @BindView(R.id.route_travel_direction) TextView directionTextView;
+        @BindView(R.id.route_time_label) TextView timeLabelView;
 
         RouteViewHolder(@NonNull View view) {
             super(view);
