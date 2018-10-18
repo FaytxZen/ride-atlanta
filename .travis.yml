@@ -20,6 +20,9 @@ android:
     - extra-android-m2repository
     - addon-google_apis-google-26
 
+env:
+ - FABRIC_API_KEY=randomalphanumerics123
+
 before_install:
  - chmod +x gradlew
 

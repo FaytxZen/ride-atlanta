@@ -89,7 +89,6 @@ dependencies {
 
     // dev
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-//    debugCompile "com.squareup.leakcanary:leakcanary-android:$leak_canary_version"
     debugImplementation "com.squareup.leakcanary:leakcanary-android-no-op:$leak_canary_version"
     releaseImplementation "com.squareup.leakcanary:leakcanary-android-no-op:$leak_canary_version"
 
