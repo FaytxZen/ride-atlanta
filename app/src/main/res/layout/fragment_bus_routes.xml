@@ -17,7 +17,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/text_no_buses_running"/>
+            android:text="@string/text_no_buses_running"
+            android:textColor="@color/md_grey_700"/>
 
     </LinearLayout>
 

@@ -16,8 +16,8 @@ android {
         applicationId "com.andrewvora.apps.rideatlanta"
         minSdkVersion 21
         targetSdkVersion 26
-        versionCode 3
-        versionName "1.2.0"
+        versionCode 4
+        versionName "1.2.1"
         testInstrumentationRunner "com.andrewvora.apps.rideatlanta.testing.RideAtlantaTestRunner"
     }
 
@@ -85,7 +85,7 @@ dependencies {
     kapt "com.google.dagger:dagger-android-processor:$dagger_version"
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
     implementation "com.squareup.retrofit2:adapter-rxjava2:$retrofit_version"
-    implementation 'com.google.code.gson:gson:2.8.0'
+    implementation 'com.google.code.gson:gson:2.8.2'
 
     // dev
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"

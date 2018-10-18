@@ -33,6 +33,7 @@
 
     <style name="RouteTitleTextStyle" parent="BaseTextViewStyle">
         <item name="android:textSize">@dimen/train_title_text_size</item>
+        <item name="android:maxLines">1</item>
         <item name="android:ellipsize">end</item>
     </style>
 
