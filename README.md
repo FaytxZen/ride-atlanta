@@ -1,7 +1,7 @@
 # Ride Atlanta
 
 ![license](https://img.shields.io/badge/license-MIT-blue.svg)
-![Build Status](https://travis-ci.org/andrewvora/ride-atlanta.svg?branch=development)](https://travis-ci.org/andrewvora/ride-atlanta)
+[![Build Status](https://travis-ci.org/andrewvora/ride-atlanta.svg?branch=development)](https://travis-ci.org/andrewvora/ride-atlanta)
 
 ## Purpose
 To give a different take on the [MARTA On the Go](http://www.itsmarta.com/) app.
