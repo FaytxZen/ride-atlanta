@@ -8,15 +8,11 @@ To give a different take on the [MARTA On the Go](http://www.itsmarta.com/) app.
 
 ## Set Up
 
-This project leverages the Fabric SDK, MARTA API, and Twitter API.
+This project leverages the MARTA API and Twitter API.
 
 In order to successfully run this project, you'll need the following:
 
 * Get an API key from [MARTA](http://www.itsmarta.com/)
-* A `fabric.properties` file in your app root containing
-    * an `apiSecret` token
-    * a `twitterPluginId`
-    * a `apiKey` from Fabric
 * Twitter API key and API secret
 
 The MARTA API key, Twitter API key and API secret, and Fabric API key should be set as environment

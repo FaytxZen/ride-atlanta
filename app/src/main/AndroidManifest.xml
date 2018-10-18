@@ -15,6 +15,7 @@
         android:name=".RideAtlantaApplication"
         android:theme="@style/AppTheme">
 
+        <meta-data android:name="io.fabric.ApiKey" android:value="@string/fabric_api_key"/>
         <meta-data android:name="android.max_aspect" android:value="2.1" />
 
         <activity

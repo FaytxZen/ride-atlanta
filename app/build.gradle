@@ -27,6 +27,7 @@ android {
             useProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 
+            resValue "string", "fabric_api_key", "\"$System.env.RIDEATLANTA_FABRIC_API_KEY\""
             buildConfigField "String", "MARTA_API_KEY", "\"$System.env.RIDEATLANTA_MARTA_API_KEY\""
             buildConfigField "String", "FABRIC_API_KEY", "\"$System.env.RIDEATLANTA_FABRIC_API_KEY\""
             buildConfigField "String", "TWITTER_API_KEY", "\"$System.env.RIDEATLANTA_TWITTER_API_KEY\""
@@ -38,6 +39,7 @@ android {
             useProguard true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 
+            resValue "string", "fabric_api_key", "\"$System.env.RIDEATLANTA_PROD_FABRIC_API_KEY\""
             buildConfigField "String", "MARTA_API_KEY", "\"$System.env.RIDEATLANTA_PROD_MARTA_API_KEY\""
             buildConfigField "String", "FABRIC_API_KEY", "\"$System.env.RIDEATLANTA_PROD_FABRIC_API_KEY\""
             buildConfigField "String", "TWITTER_API_KEY", "\"$System.env.RIDEATLANTA_PROD_TWITTER_API_KEY\""
